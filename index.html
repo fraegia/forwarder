@@ -50,6 +50,10 @@ button:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
 .keys b{color:var(--ink);font-weight:600}
 
 .screen:fullscreen{max-width:none;width:100vw;height:100vh;aspect-ratio:auto;border:0}
+.screen:focus{outline:none}
+/* schermo intero: va a tutto schermo l'intera pagina e lo schermo di gioco la riempie (così il focus, e con lui tastiera e controller, resta nel gioco) */
+body.fs{overflow:hidden}
+body.fs .screen{position:fixed;inset:0;width:100vw;height:100vh;aspect-ratio:auto;border:0;z-index:10;background:#000}
 .overlay.lite{background:rgba(5,4,14,.62)}
 .menu{display:flex;flex-direction:column;gap:8px;max-width:420px}
 button.go.alt{background:var(--panel);color:var(--ink);box-shadow:0 4px 0 var(--line);border:1px solid var(--line)}
@@ -71,7 +75,7 @@ button.lang:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
 
 <div class="wrap">
   <header class="top"><h1>ROOFTOP PROTOCOL</h1><span class="tag" id="tagline"></span><button class="fsb" id="fsb" type="button"></button></header>
-  <div class="screen" id="screen">
+  <div class="screen" id="screen" tabindex="-1">
     <canvas id="c" aria-label="Schermo di gioco"></canvas>
     <div class="overlay" id="ov"><div class="card" id="ovc"></div></div>
     <span class="ver" id="ver"></span>
@@ -1389,7 +1393,7 @@ function showWorlds(){
 function showOptions(back){
   const acts={back:back,fs:()=>{toggleFS();setTimeout(()=>showOptions(back),150)},au:()=>{muted=!muted;saveCfg();showOptions(back)}};
   const h='<h2>'+t('opt.title')+'</h2><p class="dim">'+t('menu.lang')+'</p>'+langRow()+'<div class="menu">'+
-    btn(t('menu.fs')+': '+(document.fullscreenElement?'ON':'OFF'),'fs','alt')+btn(t('menu.audio')+': '+(muted?'OFF':'ON'),'au','alt')+btn(t('menu.back'),'back')+'</div>'+
+    btn(t('menu.fs')+': '+(fsEl()?'ON':'OFF'),'fs','alt')+btn(t('menu.audio')+': '+(muted?'OFF':'ON'),'au','alt')+btn(t('menu.back'),'back')+'</div>'+
     '<p class="dim small">'+t('opt.pad')+'</p>';
   setMenu(h,acts,G.state==='title',()=>showOptions(back));
 }
@@ -1411,19 +1415,40 @@ function applyStatic(){
   $('tagline').textContent=t('menu.tag');
   $('keys').innerHTML=t('keys');
   document.querySelectorAll('#pad button[data-k]').forEach(b=>{const k=b.dataset.k;if(k==='dash'||k==='shoot'||k==='jump')b.textContent=t('pad.'+k)});
-  $('fsb').textContent=document.fullscreenElement?t('fs.exit'):t('fs.enter');
+  $('fsb').textContent=fsEl()?t('fs.exit'):t('fs.enter');
   document.documentElement.lang=Cfg.lang;
 }
+let fsT=-1e9;
+function fsEl(){return document.fullscreenElement||document.webkitFullscreenElement||null}
 function toggleFS(){
+  fsT=performance.now();
   try{
-    const el=$('screen');
-    if(document.fullscreenElement){document.exitFullscreen()}
-    else if(el.requestFullscreen){const r=el.requestFullscreen();if(r&&r.catch)r.catch(()=>toast(t('fs.fail'),2))}
-    else toast(t('fs.fail'),2);
+    const d=document,el=d.documentElement;
+    if(fsEl()){(d.exitFullscreen||d.webkitExitFullscreen).call(d)}
+    else{
+      const rq=el.requestFullscreen||el.webkitRequestFullscreen;
+      if(!rq){toast(t('fs.fail'),2);return}
+      const r=rq.call(el);if(r&&r.catch)r.catch(()=>toast(t('fs.fail'),2));
+    }
   }catch(e){toast(t('fs.fail'),2)}
 }
-$('fsb').onclick=toggleFS;
-document.addEventListener('fullscreenchange',applyStatic);
+/* riporta il focus sul gioco: il browser passa tastiera e controller solo alla pagina che ha il focus */
+function refocusGame(){
+  try{window.focus()}catch(e){}
+  const b=!$('ov').hidden&&$('ovc').querySelector('button:not([disabled])');
+  if(b&&!$('ovc').contains(document.activeElement))b.focus({preventScroll:true});
+  else if(!b)$('screen').focus({preventScroll:true});
+}
+function onFS(){
+  fsT=performance.now();
+  document.body.classList.toggle('fs',!!fsEl());
+  applyStatic();refocusGame();setTimeout(refocusGame,120);
+}
+$('fsb').onclick=()=>{toggleFS();$('fsb').blur()};
+document.addEventListener('fullscreenchange',onFS);
+document.addEventListener('webkitfullscreenchange',onFS);
+$('screen').addEventListener('pointerdown',()=>{try{window.focus()}catch(e){}});
+window.addEventListener('gamepadconnected',()=>{GP.on=false;refocusGame()});
 
 /* ---------- controller (Gamepad API, compatibile con DS4Windows / XInput) ---------- */
 const GP={on:false,prev:{},pg:{}};
@@ -4841,7 +4866,7 @@ function hellWin(){
 })();
 
 /* =====================  FASE 6 : versione, easter egg del telescopio  ===================== */
-const VERSION='1.2.0';
+const VERSION='1.2.1';
 const VER_EL=$('ver');VER_EL.textContent='v'+VERSION;
 
 /* stanza sotterranea: si entra cadendo nel vuoto subito prima del tetto del boss del Mondo 1 */
@@ -5016,8 +5041,10 @@ window.addEventListener('keydown',e=>{
   if(!e.repeat)press(k);
 });
 window.addEventListener('keyup',e=>{const k=KEYMAP[e.key];if(k)release(k)});
-window.addEventListener('blur',()=>{for(const k of['left','right','jump','shoot','dash'])In[k]=0;if(G.state==='play')setPause(true)});
-document.addEventListener('visibilitychange',()=>{if(document.hidden&&G.state==='play')setPause(true)});
+/* durante il passaggio a/da schermo intero il browser può togliere il focus per un attimo: lì non si mette in pausa */
+const fsBusy=()=>performance.now()-fsT<1500;
+window.addEventListener('blur',()=>{for(const k of['left','right','jump','shoot','dash'])In[k]=0;if(G.state==='play'&&!fsBusy())setPause(true)});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&G.state==='play'&&!fsBusy())setPause(true)});
 document.querySelectorAll('#pad button').forEach(b=>{
   const k=b.dataset.k;
   const on=e=>{e.preventDefault();press(k);b.classList.add('on')};
