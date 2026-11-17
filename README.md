@@ -13,3 +13,7 @@ python3 -m http.server 8000
 e visita http://localhost:8000.
 
 Su telefono compare un pad touch sotto lo schermo di gioco.
+
+## Versione
+
+La versione corrente è scritta in basso a destra nella schermata iniziale ed è definita dalla costante `VERSION` in `index.html`. Va aggiornata a ogni rilascio.
