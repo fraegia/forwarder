@@ -70,6 +70,8 @@ button.lang:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
 .fsb{font-family:var(--ui);font-size:12px;padding:6px 10px;background:var(--panel);color:var(--ink);border:1px solid var(--line);cursor:pointer}
 .fsb:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
 .overlay>div{max-height:100%;overflow:auto}
+/* nei menu la voce selezionata ha sempre la cornice: il browser nasconde :focus-visible dopo un clic (es. sul pulsante schermo intero) anche se poi si naviga con levetta o tastiera */
+#ovc button:focus{outline:3px solid var(--cyan);outline-offset:2px}
 .ver{position:absolute;right:8px;bottom:6px;z-index:2;font-family:var(--px);font-size:9px;color:var(--dim);pointer-events:none}
 </style>
 
@@ -4866,7 +4868,7 @@ function hellWin(){
 })();
 
 /* =====================  FASE 6 : versione, easter egg del telescopio  ===================== */
-const VERSION='1.2.1';
+const VERSION='1.2.2';
 const VER_EL=$('ver');VER_EL.textContent='v'+VERSION;
 
 /* stanza sotterranea: si entra cadendo nel vuoto subito prima del tetto del boss del Mondo 1 */
