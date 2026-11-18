@@ -4966,7 +4966,7 @@ function hellWin(){
 })();
 
 /* =====================  FASE 6 : versione, easter egg del telescopio  ===================== */
-const VERSION='1.4.0';
+const VERSION='1.4.1';
 const VER_EL=$('ver');VER_EL.textContent='v'+VERSION;
 
 /* stanza sotterranea: si entra cadendo nel vuoto subito prima del tetto del boss del Mondo 1 */
@@ -5122,7 +5122,7 @@ let bzg=[],whips=[];
 function bonezRoute(){return world.theme===3&&(Hell.on||chipCount()>=12)}
 function makeBonez(){
   const A=world.arena,mx=Math.round(4000*DIFFS[Cfg.diff].hpMul);
-  return{kind:'bonez',nameKey:'b.bonez',x:A.x+A.w+30,y:A.roof-52,w:40,h:52,hp:mx,max:mx,state:'enter',t:0,cd:.8,face:-1,active:true,dead:false,flash:0,last:'',deathT:0,shots:0,hitDone:false,say:'',vy:0,sx:0,len:0,jump:0};
+  return{kind:'bonez',nameKey:'b.bonez',x:A.x+A.w+30,y:A.roof-58,w:26,h:58,hp:mx,max:mx,state:'enter',t:0,cd:.8,face:-1,active:true,dead:false,flash:0,last:'',deathT:0,shots:0,hitDone:false,say:'',vy:0,sx:0,len:0,jump:0};
 }
 function startBonez(){
   const A=world.arena;G.bonezStage=true;
@@ -5138,7 +5138,7 @@ function sayType(lines,u,cps,hold){
   return{txt:'',done:true};
 }
 function bonezBolt(B){
-  const ex=B.x+B.w/2+8,ey=B.y+15,a=Math.atan2((P.y+6)-ey,(P.x+5)-ex);
+  const ex=B.x+B.w/2+4,ey=B.y+9,a=Math.atan2((P.y+6)-ey,(P.x+5)-ex);
   for(let k=-1;k<=1;k++){const aa=a+k*.15;ebullets.push({x:ex,y:ey,vx:Math.cos(aa)*210,vy:Math.sin(aa)*210,r:3,dmg:15,life:2.4,col:'#ff3b30'})}
   sfx(700,.08,'square',.04,-300);
 }
@@ -5289,10 +5289,10 @@ function drawBonez(cx,cy){
   if(B.state==='dash'&&B.t<.5&&fl){ctx.globalAlpha=.2;ctx.fillStyle='#ff3b30';const x0=B.face>0?B.x:A.x,x1=B.face>0?A.x+A.w:B.x+B.w;ctx.fillRect(Math.round(x0-cx),roofY-40,Math.round(x1-x0),40);ctx.globalAlpha=1}
   if(B.state==='whip'&&B.t<.5&&fl){ctx.globalAlpha=.35;ctx.fillStyle='#ff3b30';const x0=B.face>0?B.x+B.w/2:A.x,x1=B.face>0?A.x+A.w:B.x+B.w/2;ctx.fillRect(Math.round(x0-cx),roofY-12,Math.round(x1-x0),12);ctx.globalAlpha=1}
   ctx.save();ctx.beginPath();ctx.rect(0,0,W,roofY);ctx.clip();
-  /* tentacoli neri dietro il corpo */
+  /* tentacoli neri dietro la schiena */
   const wob=B.state==='gears'&&B.t<.35?Math.round((Math.random()-.5)*3):0;
   for(let i=0;i<8;i++){
-    let px=mx-10+i*3+wob,py=y+20;const base=-2.75+i*.36,len=34+(i%3)*9;
+    let px=mx-7+i*2+wob,py=y+26;const base=-2.75+i*.36,len=34+(i%3)*9;
     for(let k=0;k<11;k++){
       const a=base+Math.sin(NOW*2.3+i*1.7+k*.4)*.32;px+=Math.cos(a)*len/11;py+=Math.sin(a)*len/11;const r=Math.max(1,4.2-k*.33);
       ctx.fillStyle='#07060f';ctx.fillRect(Math.round(px-r),Math.round(py-r),Math.ceil(r*2),Math.ceil(r*2));
@@ -5303,21 +5303,44 @@ function drawBonez(cx,cy){
   if(B.state==='whip'&&B.len>2){for(let k=0;k<B.len;k+=3){const xx=mx+B.face*k,yy=roofY-6+Math.round(Math.sin(k*.15-NOW*30)*1.5);ctx.fillStyle='#07060f';ctx.fillRect(Math.round(xx)-3,yy-3,6,6);if(k%9===0){ctx.fillStyle='#9b5de5';ctx.fillRect(Math.round(xx),yy-3,1,1)}}}
   /* pugno */
   if(B.state==='punch'&&B.hitDone&&B.t<.6){const L=60;for(let k=0;k<L;k+=3){const xx=mx+B.face*(w/2-4+k);ctx.fillStyle='#07060f';ctx.fillRect(Math.round(xx)-4,y+24,8,8)}const fx=Math.round(mx+B.face*(w/2-4+L));ctx.fillStyle='#07060f';ctx.fillRect(fx-7,y+21,14,14);ctx.fillStyle='#9b5de5';ctx.fillRect(fx-5,y+22,3,2)}
-  /* corpo di melma */
-  ctx.fillStyle='#2a1a3a';ctx.beginPath();ctx.ellipse(mx,y+h*.58,w/2+1,h*.43+1,0,0,6.283);ctx.fill();ctx.beginPath();ctx.arc(mx,y+16,16,0,6.283);ctx.fill();
-  ctx.fillStyle='#050408';ctx.beginPath();ctx.ellipse(mx,y+h*.58,w/2,h*.43,0,0,6.283);ctx.fill();ctx.beginPath();ctx.arc(mx,y+16,15,0,6.283);ctx.fill();
-  for(let k=0;k<5;k++){const dl=2+Math.round(((NOW*1.3+k*.37)%1)*6);ctx.fillStyle='#050408';ctx.fillRect(x+6+k*7,y+h-3,2,dl)}
-  ctx.fillStyle='#3a2a52';ctx.fillRect(mx-11,y+8,2,5);ctx.fillRect(mx-15,y+26,2,8);
+  /* corpo di melma: snello e umanoide (testa, collo sottile, busto affusolato, gambe lunghe, braccia ciondolanti) */
+  const sway=Math.sin(NOW*3)*1.5,bob=Math.round(Math.sin(NOW*2.5));
+  const walking=(B.state==='dash'&&B.t>=.5)||(B.state==='idle'&&Math.abs((P.x+5)-(B.x+B.w/2))>100)||(B.state==='enter'&&B.x>world.arena.x+world.arena.w-100);
+  const stp=walking?Math.round(Math.sin(NOW*14)*2):0;
+  const body=(c,o)=>{
+    ctx.fillStyle=c;
+    const Rr=(a,b2,w2,h2)=>ctx.fillRect(Math.round(a)-o,Math.round(b2)-o,w2+o*2,h2+o*2);
+    /* testa */
+    Rr(mx-6,y+2+bob,12,1);Rr(mx-8,y+3+bob,16,13);Rr(mx-9,y+5+bob,18,8);Rr(mx-6,y+16+bob,9,2);
+    /* collo e busto */
+    Rr(mx-2,y+17+bob,4,4);
+    Rr(mx-7,y+21,14,4);Rr(mx-6,y+25,12,8);Rr(mx-4,y+33,8,5);Rr(mx-6,y+38,12,3);
+    /* gambe lunghe e piedi a punta */
+    Rr(mx-5+stp,y+41,3,13);Rr(mx+2-stp,y+41,3,13);
+    Rr(mx-8+stp,y+54,6,4);Rr(mx-10+stp,y+56,2,2);Rr(mx+2-stp,y+54,7,4);Rr(mx+9-stp,y+56,2,2);
+    /* braccia lunghissime fino alle ginocchia */
+    for(const sd of[-1,1]){
+      const sx=mx+sd*7,sy=y+22,hx=mx+sd*(10+sway*.5),hy=y+44+sd*sway;
+      for(let k=0;k<=8;k++){const u=k/8;Rr(lerp(sx,hx,u)-1,lerp(sy,hy,u)-1,3,3)}
+      Rr(hx-2,hy,4,5);Rr(hx-2,hy+5,1,2);Rr(hx+1,hy+5,1,2);
+    }
+  };
+  body('#2a1a3a',1);body('#050408',0);
+  /* gocce di melma da mento, mani e piedi */
+  ctx.fillStyle='#050408';
+  for(const[dx0,dy0,k]of[[-3,18+bob,0],[-10-sway*.5,51-sway,1],[10+sway*.5,51+sway,2],[-6,58,3]]){const dl=1+Math.round(((NOW*1.2+k*.31)%1)*5);ctx.fillRect(Math.round(mx+dx0),y+dy0,1,dl)}
+  ctx.fillStyle='#3a2a52';ctx.fillRect(mx-6,y+6+bob,1,4);ctx.fillRect(mx-4,y+24,1,7);ctx.fillRect(mx-4,y+43,1,6);
   /* coroncina da Meccanico Reale */
-  ctx.fillStyle='#07060f';ctx.fillRect(mx-9,y-3,16,6);ctx.fillStyle='#b8860b';ctx.fillRect(mx-8,y-2,14,4);ctx.fillStyle='#ffd23f';ctx.fillRect(mx-8,y-5,2,3);ctx.fillRect(mx-2,y-6,2,4);ctx.fillRect(mx+4,y-5,2,3);ctx.fillStyle='#07060f';ctx.fillRect(mx-2,y-1,2,2);
-  /* un solo occhio, spostato a destra */
-  const ex=mx+8,ey=y+15,glow=B.state==='beam'&&B.t<.9;
-  ctx.fillStyle=glow?'#7dff7a':'#e8e0d0';ctx.beginPath();ctx.arc(ex,ey,5.5,0,6.283);ctx.fill();
-  const ang=Math.atan2((P.y+6)-(B.y+15),(P.x+5)-(B.x+B.w/2+8)),pxe=Math.round(ex+Math.cos(ang)*2),pye=Math.round(ey+Math.sin(ang)*2);
-  ctx.fillStyle=glow?'#fff':'#c0202f';ctx.fillRect(pxe-2,pye-2,4,4);ctx.fillStyle='#07060f';ctx.fillRect(pxe-1,pye-1,2,2);
-  ctx.fillStyle='#1a0f24';ctx.fillRect(mx-11,y+15,6,1);
-  if(glow){ctx.globalAlpha=.25+.2*fl;ctx.fillStyle='#7dff7a';ctx.beginPath();ctx.arc(ex,ey,11,0,6.283);ctx.fill();ctx.globalAlpha=1}
-  if(B.flash>0){ctx.globalAlpha=.45;ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(mx,y+h*.58,w/2,h*.43,0,0,6.283);ctx.fill();ctx.globalAlpha=1}
+  const cy0=y+bob;
+  ctx.fillStyle='#07060f';ctx.fillRect(mx-7,cy0-2,13,5);ctx.fillStyle='#b8860b';ctx.fillRect(mx-6,cy0-1,11,3);ctx.fillStyle='#ffd23f';ctx.fillRect(mx-6,cy0-4,2,3);ctx.fillRect(mx-1,cy0-5,2,4);ctx.fillRect(mx+3,cy0-4,2,3);ctx.fillStyle='#07060f';ctx.fillRect(mx-1,cy0,2,2);
+  /* un solo occhio, spostato a destra (come se a sinistra ce ne fosse un altro) */
+  const ex=mx+4,ey=y+9+bob,glow=B.state==='beam'&&B.t<.9;
+  ctx.fillStyle=glow?'#7dff7a':'#e8e0d0';ctx.beginPath();ctx.arc(ex,ey,4,0,6.283);ctx.fill();
+  const ang=Math.atan2((P.y+6)-(B.y+9),(P.x+5)-(B.x+B.w/2+4)),pxe=Math.round(ex+Math.cos(ang)*1.5),pye=Math.round(ey+Math.sin(ang)*1.5);
+  ctx.fillStyle=glow?'#fff':'#c0202f';ctx.fillRect(pxe-2,pye-2,3,3);ctx.fillStyle='#07060f';ctx.fillRect(pxe-1,pye-1,1,1);
+  ctx.fillStyle='#1a0f24';ctx.fillRect(mx-6,ey,4,1);
+  if(glow){ctx.globalAlpha=.25+.2*fl;ctx.fillStyle='#7dff7a';ctx.beginPath();ctx.arc(ex,ey,9,0,6.283);ctx.fill();ctx.globalAlpha=1}
+  if(B.flash>0){ctx.globalAlpha=.45;body('#fff',0);ctx.globalAlpha=1}
   ctx.restore();
   /* ingranaggi rimbalzanti */
   for(const g of bzg){
