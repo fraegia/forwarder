@@ -4680,6 +4680,7 @@ const Music=(function(){
     if(md==='garden'||md==='gboss')return playGarden(s,t);
     if(md==='deep')return playDeep(s,t);
     if(md==='castle')return playCastle(s,t);
+    if(md==='bonez')return playBonez(s,t);
     const boss=md==='boss',bar=(s>>4)&3,i=s&15;
     const roots=boss?[45,45,41,40]:[45,41,48,43];
     const ch=boss?[[69,72,76],[69,72,76],[65,69,72],[64,68,71]]:[[57,60,64],[53,57,60],[55,60,64],[55,59,62]];
@@ -4804,8 +4805,41 @@ const Music=(function(){
     if(i===0&&bar===0)tone(t,98,1.5,'sine',.02);
   }
 
+  /* ---- Bonez: inno divino da scontro finale ----
+     coro "aaah", organo, campane, arpa in arpeggio, timpani e voce soprano; Re minore -> Si bemolle -> Fa -> La */
+  function choir(t,n,d,v){
+    const f=AC.createBiquadFilter(),g=AC.createGain();
+    f.type='bandpass';f.frequency.value=900;f.Q.value=1.2;
+    g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+.35);g.gain.setValueAtTime(v,t+d*.7);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+    f.connect(g);g.connect(master);
+    for(const dc of[-9,0,9]){const o=AC.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(hz(n),t);o.detune.setValueAtTime(dc,t);o.connect(f);o.start(t);o.stop(t+d+.05)}
+  }
+  function bell(t,n,v){
+    for(const[m,vv,dd]of[[1,v,1.6],[2.76,v*.35,.9],[5.4,v*.15,.5]]){
+      const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.setValueAtTime(hz(n)*m,t);
+      g.gain.setValueAtTime(vv,t);g.gain.exponentialRampToValueAtTime(.0001,t+dd);o.connect(g);g.connect(master);o.start(t);o.stop(t+dd+.05);
+    }
+  }
+  const BZM=[
+    [74,0,0,0,0,0,0,0,77,0,0,0,76,0,0,0],
+    [74,0,0,0,0,0,0,0,70,0,0,0,72,0,74,0],
+    [72,0,0,0,77,0,0,0,81,0,0,0,79,0,77,0],
+    [76,0,0,0,0,0,0,0,73,0,0,0,76,0,0,0]];
+  function playBonez(s,t){
+    const bar=(s>>4)&3,i=s&15,r=[50,46,53,45][bar],c=[[62,65,69],[58,62,65],[60,65,69],[61,64,69]][bar];
+    if(i===0){for(const n of c)choir(t,n,2.1,.05);choir(t,c[0]+12,2.1,.035);hit(t,.9,.03,6000)}
+    if(i===8)for(const n of c)choir(t,n+12,1,.025);
+    if(i%8===0){tone(t,r-12,1,'square',.035);tone(t,r-24,1,'sine',.09)}
+    if(i===0||i===8)timp(t,r-12,.32);
+    if(bar===3&&i>=12)timp(t,r-12,.2);
+    if(i===4||i===12)hit(t,.08,.05,2000);
+    tone(t,c[[0,1,2,1,2,0,1,2][i&7]]+24,.18,'triangle',.022);
+    if(i===0||i===8)bell(t,c[2]+24,.03);
+    const m=BZM[bar][i];if(m)vib(t,m,i===0?1:.7,.05);
+  }
+
   function sched(){
-    const sd=60/(md==='boss'?156:md==='garden'?84:md==='gboss'?100:md==='deep'?72:md==='castle'?96:128)/4;
+    const sd=60/(md==='boss'?156:md==='garden'?84:md==='gboss'?100:md==='deep'?72:md==='castle'?96:md==='bonez'?120:128)/4;
     master.gain.value=muted?0:.5;
     let guard=0;
     while(nextT<AC.currentTime+.15&&guard++<16){play(stp,nextT);nextT+=sd;stp=(stp+1)%64}
@@ -4820,7 +4854,7 @@ const Music=(function(){
       const A0=AC,M0=master,N0=nbuf,D0=md;
       AC=ctx;master=ctx.createGain();master.gain.value=.5;master.connect(ctx.destination);
       nbuf=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate);const d=nbuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
-      md=m;const sd=60/(m==='boss'?156:m==='garden'?84:m==='gboss'?100:m==='deep'?72:m==='castle'?96:128)/4;
+      md=m;const sd=60/(m==='boss'?156:m==='garden'?84:m==='gboss'?100:m==='deep'?72:m==='castle'?96:m==='bonez'?120:128)/4;
       let tt=.05,st=0;while(tt<sec-1){play(st,tt);tt+=sd;st=(st+1)%64}
       AC=A0;master=M0;nbuf=N0;md=D0;
     }
@@ -5117,7 +5151,7 @@ function hellWin(){
 })();
 
 /* =====================  FASE 6 : versione, easter egg del telescopio  ===================== */
-const VERSION='1.5.2';
+const VERSION='1.5.3';
 const VER_EL=$('ver');VER_EL.textContent='v'+VERSION;
 
 /* stanza sotterranea: si entra cadendo nel vuoto subito prima del tetto del boss del Mondo 1 */
@@ -5280,7 +5314,7 @@ function startBonez(){
   for(const e of enemies.slice())if(e.minion)killEnemy(e);
   ebullets=[];missiles=[];shocks=[];bombs=[];clearHz();bzg=[];flasks=[];pools=[];
   A.lx=A.x;A.rx=A.x+A.w;
-  boss=makeBonez();setDoor(true);setExit(true);G.toastT=0;
+  boss=makeBonez();setDoor(true);setExit(true);G.toastT=0;Music.mode('bonez');
   G.shake=.3;sfx(90,.8,'sawtooth',.07,-30);
 }
 function sayType(lines,u,cps,hold){
