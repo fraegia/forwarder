@@ -699,7 +699,7 @@ function step(dt){
     if(Math.abs(ex-P.x)>560&&!e.minion&&e.type!=='bird')continue;
     updateEnemy(e,dt);
   }
-  updateBoss(dt);updateMini(dt);updateBombs(dt);updatePBombs(dt);updateSpecials(dt);updateBullets(dt);updateWorld(dt);updateHazards(dt);if(G.state==='play')updateP3(dt);hellStep(dt);secretStep(dt);updateWhips(dt);
+  updateBoss(dt);updateMini(dt);updateBombs(dt);updatePBombs(dt);updateSpecials(dt);updateBullets(dt);updateWorld(dt);updateHazards(dt);if(G.state==='play')updateP3(dt);hellStep(dt);secretStep(dt);updateWhips(dt);achStep();
 }
 function stepFx(dt){
   for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=220*dt;if(p.life<=0)parts.splice(i,1)}
@@ -1348,9 +1348,9 @@ function showMain(){
   G.state='title';G.paused=false;Music.stop();G.toastT=0;G.black=false;cutKind=null;
   if(world.theme!==1){resetWorld();buildLevel();newGame();G.state='title'}
   Hell.on=false;
-  const acts={new:()=>flowNew(1),load:showLoad,worlds:showWorlds,hell:()=>pickDiff(d=>startHell(d),showMain),opt:()=>showOptions(showMain)};
+  const acts={new:()=>flowNew(1),load:showLoad,worlds:showWorlds,hell:()=>pickDiff(d=>startHell(d),showMain),ach:()=>showAch(),opt:()=>showOptions(showMain)};
   setMenu('<h2>ROOFTOP PROTOCOL</h2><p class="dim">'+t('menu.tag')+'</p><div class="menu">'+
-    btn(t('menu.new'),'new')+btn(t('menu.load'),'load','alt')+btn(t('menu.worlds'),'worlds','alt')+btn(t('menu.hell'),'hell','alt')+btn(t('menu.options'),'opt','alt')+'</div>'+langRow(),acts,true,showMain);
+    btn(t('menu.new'),'new')+btn(t('menu.load'),'load','alt')+btn(t('menu.worlds'),'worlds','alt')+btn(t('menu.hell'),'hell','alt')+btn(t('menu.ach'),'ach','alt')+btn(t('menu.options'),'opt','alt')+'</div>'+langRow(),acts,true,showMain);
 }
 function pickDiff(next,back){
   const acts={back:back};
@@ -2172,7 +2172,7 @@ function updatePlayer(dt){
   if(In.jumpHit){p.buf=.12;In.jumpHit=false}
   const dir=(In.right?1:0)-(In.left?1:0);
   if(dir&&p.dashT<=0&&p.kb<=0&&!p.cling)p.face=dir;
-  const spd=RUN*(hasAmu('a_boots')?1.12:1);
+  const spd=RUN*(hasAmu('a_boots')?1.12:1)*(p.slowT>0?.55:1);
   if(In.dashHit){
     In.dashHit=false;
     if(p.abil.dash&&p.dashCd<=0&&p.dashT<=0){p.dashT=.18;p.dashCd=.65*(hasAmu('a_cap')?.65:1);p.inv=Math.max(p.inv,.22);p.cling=false;sfx(300,.15,'sawtooth',.05,400);burst(p.x+5,p.y+7,8,'#35e8ff',60,.3)}
@@ -2326,7 +2326,7 @@ function pickupsUpdate(){
     collected.add(k.id);sfx(700,.2,'square',.05,500);burst(k.x+6,k.y+6,14,'#ffd23f',90,.5);
     if(AB_KEYS.indexOf(k.kind)>=0){P.abil[k.kind]=true;toast(t('t.'+k.kind),4.5);burst(k.x+6,k.y+6,26,'#ffd23f',130,.8)}
     else if(k.kind==='chip'||k.kind==='seed'||k.kind==='gear'){Inv.coins++;toast(t('t.'+k.kind,chipCount()),1.8)}
-    else if(k.kind==='medkit'){P.hp=maxHP();toast(t('t.medkit'),2);sfx(880,.4,'triangle',.07,600);burst(P.x+5,P.y+6,26,'#7dff7a',130,.7)}
+    else if(k.kind==='medkit'){Hell.medUsed=true;P.hp=maxHP();toast(t('t.medkit'),2);sfx(880,.4,'triangle',.07,600);burst(P.x+5,P.y+6,26,'#7dff7a',130,.7)}
     else{P.hp=Math.min(maxHP(),P.hp+40);toast('+40 HP',1.2)}
   }
 }
@@ -4354,7 +4354,7 @@ const SP_UDARK=(()=>{
 let tballs=[],uni=null;
 const TBCOL=['#ff4d5e','#ffd23f','#35e8ff','#7dff7a','#ff4fd8'];
 function trueRoute(){return!!(Inv.colW&&Inv.colW[1]&&Inv.colW[2]&&Inv.colW[3])}
-function resetTram(){tballs=[];uni=null;G.uniOff=false;G.trueEnd=false}
+function resetTram(){tcirc=[];tballs=[];uni=null;G.uniOff=false;G.trueEnd=false}
 function makeTram(){
   const a=world.arena,cx=(a.lx+a.rx)/2;
   const b={kind:'tram',nameKey:'b.tram',x:cx-12,y:cam.y-90,w:24,h:56,hp:6000,max:Math.round(6000*DIFFS[Cfg.diff].hpMul),state:'fall',t:0,cd:1,face:-1,vy:0,vx:0,
@@ -4389,7 +4389,7 @@ function updateTram(dt){
   const B=boss,A=world.arena;
   if(!B.active||B.dead)return;
   B.flash=Math.max(0,B.flash-dt);
-  updateTballs(dt);
+  updateTballs(dt);updateCirc(dt);
   const gy=A.roof-B.h;
   if(B.hp<=0)return tramDeath(dt);
   const cx=B.x+B.w/2,dx=(P.x+5)-cx;
@@ -4416,7 +4416,7 @@ function updateTram(dt){
       return;
     }
     if(B.cd<=0){
-      const opts=['dash','juggle','punch','missiles','scarf'];
+      const opts=['dash','juggle','punch','missiles','scarf','cannon','hoops','pies'];
       let a;
       if(ad<80&&Math.random()<.55&&B.last!=='punch')a='punch';
       else{do{a=opts[Math.floor(Math.random()*opts.length)]}while(a===B.last&&Math.random()<.85)}
@@ -4466,6 +4466,25 @@ function updateTram(dt){
       if(overlapR(tramScarfRect(B),P))hurtPlayer(20,cx);
     }
     if(B.t>=1.9){B.state='idle';B.cd=1}
+  }else if(B.state==='cannon'){
+    /* cannone da circo: spara una palla a spicchi che rimbalza per tutta l'arena */
+    if(B.t<.05){const fromL=(P.x+5)>(A.lx+A.rx)/2;B.cx0=fromL?A.lx+16:A.rx-16;B.cdir=fromL?1:-1}
+    if(B.t<.8)B.face=dx>=0?1:-1;
+    else if(!B.hitDone){B.hitDone=true;tcirc.push({k:'ball',x:B.cx0+B.cdir*14,y:A.roof-30,vx:B.cdir*175,vy:-160,r:10,rot:0,hit:false});sfx(90,.4,'sawtooth',.09,-30);G.shake=.35;burst(B.cx0+B.cdir*16,A.roof-30,20,'#ffd23f',150,.5)}
+    if(B.t>=1.8){B.state='idle';B.cd=.8}
+  }else if(B.state==='hoops'){
+    /* cerchi di fuoco: bisogna saltarci dentro */
+    if(B.t<.5)B.face=dx>=0?1:-1;
+    while(B.shots<3&&B.t>=.5+B.shots*.6){B.shots++;tcirc.push({k:'hoop',x:B.x+B.w/2+B.face*20,y:A.roof-26,vx:B.face*140,r:18,hit:false,pass:false});sfx(300,.3,'sawtooth',.05,200)}
+    if(B.t>=2.4){B.state='idle';B.cd=.8}
+  }else if(B.state==='pies'){
+    /* torte in faccia: la panna a terra rallenta */
+    if(B.t<.4)B.face=dx>=0?1:-1;
+    while(B.shots<5&&B.t>=.4+B.shots*.22){
+      B.shots++;const sx=B.x+B.w/2,sy=B.y+10,tx=clamp(P.x+5+(Math.random()-.5)*70,A.lx+10,A.rx-10),tt=.75;
+      tcirc.push({k:'pie',x:sx,y:sy,vx:(tx-sx)/tt,vy:((A.roof-sy)-.5*600*tt*tt)/tt});sfx(500,.1,'triangle',.04,-200);
+    }
+    if(B.t>=1.8){B.state='idle';B.cd=.8}
   }else if(B.state==='rest'){
     if(B.t>=.7){B.state='idle';B.cd=.7}
   }else if(B.state==='halve'){
@@ -4482,7 +4501,7 @@ function updateTram(dt){
 function tramDeath(dt){
   const B=boss,A=world.arena,gy=A.roof-B.h;
   if(B.deathT===0){
-    tballs=[];missiles=[];shocks=[];orbs=[];ebullets=[];Music.stop();
+    tballs=[];tcirc=[];missiles=[];shocks=[];orbs=[];ebullets=[];Music.stop();
     for(const e of enemies.slice())if(e.minion)killEnemy(e);
     const l1=t('tram.say1').length,l2=t('tram.say2').length,m={hold:1.0,s1:1.8};
     m.e1=m.s1+l1/18;m.up=m.e1+1.1;m.ufo=m.up+.4;m.s2=m.ufo+1.8;m.e2=m.s2+l2/18;m.rel=m.e2+1.3;m.leave=m.rel+.9;m.fade=m.leave+2.2;m.end=m.fade+1.4;
@@ -4554,6 +4573,7 @@ function drawUfo(x,y,beam){
 }
 function drawTramFront(cx,cy){
   const B=boss,A=world.arena;if(B.dead)return;
+  drawCirc(cx,cy);
   /* Unity inerte sullo sfondo (nel Boss Hell è andato in tribuna) */
   if(uni&&!world.hellArena){
     const dr=Math.min(8,(NOW-uni.n0)*5);
@@ -5154,7 +5174,7 @@ function hellWin(){
 })();
 
 /* =====================  FASE 6 : versione, easter egg del telescopio  ===================== */
-const VERSION='1.6.0';
+const VERSION='1.7.0';
 const VER_EL=$('ver');VER_EL.textContent='v'+VERSION;
 
 /* stanza sotterranea: si entra cadendo nel vuoto subito prima del tetto del boss del Mondo 1 */
@@ -5629,7 +5649,7 @@ function drawHellBalcony(cx,cy,wy){
   /* fondo e baldacchino */
   ctx.fillStyle='#1c0f0b';ctx.fillRect(x0,top-44,bw,44);
   ctx.fillStyle='#6a1420';ctx.fillRect(x0-6,top-52,bw+12,8);
-  for(let k=0;k<bw+12;k+=10){ctx.beginPath();ctx.arc(x0-6+k+5,top-44,5,0,Math.PI);ctx.fill()}
+  for(let k=0;k+10<=bw+12;k+=10){ctx.beginPath();ctx.arc(x0-5+k+5,top-44,5,0,Math.PI);ctx.fill()}
   ctx.fillStyle='#d4a03a';ctx.fillRect(x0-6,top-52,bw+12,1);ctx.fillRect(x0-6,top-45,bw+12,1);
   for(const px of[x0-6,x0+bw]){ctx.fillStyle='#5a3a28';ctx.fillRect(px,top-44,6,48);ctx.fillStyle='#7a5238';ctx.fillRect(px+1,top-44,1,48)}
   ctx.fillStyle='#3a2216';ctx.fillRect(x0,top-6,bw,6);ctx.fillStyle='#6a4428';ctx.fillRect(x0,top-6,bw,2);
@@ -5657,6 +5677,177 @@ function drawDivineLight(){
   }
   ctx.restore();
 }
+
+/* =====================  FASE 9 : attacchi da circo di Tramezzino  ===================== */
+let tcirc=[];
+function updateCirc(dt){
+  const A=world.arena;if(!A)return;
+  if(P.slowT>0)P.slowT-=dt;
+  for(let i=tcirc.length-1;i>=0;i--){
+    const o=tcirc[i];
+    if(o.k==='ball'){
+      o.vy+=700*dt;o.x+=o.vx*dt;o.y+=o.vy*dt;o.rot+=o.vx*dt/o.r;
+      if(o.y+o.r>=A.roof&&o.vy>0){o.y=A.roof-o.r;o.vy=-Math.max(170,Math.abs(o.vy)*.78);sfx(150,.08,'square',.03,-60)}
+      const dx=(P.x+5)-o.x,dy=(P.y+6)-o.y;
+      if(!o.hit&&dx*dx+dy*dy<(o.r+6)*(o.r+6)){o.hit=true;hurtPlayer(25,o.x)}
+      if(o.x<A.lx-30||o.x>A.rx+30)tcirc.splice(i,1);
+    }else if(o.k==='hoop'){
+      o.x+=o.vx*dt;
+      if(!o.hit&&!o.pass&&Math.abs(P.x+5-o.x)<6){
+        const top=o.y-o.r+4,bot=o.y+o.r-4;
+        if(P.y<top||P.y+P.h>bot){o.hit=true;hurtPlayer(20,o.x)}
+        else{o.pass=true;sfx(880,.15,'triangle',.05,400);burst(o.x,o.y,10,'#ffd23f',90,.4)}
+      }
+      if(o.x<A.lx-30||o.x>A.rx+30)tcirc.splice(i,1);
+    }else if(o.k==='pie'){
+      o.vy+=600*dt;o.x+=o.vx*dt;o.y+=o.vy*dt;
+      if(o.x>P.x-3&&o.x<P.x+P.w+3&&o.y>P.y-3&&o.y<P.y+P.h+3){hurtPlayer(10,o.x);P.slowT=2;burst(o.x,o.y,10,'#fff8f0',80,.4);tcirc.splice(i,1);continue}
+      if(o.y>=A.roof-3){tcirc.splice(i,1);tcirc.push({k:'cream',x:o.x,w:22,t:4});burst(o.x,A.roof-3,8,'#fff8f0',70,.3);sfx(200,.1,'triangle',.04,-100)}
+    }else if(o.k==='cream'){
+      o.t-=dt;
+      if(P.ground&&Math.abs(P.x+5-o.x)<o.w/2+3&&Math.abs(P.y+P.h-A.roof)<3)P.slowT=Math.max(P.slowT||0,.35);
+      if(o.t<=0)tcirc.splice(i,1);
+    }
+  }
+}
+function drawCirc(cx,cy){
+  const A=world.arena,B=boss,ry=Math.round(A.roof-cy);
+  if(B.state==='cannon'&&B.t<1.3&&B.cx0!==undefined){
+    const x=Math.round(B.cx0-cx),d=B.cdir;
+    ctx.fillStyle='#07060f';ctx.fillRect(x-10,ry-10,20,10);ctx.fillStyle='#c0202f';ctx.fillRect(x-9,ry-9,18,8);ctx.fillStyle='#ffd23f';ctx.fillRect(x-9,ry-6,18,2);
+    ctx.save();ctx.translate(x,ry-12);ctx.rotate(d>0?-.5:Math.PI+.5);
+    ctx.fillStyle='#07060f';ctx.fillRect(-2,-7,26,14);ctx.fillStyle='#3a6ea5';ctx.fillRect(-1,-6,24,12);
+    ctx.fillStyle='#ffd23f';for(let k=2;k<22;k+=6)ctx.fillRect(k,-6,2,12);
+    ctx.restore();
+    if(B.t<.8&&Math.floor(NOW*14)%2){ctx.fillStyle='#ff6a1a';ctx.fillRect(x-d*10,ry-20,3,3)}
+  }
+  for(const o of tcirc){
+    const x=Math.round(o.x-cx),y=Math.round(o.y-cy);
+    if(o.k==='ball'){
+      ctx.save();ctx.translate(x,y);ctx.rotate(o.rot);
+      ctx.fillStyle='#07060f';ctx.beginPath();ctx.arc(0,0,o.r+1,0,6.283);ctx.fill();
+      const cols=['#ff4d5e','#ffd23f','#35e8ff','#ffffff'];
+      for(let q=0;q<4;q++){ctx.fillStyle=cols[q];ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,o.r,q*1.5708,(q+1)*1.5708);ctx.fill()}
+      ctx.fillStyle='#ffd23f';ctx.beginPath();ctx.arc(0,0,3,0,6.283);ctx.fill();ctx.restore();
+    }else if(o.k==='hoop'){
+      const f=Math.floor(NOW*20)%2;
+      ctx.strokeStyle='#07060f';ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(x,y,6,o.r,0,0,6.283);ctx.stroke();
+      ctx.strokeStyle=f?'#ff6a1a':'#ffd23f';ctx.lineWidth=3;ctx.stroke();ctx.lineWidth=1;
+      for(let k=0;k<6;k++){const a=k*1.047+NOW*6;ctx.fillStyle=k%2?'#ff6a1a':'#ffd23f';ctx.fillRect(Math.round(x+Math.cos(a)*7)-1,Math.round(y+Math.sin(a)*o.r)-3,3,3)}
+    }else if(o.k==='pie'){
+      ctx.fillStyle='#07060f';ctx.fillRect(x-5,y-3,10,6);ctx.fillStyle='#c98a4a';ctx.fillRect(x-4,y,8,2);ctx.fillStyle='#fff8f0';ctx.fillRect(x-4,y-2,8,2);ctx.fillStyle='#ff4d5e';ctx.fillRect(x-1,y-3,2,1);
+    }else if(o.k==='cream'){
+      ctx.globalAlpha=Math.min(1,o.t);ctx.fillStyle='#fff8f0';ctx.fillRect(x-o.w/2,ry-3,o.w,3);ctx.fillRect(x-o.w/2+3,ry-5,o.w-6,2);ctx.fillStyle='#ffd0e0';ctx.fillRect(x-2,ry-6,4,2);ctx.globalAlpha=1;
+    }
+  }
+  /* panna addosso: VERDE-7 gocciola ed è più lento */
+  if(P&&P.slowT>0&&!P.dead){ctx.fillStyle='#fff8f0';const px=Math.round(P.x-cx),py=Math.round(P.y-cy);ctx.fillRect(px+1,py-1,8,2);if(Math.floor(NOW*6)%2)ctx.fillRect(px+3,py+13,1,2)}
+}
+
+/* =====================  FASE 9 : Traguardi  ===================== */
+const ACH=[
+ {id:'w1',n:['Tetti liberati','Rooftops freed','Tejados liberados','Toits libérés'],d:['Completa il Mondo 1.','Complete World 1.','Completa el Mundo 1.','Termine le Monde 1.']},
+ {id:'w2',n:['Pollice verde','Green thumb','Mano verde','Main verte'],d:['Completa il Mondo 2.','Complete World 2.','Completa el Mundo 2.','Termine le Monde 2.']},
+ {id:'w3',n:['Fino alle fondamenta','Down to the foundations','Hasta los cimientos','Jusqu’aux fondations'],d:['Completa il Mondo 3.','Complete World 3.','Completa el Mundo 3.','Termine le Monde 3.']},
+ {id:'w4',n:['Protocollo completato','Protocol complete','Protocolo completado','Protocole terminé'],d:['Completa il Mondo 4.','Complete World 4.','Completa el Mundo 4.','Termine le Monde 4.']},
+ {id:'b1',n:['Rottamatore','Scrapper','Chatarrero','Ferrailleur'],d:['Sconfiggi il Colosso Corazzato.','Defeat the Armored Colossus.','Derrota al Coloso Blindado.','Bats le Colosse Blindé.']},
+ {id:'b2',n:['Diserbante','Weed killer','Herbicida','Désherbant'],d:['Sconfiggi Madre Flora.','Defeat Mother Flora.','Derrota a Madre Flora.','Bats Mère Flora.']},
+ {id:'b3',n:['Smontato','Dismantled','Desmontado','Démonté'],d:['Sconfiggi il 1000-THR.','Defeat 1000-THR.','Derrota al 1000-THR.','Bats le 1000-THR.']},
+ {id:'b4',n:['Regicida','Regicide','Regicida','Régicide'],d:['Sconfiggi Unity.','Defeat Unity.','Derrota a Unity.','Bats Unity.']},
+ {id:'mini',n:['Caccia grossa','Big game hunter','Caza mayor','Gros gibier'],d:['Sconfiggi tutti e 4 i miniboss.','Defeat all 4 minibosses.','Derrota a los 4 minijefes.','Bats les 4 mini-boss.']},
+ {id:'c1',n:['Archivista','Archivist','Archivista','Archiviste'],d:['Raccogli i 12 chip dati del Mondo 1.','Collect the 12 data chips in World 1.','Reúne los 12 chips de datos del Mundo 1.','Ramasse les 12 puces du Monde 1.']},
+ {id:'c2',n:['Giardiniere','Gardener','Jardinero','Jardinier'],d:['Raccogli i 12 semi del Mondo 2.','Collect the 12 seeds in World 2.','Reúne las 12 semillas del Mundo 2.','Ramasse les 12 graines du Monde 2.']},
+ {id:'c3',n:['Ingranaggio mancante','Missing cog','Engranaje perdido','Rouage manquant'],d:['Raccogli i 12 ingranaggi del Mondo 3.','Collect the 12 gears in World 3.','Reúne los 12 engranajes del Mundo 3.','Ramasse les 12 engrenages du Monde 3.']},
+ {id:'shop',n:['Cliente d’oro','Golden customer','Cliente de oro','Client en or'],d:['Compra tutto dal venditore.','Buy everything from the vendor.','Compra todo al vendedor.','Achète tout au marchand.']},
+ {id:'zeph',n:['Fortuna sfacciata','Sheer luck','Suerte descarada','Chance insolente'],d:['Ottieni lo Zephor dal 1000-THR.','Get the Zephor from 1000-THR.','Consigue el Zephor del 1000-THR.','Obtiens le Zephor du 1000-THR.']},
+ {id:'bonez',sec:1,n:['Meglio di una macchina','Better than a machine','Mejor que una máquina','Mieux qu’une machine'],d:['Sconfiggi Bonez, il Meccanico Reale.','Defeat Bonez, the Royal Mechanic.','Derrota a Bonez, el Mecánico Real.','Bats Bonez, le Mécanicien Royal.']},
+ {id:'tart',sec:1,n:['Dall’abisso','From the abyss','Desde el abismo','Venu de l’abîme'],d:['Ottieni il Tartarus.','Get the Tartarus.','Consigue el Tartarus.','Obtiens le Tartarus.']},
+ {id:'tram',sec:1,n:['Ritorno a casa','Homecoming','Regreso a casa','Retour à la maison'],d:['Sconfiggi Tramezzino, il vero boss finale.','Defeat Tramezzino, the true final boss.','Derrota a Tramezzino, el verdadero jefe final.','Bats Tramezzino, le vrai boss final.']},
+ {id:'scope',sec:1,n:['HomePlanet','HomePlanet','HomePlanet','HomePlanet'],d:['Guarda nel telescopio segreto.','Look into the secret telescope.','Mira por el telescopio secreto.','Regarde dans le télescope secret.']},
+ {id:'hell',n:['Gladiatore','Gladiator','Gladiador','Gladiateur'],d:['Completa il Boss Hell.','Complete Boss Hell.','Completa el Boss Hell.','Termine le Boss Hell.']},
+ {id:'hellnm',n:['Senza cerotti','No band-aids','Sin tiritas','Sans pansements'],d:['Completa il Boss Hell senza raccogliere medikit.','Complete Boss Hell without picking up a medkit.','Completa el Boss Hell sin recoger botiquines.','Termine le Boss Hell sans ramasser de médikit.']},
+ {id:'hellx',n:['Collasso Totale','Total Meltdown','Colapso Total','Effondrement Total'],d:['Completa il Boss Hell a difficoltà Collasso Totale.','Complete Boss Hell on Total Meltdown.','Completa el Boss Hell en Colapso Total.','Termine le Boss Hell en Effondrement Total.']},
+ {id:'nodmg',n:['Intoccabile','Untouchable','Intocable','Intouchable'],d:['Completa il Mondo 1 dall’inizio senza subire danni.','Complete World 1 from the start without taking damage.','Completa el Mundo 1 desde el inicio sin recibir daño.','Termine le Monde 1 depuis le début sans subir de dégâts.']},
+ {id:'perfect',n:['Danza perfetta','Perfect dance','Danza perfecta','Danse parfaite'],d:['Sconfiggi un boss senza farti colpire.','Defeat a boss without getting hit.','Derrota a un jefe sin recibir golpes.','Bats un boss sans être touché.']},
+ {id:'apoc',n:['Fine del mondo','End of the world','Fin del mundo','Fin du monde'],d:['Completa il Mondo 4 a Collasso Totale.','Complete World 4 on Total Meltdown.','Completa el Mundo 4 en Colapso Total.','Termine le Monde 4 en Effondrement Total.']},
+ {id:'kills',n:['Sterminatore','Exterminator','Exterminador','Exterminateur'],d:['Distruggi 500 nemici in totale.','Destroy 500 enemies in total.','Destruye 500 enemigos en total.','Détruis 500 ennemis au total.']},
+ {id:'deaths',n:['Riavvio infinito','Endless reboot','Reinicio infinito','Redémarrage infini'],d:['Riavviati 50 volte.','Reboot 50 times.','Reinicia 50 veces.','Redémarre 50 fois.']}
+];
+const Ach=(function(){
+  const d={u:{},kills:0,deaths:0,minis:[]};
+  try{const o=JSON.parse(fetchS('rp_ach')||'{}');if(o&&o.u){d.u=o.u;d.kills=o.kills|0;d.deaths=o.deaths|0;d.minis=Array.isArray(o.minis)?o.minis:[]}}catch(e){}
+  return d;
+})();
+function achSave(){store('rp_ach',JSON.stringify({u:Ach.u,kills:Ach.kills,deaths:Ach.deaths,minis:Ach.minis}))}
+const achQ=[];let achCur=null;
+function achUnlock(id){
+  if(Ach.u[id])return;const a=ACH.find(x=>x.id===id);if(!a)return;
+  Ach.u[id]=Date.now();achSave();achQ.push(a);
+}
+function achStep(){
+  if(boss&&boss.active&&Ach.cur!==boss){Ach.cur=boss;Ach.bossHit=false}
+  if(boss&&boss.dead&&!boss._ach){
+    boss._ach=1;
+    const map={colossus:['b1'],flora:['b2'],centaur:['b3'],unity:['b4'],tram:['b4','tram'],bonez:['b3','bonez']};
+    (map[boss.kind||'colossus']||[]).forEach(achUnlock);
+    if(Ach.cur===boss&&!Ach.bossHit)achUnlock('perfect');
+  }
+  if(mini&&mini.dead&&!mini._ach){mini._ach=1;if(Ach.minis.indexOf(mini.theme)<0){Ach.minis.push(mini.theme);achSave()}if(Ach.minis.length>=4)achUnlock('mini')}
+  if(!Hell.on){
+    if(world.theme>=1&&world.theme<=3&&chipCount()>=12)achUnlock('c'+world.theme);
+    if(Inv.plate)achUnlock('shop');
+    if(Inv.own.w_tartarus)achUnlock('tart');
+    if(Inv.own.w_zephor)achUnlock('zeph');
+  }
+}
+function drawAchNote(){
+  if(!achCur&&achQ.length){achCur={a:achQ.shift(),t0:NOW};sfx(1046,.3,'triangle',.06,0);setTimeout(()=>sfx(1318,.4,'triangle',.06,0),140)}
+  if(!achCur)return;
+  const k=NOW-achCur.t0;if(k>3.6){achCur=null;return}
+  const li=Math.max(0,LANGS.indexOf(Cfg.lang)),y=Math.round(-26+Math.min(1,k*5)*30);
+  ctx.globalAlpha=Math.max(0,Math.min(1,(3.6-k)*3));
+  ctx.fillStyle='#07060f';ctx.fillRect(W/2-115,y,230,25);ctx.fillStyle='#ffd23f';ctx.fillRect(W/2-115,y+24,230,1);ctx.fillRect(W/2-115,y,2,25);
+  ptxt('★ '+t('ach.new'),W/2,y+3,8,'#ffd23f','center');ptxt(achCur.a.n[li],W/2,y+14,8,'#e8f7ee','center');
+  ctx.globalAlpha=1;
+}
+function showAch(){
+  const li=Math.max(0,LANGS.indexOf(Cfg.lang)),got=ACH.filter(a=>Ach.u[a.id]).length,acts={back:showMain};
+  let h='<h2>'+t('ach.title')+' '+got+'/'+ACH.length+'</h2><div class="menu">'+btn(t('menu.back'),'back','alt');
+  ACH.forEach(a=>{
+    const ok=!!Ach.u[a.id],hide=a.sec&&!ok;let d=hide?t('ach.secret'):a.d[li];
+    if(a.id==='kills')d+=' ('+Math.min(Ach.kills,500)+'/500)';
+    if(a.id==='deaths')d+=' ('+Math.min(Ach.deaths,50)+'/50)';
+    if(a.id==='mini')d+=' ('+Ach.minis.length+'/4)';
+    acts['a:'+a.id]=()=>{};
+    h+=btn((ok?'★ ':'☆ ')+'<b>'+(hide?'???':a.n[li])+'</b><br><span class="small">'+d+'</span>','a:'+a.id,'slot'+(ok?' sel':''));
+  });
+  h+=btn(t('menu.back'),'back','alt')+'</div>';
+  setMenu(h,acts,true,showAch);
+}
+/* agganci agli eventi del gioco */
+{
+  const _h=hurtPlayer;hurtPlayer=function(d,sx,soft){
+    const h0=P?P.hp:0,d0=P&&P.dead;_h(d,sx,soft);
+    if(P&&P.hp<h0){G.hurtRun=true;if(boss&&boss.active)Ach.bossHit=true}
+    if(P&&P.dead&&!d0){Ach.deaths++;achSave();if(Ach.deaths>=50)achUnlock('deaths')}
+  };
+  const _k=killEnemy;killEnemy=function(e){_k(e);Ach.kills++;if(Ach.kills%10===0)achSave();if(Ach.kills>=500)achUnlock('kills')};
+  const _l=launch;launch=function(o){_l(o);G.hurtRun=false;G.freshRun=!o.load&&o.world===1};
+  const _sw=startWorld;startWorld=function(n){_sw(n);G.hurtRun=false;G.freshRun=false};
+  const _cs=startCutscene;startCutscene=function(){if(!Hell.on){achUnlock('w1');if(G.freshRun&&!G.hurtRun)achUnlock('nodmg')}_cs()};
+  const _c=startCut;startCut=function(k){if(k==='fall')achUnlock('w2');if(k==='door')achUnlock('w3');if(k==='ending'){achUnlock('w4');if(Cfg.diff===3)achUnlock('apoc')}_c(k)};
+  const _sc=startScope;startScope=function(){achUnlock('scope');_sc()};
+  const _sh=startHell;startHell=function(d){Hell.medUsed=false;_sh(d)};
+  const _hw=hellWin;hellWin=function(){const d=Cfg.diff,m=Hell.medUsed;_hw();achUnlock('hell');if(!m)achUnlock('hellnm');if(d===3)achUnlock('hellx')};
+}
+(function(){
+  const L=['it','en','es','fr'],D={
+   'menu.ach':['Traguardi','Achievements','Logros','Succès'],
+   'ach.title':['Traguardi','Achievements','Logros','Succès'],
+   'ach.secret':['Traguardo segreto','Secret achievement','Logro secreto','Succès secret'],
+   'ach.new':['TRAGUARDO SBLOCCATO','ACHIEVEMENT UNLOCKED','LOGRO DESBLOQUEADO','SUCCÈS DÉBLOQUÉ']};
+  for(const k in D)D[k].forEach((s,i)=>{TX[L[i]][k]=s});
+})();
 
 /* ---------- input ---------- */
 const KEYMAP={ArrowLeft:'left',a:'left',A:'left',ArrowRight:'right',d:'right',D:'right',ArrowUp:'jump',w:'jump',W:'jump',' ':'jump',x:'shoot',X:'shoot',j:'shoot',J:'shoot',Shift:'dash',k:'dash',K:'dash'};
@@ -5727,6 +5918,7 @@ function frame(t){
     if(P&&P.dashT>0&&G.state==='play')burst(P.x+5,P.y+7,1,'#35e8ff',20,.25);
   }
   if(G.state==='cut')drawCutscene();else if(G.state==='scope')drawScope();else draw();
+  drawAchNote();
   const vh=G.state!=='title';if(VER_EL.hidden!==vh)VER_EL.hidden=vh;
 }
 cv.addEventListener('pointerdown',()=>{if(G.state==='cut')skipCut()});
