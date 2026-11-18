@@ -5117,7 +5117,7 @@ function hellWin(){
 })();
 
 /* =====================  FASE 6 : versione, easter egg del telescopio  ===================== */
-const VERSION='1.5.1';
+const VERSION='1.5.2';
 const VER_EL=$('ver');VER_EL.textContent='v'+VERSION;
 
 /* stanza sotterranea: si entra cadendo nel vuoto subito prima del tetto del boss del Mondo 1 */
@@ -5311,7 +5311,7 @@ function updateBzGears(dt){
 function updateBonez(dt){
   const B=boss,A=world.arena;
   if(!B.active||B.dead)return;
-  B.flash=Math.max(0,B.flash-dt);
+  B.flash=Math.max(0,B.flash-dt);B.beamT=Math.max(0,(B.beamT||0)-dt);
   updateBzGears(dt);
   const gy=A.roof-B.h;
   if(B.state==='enter'){
@@ -5338,11 +5338,12 @@ function updateBonez(dt){
     B.face=dx>=0?1:-1;B.cd-=dt*ts;
     const ad=Math.abs(dx);B.x+=(ad>100?B.face*55:ad<40?-B.face*30:0)*dt;lim();
     if(B.cd<=0){
-      const opts=['gears','beam','spikes','bombs','whip','rain','bolts','dash'];if(bossMinions()<2)opts.push('summon');
+      /* il raggio nucleare: al massimo una volta ogni 12 secondi */
+      const opts=['gears','spikes','bombs','whip','rain','bolts','dash'];if(B.beamT<=0)opts.push('beam');if(bossMinions()<2)opts.push('summon');
       let a;
       if(ad<64&&Math.random()<.6&&B.last!=='punch')a='punch';
       else{do{a=opts[Math.floor(Math.random()*opts.length)]}while(a===B.last&&Math.random()<.9)}
-      B.last=a;B.state=a;B.t=0;B.hitDone=false;B.shots=0;B.sx=cx;B.len=0;
+      B.last=a;B.state=a;B.t=0;B.hitDone=false;B.shots=0;B.sx=cx;B.len=0;if(a==='beam')B.beamT=12;
       /* fase 2: spesso spara anche una raffica dall'occhio mentre attacca */
       if(ts>1&&a!=='bolts'&&Math.random()<.35)bonezBolt(B);
     }
