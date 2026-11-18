@@ -5117,7 +5117,7 @@ function hellWin(){
 })();
 
 /* =====================  FASE 6 : versione, easter egg del telescopio  ===================== */
-const VERSION='1.5.0';
+const VERSION='1.5.1';
 const VER_EL=$('ver');VER_EL.textContent='v'+VERSION;
 
 /* stanza sotterranea: si entra cadendo nel vuoto subito prima del tetto del boss del Mondo 1 */
@@ -5400,9 +5400,9 @@ function updateBonez(dt){
       }
       break;
     case'rest':done(.45,.3);break;
-    case'summon': /* richiama due orrori di melma */
+    case'summon': /* richiama due robot operai */
       if(B.t>=.5&&!B.hitDone){B.hitDone=true;sfx(180,.4,'square',.05,300);
-        for(const x of[A.x+3*T,A.x+A.w-4*T])if(bossMinions()<3){const e=makeEnemy({id:-1,type:'horror',x:x,y:A.roof-16,min:A.x+6,max:A.x+A.w-6});e.minion=true;e.aggro=true;enemies.push(e);burst(x+8,A.roof-8,14,'#9b5de5',90,.5)}}
+        for(const x of[A.x+3*T,A.x+A.w-4*T])if(bossMinions()<3){const e=makeEnemy({id:-1,type:'machine',x:x,y:A.roof-15,min:A.x+6,max:A.x+A.w-6});e.minion=true;enemies.push(e);burst(x+8,A.roof-8,14,'#ffd23f',90,.5)}}
       done(1,.5);break;
   }
 }
