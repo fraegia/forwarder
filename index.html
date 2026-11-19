@@ -413,6 +413,7 @@ function chipCount(){let n=0;collected.forEach(k=>{if(k.indexOf('chip')===0)n++}
 /* ---------- player ---------- */
 function hurtPlayer(dmg,srcX,soft){
   if(P.inv>0||P.dead||P.dashT>0||G.state!=='play')return;
+  if(testNoDmg())return;
   dmg=Math.max(1,Math.round(dmg*DIFFS[Cfg.diff].dmgIn*(hasAmu('a_shield')?.85:1)));
   P.hp=Math.max(0,P.hp-dmg);P.inv=soft?.3:1;
   if(!soft){P.kb=.14;P.vx=((P.x+5)<srcX?-1:1)*120;P.vy=-130}
@@ -4103,6 +4104,7 @@ function drawUnityFront(cx,cy){
 function wrapTxt(s,n){const out=[];let cur='';for(const w of s.split(' ')){if((cur+' '+w).trim().length>n){out.push(cur);cur=w}else cur=(cur+' '+w).trim()}if(cur)out.push(cur);return out}
 function drawHud3(){
   if(Hell.on&&Hell.wait>0&&G.state==='play')drawHellWait();
+  if(testNoDmg()&&Math.floor(NOW*1.5)%2)txt('TEST · NO DANNI',W/2,H-30,'#7dff7a','center');
   drawHudDuo();
   if(boss&&boss.kind==='bonez'&&boss.say)drawSay('BONEZ','#9b5de5',boss.say);
   drawHudTram();
@@ -5189,7 +5191,11 @@ function hellWin(){
 })();
 
 /* =====================  FASE 6 : versione, easter egg del telescopio  ===================== */
-const VERSION='1.8.0';
+const VERSION='1.8.0-test';
+/* VERSIONE DI PROVA (temporanea): nel Boss Hell a difficoltà Manutenzione i boss non fanno danno.
+   Per tornare alla versione normale: TEST_NODMG=false. In prova i traguardi non si sbloccano. */
+const TEST_NODMG=true;
+function testNoDmg(){return TEST_NODMG&&Hell.on&&Cfg.diff===0}
 const VER_EL=$('ver');VER_EL.textContent='v'+VERSION;
 
 /* stanza sotterranea: si entra cadendo nel vuoto subito prima del tetto del boss del Mondo 1 */
@@ -5810,6 +5816,7 @@ const Ach=(function(){
 function achSave(){store('rp_ach',JSON.stringify({u:Ach.u,kills:Ach.kills,deaths:Ach.deaths,minis:Ach.minis}))}
 const achQ=[];let achCur=null;
 function achUnlock(id){
+  if(TEST_NODMG&&G.testRun)return;
   if(Ach.u[id])return;const a=ACH.find(x=>x.id===id);if(!a)return;
   Ach.u[id]=Date.now();achSave();achQ.push(a);
 }
@@ -5861,12 +5868,12 @@ function showAch(){
     if(P&&P.dead&&!d0){Ach.deaths++;achSave();if(Ach.deaths>=50)achUnlock('deaths')}
   };
   const _k=killEnemy;killEnemy=function(e){_k(e);Ach.kills++;if(Ach.kills%10===0)achSave();if(Ach.kills>=500)achUnlock('kills')};
-  const _l=launch;launch=function(o){_l(o);G.hurtRun=false;G.freshRun=!o.load&&o.world===1};
+  const _l=launch;launch=function(o){_l(o);G.testRun=false;G.hurtRun=false;G.freshRun=!o.load&&o.world===1};
   const _sw=startWorld;startWorld=function(n){_sw(n);G.hurtRun=false;G.freshRun=false};
   const _cs=startCutscene;startCutscene=function(){if(!Hell.on){achUnlock('w1');if(G.freshRun&&!G.hurtRun)achUnlock('nodmg')}_cs()};
   const _c=startCut;startCut=function(k){if(k==='fall')achUnlock('w2');if(k==='door')achUnlock('w3');if(k==='ending'){achUnlock('w4');if(Cfg.diff===3)achUnlock('apoc')}_c(k)};
   const _sc=startScope;startScope=function(){achUnlock('scope');_sc()};
-  const _sh=startHell;startHell=function(d){Hell.medUsed=false;_sh(d)};
+  const _sh=startHell;startHell=function(d){Hell.medUsed=false;G.testRun=TEST_NODMG&&d===0;_sh(d)};
   const _hw=hellWin;hellWin=function(){const d=Cfg.diff,m=Hell.medUsed;_hw();achUnlock('hell');if(!m)achUnlock('hellnm');if(d===3)achUnlock('hellx')};
 }
 (function(){
