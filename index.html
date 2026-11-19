@@ -5027,7 +5027,7 @@ function hellStage(i){
   Music.mode(worldMusic());Music.start();
   /* attesa nell'arena prima del boss: 10 secondi tra un boss e l'altro, 3 per il primo */
   Hell.wait=i===0?3:10;Hell.lastS=0;
-  if(i===4){Hell.wait=0;Hell.duoCk='fight';Hell.duoSeen=false;G.flash=.9;G.shake=.7;sfx(60,1.2,'sawtooth',.1,-20);Music.mode('bonez')}
+  if(i===4){if(Cfg.diff===3)P.hp=maxHP();Hell.wait=0;Hell.duoCk='fight';Hell.duoSeen=false;G.flash=.9;G.shake=.7;sfx(60,1.2,'sawtooth',.1,-20);Music.mode('bonez')}
 }
 function hellBegin(){
   boss.active=true;setDoor(true);Music.mode(bossMusic());
@@ -5191,7 +5191,7 @@ function hellWin(){
 })();
 
 /* =====================  FASE 6 : versione, easter egg del telescopio  ===================== */
-const VERSION='1.8.1';
+const VERSION='1.8.2';
 /* VERSIONE DI PROVA (temporanea): nel Boss Hell a difficoltà Manutenzione i boss non fanno danno.
    Per tornare alla versione normale: TEST_NODMG=false. In prova i traguardi non si sbloccano. */
 const TEST_NODMG=false;
@@ -5908,7 +5908,7 @@ function clearDuoAttacks(){
 const DUO_DUR={dash:1.2,juggle:2,cannon:1.5,hoops:1.9,pies:1.5,scarf:1.5,gears:1.1,spikes:2.4,bolts:1,bombs:1,rain:.9,whip:1.3,beam:1.7,juggleF:1.5,hoopsF:1.8,diveF:1.6,boltsF:1.2,tentF:1.6,beamF:1.8};
 function duoStart(X,a,fall){
   X.state=a;X.t=0;X.shots=0;X.hitDone=false;X.last=a;X.len=0;X.sx=X.x+X.w/2;
-  X.dur=DUO_DUR[a]||1.2;X.hand=X.dur*(fall?.55:.7);
+  X.dur=DUO_DUR[a]||1.2;X.hand=X.dur*(fall?.65:.7);
   if(a==='beam')boss.Z.beamT=14;if(a==='beamF')boss.Z.beamT=10;
 }
 /* un attacco di uno dei due; il prossimo parte solo quando questo è quasi finito, così non si sovrappongono mai del tutto */
@@ -5945,7 +5945,7 @@ function duoAct(X,dt){
       if(X.t>=.35&&!X.hitDone){X.hitDone=true;sfx(500,.3,'square',.05,-200);for(let k=0;k<10;k++)bzg.push({x:cx,y:X.y+12,vx:(Math.random()-.5)*360,vy:-120-Math.random()*220,b:0,life:7})}
       break;
     case'spikes':
-      if(X.t<2.2){const n=Math.floor(X.t/.2);while(X.shots<=n){X.shots++;X.sx+=clamp((P.x+5)-X.sx,-26,26);addHz('tent',X.sx-8,16,0,.3,.35,20,'#9b5de5');hz[hz.length-1].h=46}}
+      if(X.t<2.2){const n=Math.floor(X.t/.2);while(X.shots<=n){X.shots++;X.sx+=clamp((P.x+5)-X.sx,-18,18);addHz('tent',X.sx-8,16,0,.3,.35,20,'#9b5de5');hz[hz.length-1].h=46}}
       break;
     case'bolts':
       while(X.shots<3&&X.t>=.2+X.shots*.25){X.shots++;bonezBolt(X)}
@@ -5962,7 +5962,7 @@ function duoAct(X,dt){
         const r={x:X.face>0?cx:cx-X.len,y:A.roof-12,w:X.len,h:12};if(!X.hitDone&&r.w>4&&overlapR(r,P)){X.hitDone=true;hurtPlayer(25,cx)}}
       break;
     case'beam':
-      if(!X.hitDone){X.hitDone=true;const left=(P.x+5)<A.x+A.w/2;addHz('col',left?A.x:A.x+A.w/2,A.w/2,0,.9,.6,30,'#7dff7a');sfx(200,1.4,'sawtooth',.05,400)}
+      if(!X.hitDone){X.hitDone=true;const bw=Math.round(A.w*.45),bx=P.x+5-bw/2;addHz('col',bx,bw,0,1.1,.6,30,'#7dff7a');sfx(200,1.4,'sawtooth',.05,400)}
       break;
     /* ---- caduta libera: attacchi più forti e veloci ---- */
     case'juggleF':
@@ -5982,7 +5982,7 @@ function duoAct(X,dt){
       while(X.shots<3&&X.t>=.2+X.shots*.4){X.shots++;const fromL=Math.random()<.5;uh.push({x:fromL?A.lx-40:A.rx+6,y:P.y-1,w:38,h:14,dir:fromL?1:-1,sp:240,t:-.55,dmg:20,hit:false,tent:true})}
       break;
     case'beamF':
-      if(!X.hitDone){X.hitDone=true;const left=(P.x+5)<cam.x+W/2;addHz('col',left?cam.x:cam.x+W/2,W/2,0,.8,.6,25,'#fff4c8');sfx(200,1.4,'sawtooth',.05,400)}
+      if(!X.hitDone){X.hitDone=true;const bw=Math.round(W*.45),bx=P.x+5-bw/2;addHz('col',bx,bw,0,1.15,.6,25,'#fff4c8');sfx(200,1.4,'sawtooth',.05,400)}
       break;
   }
   if(X.t>=X.dur)X.state='idle';
@@ -6067,13 +6067,14 @@ function updateDuo(dt){
       duoAct(T,dt*ts);duoAct(Z,dt*ts);duoSchedule(dt,ts,true);
       /* pezzi dei 4 mondi che sfrecciano verso l'alto: avviso rosso in basso, poi arrivano */
       FALL.sp-=dt;
-      if(FALL.sp<=0){FALL.sp=lerp(1.1,.45,k);FALL.deb.push({k:1+Math.floor(Math.random()*4),x:cam.x+16+Math.random()*(W-60),y:cam.y+H+24,vy:-(170+Math.random()*120+k*80),w:24+Math.floor(Math.random()*22),h:14+Math.floor(Math.random()*8),rot:0,vr:(Math.random()-.5)*2,warn:.7,hit:false})}
+      if(FALL.sp<=0){FALL.sp=lerp(1.1,.6,k);FALL.deb.push({k:1+Math.floor(Math.random()*4),x:cam.x+16+Math.random()*(W-60),y:cam.y+H+24,vy:-(170+Math.random()*120+k*80),w:24+Math.floor(Math.random()*22),h:14+Math.floor(Math.random()*8),rot:0,vr:(Math.random()-.5)*2,warn:.7,hit:false})}
       for(let i=FALL.deb.length-1;i>=0;i--){
         const d=FALL.deb[i];if(d.warn>0){d.warn-=dt;continue}
         d.y+=d.vy*dt;d.rot+=d.vr*dt;
         if(!d.hit&&overlapR({x:d.x+3,y:d.y+3,w:d.w-6,h:d.h-6},P)){d.hit=true;hurtPlayer(20,d.x+d.w/2);burst(P.x+5,P.y+6,10,'#c9a46a',120,.4)}
         if(d.y<cam.y-80)FALL.deb.splice(i,1);
       }
+      if(!FALL.med&&FALL.t>=60&&Cfg.diff!==3){FALL.med=1;collected.delete('medF');world.pickups.push({id:'medF',kind:'medkit',x:cam.x+W/2-7,y:cam.y+110,w:14,h:12});toast(t('t.medfall'),2.2);sfx(880,.3,'triangle',.06,400)}
       if(Math.random()<.04)G.shake=Math.max(G.shake,.12);
       if(FALL.t>=120)duoStartLand();
       break;
@@ -6175,6 +6176,7 @@ function drawFallScene(cx,cy){
     if(d.warn>0){if(Math.floor(NOW*12)%2){const x=Math.round(d.x+d.w/2-cx);ctx.fillStyle='#ff3b30';ctx.beginPath();ctx.moveTo(x,H-20);ctx.lineTo(x-6,H-10);ctx.lineTo(x+6,H-10);ctx.fill();ctx.fillRect(x-1,H-10,3,6)}continue}
     drawDebrisPiece(d.k,d.x+d.w/2-cx,d.y+d.h/2-cy,d.w,d.h,d.rot);
   }
+  for(const k of world.pickups)if(k.kind==='medkit'&&!collected.has(k.id))drawPickup(k,cx,cy);
   drawP3(cx,cy);
   drawDuo(cx,cy);
   drawPlayer(cx,cy);drawWhips(cx,cy);
@@ -6207,6 +6209,7 @@ function drawHudDuo(){
    'duo.say4':['SISI! SOLO COLPA DEL PAVIMENTO!','YEAH YEAH! ONLY THE FLOOR’S FAULT!','¡SÍ, SÍ! ¡SOLO CULPA DEL SUELO!','OUI OUI ! QUE LA FAUTE DU SOL !'],
    'duo.say5':['SPAIK, C’ENTRI QUALCOSA TU?','SPAIK, DID YOU HAVE SOMETHING TO DO WITH THIS?','SPAIK, ¿TIENES TÚ ALGO QUE VER?','SPAIK, TU Y ES POUR QUELQUE CHOSE ?'],
    'duo.survive':['SOPRAVVIVI','SURVIVE','SOBREVIVE','SURVIS'],
+   't.medfall':['MEDIKIT IN ARRIVO!','MEDKIT INCOMING!','¡BOTIQUÍN A LA VISTA!','MÉDIKIT EN APPROCHE !'],
    'duo.done':['SEI SOPRAVVISSUTO!','YOU SURVIVED!','¡HAS SOBREVIVIDO!','TU AS SURVÉCU !']};
   for(const k in D)D[k].forEach((s,i)=>{TX[L[i]][k]=s});
 })();
