@@ -5174,7 +5174,7 @@ function hellWin(){
 })();
 
 /* =====================  FASE 6 : versione, easter egg del telescopio  ===================== */
-const VERSION='1.7.0';
+const VERSION='1.7.1';
 const VER_EL=$('ver');VER_EL.textContent='v'+VERSION;
 
 /* stanza sotterranea: si entra cadendo nel vuoto subito prima del tetto del boss del Mondo 1 */
@@ -5769,6 +5769,8 @@ const ACH=[
  {id:'hellx',n:['Collasso Totale','Total Meltdown','Colapso Total','Effondrement Total'],d:['Completa il Boss Hell a difficoltà Collasso Totale.','Complete Boss Hell on Total Meltdown.','Completa el Boss Hell en Colapso Total.','Termine le Boss Hell en Effondrement Total.']},
  {id:'nodmg',n:['Intoccabile','Untouchable','Intocable','Intouchable'],d:['Completa il Mondo 1 dall’inizio senza subire danni.','Complete World 1 from the start without taking damage.','Completa el Mundo 1 desde el inicio sin recibir daño.','Termine le Monde 1 depuis le début sans subir de dégâts.']},
  {id:'perfect',n:['Danza perfetta','Perfect dance','Danza perfecta','Danse parfaite'],d:['Sconfiggi un boss senza farti colpire.','Defeat a boss without getting hit.','Derrota a un jefe sin recibir golpes.','Bats un boss sans être touché.']},
+ {id:'bzperf',sec:1,n:['Meccanica di precisione','Precision mechanics','Mecánica de precisión','Mécanique de précision'],d:['Sconfiggi Bonez senza farti colpire.','Defeat Bonez without getting hit.','Derrota a Bonez sin recibir golpes.','Bats Bonez sans être touché.']},
+ {id:'trperf',sec:1,n:['Numero da applausi','Standing ovation','Número de aplausos','Numéro applaudi'],d:['Sconfiggi Tramezzino senza farti colpire.','Defeat Tramezzino without getting hit.','Derrota a Tramezzino sin recibir golpes.','Bats Tramezzino sans être touché.']},
  {id:'apoc',n:['Fine del mondo','End of the world','Fin del mundo','Fin du monde'],d:['Completa il Mondo 4 a Collasso Totale.','Complete World 4 on Total Meltdown.','Completa el Mundo 4 en Colapso Total.','Termine le Monde 4 en Effondrement Total.']},
  {id:'kills',n:['Sterminatore','Exterminator','Exterminador','Exterminateur'],d:['Distruggi 500 nemici in totale.','Destroy 500 enemies in total.','Destruye 500 enemigos en total.','Détruis 500 ennemis au total.']},
  {id:'deaths',n:['Riavvio infinito','Endless reboot','Reinicio infinito','Redémarrage infini'],d:['Riavviati 50 volte.','Reboot 50 times.','Reinicia 50 veces.','Redémarre 50 fois.']}
@@ -5790,7 +5792,7 @@ function achStep(){
     boss._ach=1;
     const map={colossus:['b1'],flora:['b2'],centaur:['b3'],unity:['b4'],tram:['b4','tram'],bonez:['b3','bonez']};
     (map[boss.kind||'colossus']||[]).forEach(achUnlock);
-    if(Ach.cur===boss&&!Ach.bossHit)achUnlock('perfect');
+    if(Ach.cur===boss&&!Ach.bossHit){achUnlock('perfect');if(boss.kind==='bonez')achUnlock('bzperf');if(boss.kind==='tram')achUnlock('trperf')}
   }
   if(mini&&mini.dead&&!mini._ach){mini._ach=1;if(Ach.minis.indexOf(mini.theme)<0){Ach.minis.push(mini.theme);achSave()}if(Ach.minis.length>=4)achUnlock('mini')}
   if(!Hell.on){
