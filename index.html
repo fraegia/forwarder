@@ -51,7 +51,7 @@ button:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
 
 .screen:fullscreen{max-width:none;width:100vw;height:100vh;aspect-ratio:auto;border:0}
 .screen:focus{outline:none}
-/* schermo intero: va a tutto schermo l'intera pagina e lo schermo di gioco la riempie (così il focus, e con lui tastiera e controller, resta nel gioco) */
+/* fullscreen: the whole page goes fullscreen and the game screen fills it (so focus, and with it keyboard and controller, stays on the game) */
 body.fs{overflow:hidden}
 body.fs .screen{position:fixed;inset:0;width:100vw;height:100vh;aspect-ratio:auto;border:0;z-index:10;background:#000}
 .overlay.lite{background:rgba(5,4,14,.62)}
@@ -70,7 +70,7 @@ button.lang:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
 .fsb{font-family:var(--ui);font-size:12px;padding:6px 10px;background:var(--panel);color:var(--ink);border:1px solid var(--line);cursor:pointer}
 .fsb:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
 .overlay>div{max-height:100%;overflow:auto}
-/* nei menu la voce selezionata ha sempre la cornice: il browser nasconde :focus-visible dopo un clic (es. sul pulsante schermo intero) anche se poi si naviga con levetta o tastiera */
+/* in menus the selected item always shows the frame: browsers hide :focus-visible after a click (e.g. on the fullscreen button) even when navigating with stick or keyboard afterwards */
 #ovc button:focus{outline:3px solid var(--cyan);outline-offset:2px}
 .ver{position:absolute;right:8px;bottom:6px;z-index:2;font-family:var(--px);font-size:9px;color:var(--dim);pointer-events:none}
 </style>
@@ -1061,7 +1061,7 @@ function draw(){
 }
 
 
-/* =====================  lingue (IT / EN / ES / FR)  ===================== */
+/* =====================  languages (IT / EN / ES / FR)  ===================== */
 const LANGS=['it','en','es','fr'];
 const LANG_LABEL={it:'ITALIANO',en:'ENGLISH',es:'ESPAÑOL',fr:'FRANÇAIS'};
 const TX={
@@ -1170,7 +1170,7 @@ function t(k){
 function zname(z){const L=ZN[Cfg.lang]||ZN.it,a=L[world.theme]||ZN.it[world.theme];return a[Math.max(0,Math.min(z,a.length-1))]}
 function cpName(c){return c.name==='cp.sector'?t('cp.sector',c.n):t(c.name)}
 
-/* =====================  FASE 2 : testi nuovi (IT / EN / ES / FR)  ===================== */
+/* =====================  PHASE 2 : new texts (IT / EN / ES / FR)  ===================== */
 (function(){
   const L=['it','en','es','fr'];
   const D={
@@ -1187,7 +1187,7 @@ function cpName(c){return c.name==='cp.sector'?t('cp.sector',c.n):t(c.name)}
    'inv.stats':['HP max {0} · danni x{1} · monete {2}','Max HP {0} · damage x{1} · coins {2}','HP máx. {0} · daño x{1} · monedas {2}','PV max {0} · dégâts x{1} · pièces {2}'],
    'inv.eq':['EQUIPAGGIATO','EQUIPPED','EQUIPADO','ÉQUIPÉ'],
    'inv.hint':['I / Tab: apri o chiudi','I / Tab: open or close','I / Tab: abrir o cerrar','I / Tab : ouvrir ou fermer'],
-   /* oggetti */
+   /* items */
    'i.w_blaster':['Blaster Standard','Standard Blaster','Blaster estándar','Blaster standard'],
    'd.w_blaster':['Colpo singolo, 20 danni.','Single shot, 20 damage.','Disparo simple, 20 de daño.','Tir simple, 20 dégâts.'],
    'i.w_twin':['Doppio Cannone','Twin Cannon','Cañón doble','Double canon'],
@@ -1229,7 +1229,7 @@ function cpName(c){return c.name==='cp.sector'?t('cp.sector',c.n):t(c.name)}
    'i.sk_gold':['Placca d’Oro','Golden Plate','Placa de oro','Plaque d’or'],
    'd.sk':['Cambia il colore di VERDE-7.','Changes VERDE-7’s colors.','Cambia los colores de VERDE-7.','Change les couleurs de VERDE-7.'],
    'd.sk_gold':['Tutta d’oro. Solo per chi ha comprato tutto.','Pure gold. Only for those who bought everything.','Toda de oro. Solo para quien lo compró todo.','Toute en or. Pour qui a tout acheté.'],
-   /* messaggi */
+   /* messages */
    't.item':['NUOVO OGGETTO · {0}','NEW ITEM · {0}','NUEVO OBJETO · {0}','NOUVEL OBJET · {0}'],
    't.charge':['COLPO CARICO · TIENI PREMUTO SPARA 2 SECONDI','CHARGE SHOT · HOLD FIRE FOR 2 SECONDS','DISPARO CARGADO · MANTÉN DISPARO 2 SEGUNDOS','TIR CHARGÉ · MAINTENEZ TIR 2 SECONDES'],
    't.bomb':['BOMBA · PREMI E','BOMB · PRESS E','BOMBA · PULSA E','BOMBE · APPUYEZ SUR E'],
@@ -1246,7 +1246,7 @@ function cpName(c){return c.name==='cp.sector'?t('cp.sector',c.n):t(c.name)}
    'hud.coins':['MONETE','COINS','MONEDAS','PIÈCES'],
    'hud.en':['ENERGIA','ENERGY','ENERGÍA','ÉNERGIE'],
    'hud.talk':['R: VENDITORE','R: VENDOR','R: VENDEDOR','R : MARCHAND'],
-   /* negozio */
+   /* shop */
    'shop.title':['Il Venditore','The Vendor','El Vendedor','Le Marchand'],
    'shop.hi':['Bei pezzi, tutti in cambio di chip e semi. Niente sconti.','Fine goods, all for chips and seeds. No discounts.','Buenas piezas, todo a cambio de chips y semillas. Sin descuentos.','De belles pièces, contre puces et graines. Pas de remise.'],
    'shop.price':['{0} monete','{0} coins','{0} monedas','{0} pièces'],
@@ -1261,11 +1261,11 @@ function cpName(c){return c.name==='cp.sector'?t('cp.sector',c.n):t(c.name)}
    'keys2':[' · <b>E</b> bomba · <b>Q</b> arma secondaria · <b>I</b> inventario · <b>R</b> venditore',' · <b>E</b> bomb · <b>Q</b> secondary · <b>I</b> inventory · <b>R</b> vendor',' · <b>E</b> bomba · <b>Q</b> secundaria · <b>I</b> inventario · <b>R</b> vendedor',' · <b>E</b> bombe · <b>Q</b> secondaire · <b>I</b> inventaire · <b>R</b> marchand']
   };
   for(const k in D)D[k].forEach((s,i)=>{TX[L[i]][k]=s});
-  /* ai tasti mostrati in basso si aggiungono i nuovi */
+  /* the new keys are appended to the controls hint shown below the game */
   for(let i=0;i<4;i++)TX[L[i]]['keys']+=D['keys2'][i];
 })();
 
-/* =====================  impostazioni, salvataggi, menu, schermo intero, controller  ===================== */
+/* =====================  settings, saves, menus, fullscreen, controller  ===================== */
 const DIFFS=[
   {id:'story',dmgIn:.5,hpMul:.8,heal:1,drop:1.5},
   {id:'normal',dmgIn:1,hpMul:1,heal:1,drop:1},
@@ -1297,7 +1297,7 @@ function saveGame(i){
 }
 function zoneOf(x){let z=0;for(let i=0;i<world.zoneX.length;i++)if(x>=world.zoneX[i])z=i;return Math.min(z,world.nz-1)}
 
-/* ---------- avvio partita ---------- */
+/* ---------- game start ---------- */
 function launch(o){
   Hell.on=false;Cfg.diff=o.diff;Cfg.slot=o.slot;saveCfg();
   hideOv();G.paused=false;
@@ -1433,7 +1433,7 @@ function setPause(p){
 function togglePause(){if(G.state==='play'||G.paused)setPause(!G.paused)}
 function startGame(){showMain()}
 
-/* ---------- testi fissi, schermo intero ---------- */
+/* ---------- static texts, fullscreen ---------- */
 function applyStatic(){
   $('tagline').textContent=t('menu.tag');
   $('keys').innerHTML=t('keys');
@@ -1455,7 +1455,7 @@ function toggleFS(){
     }
   }catch(e){toast(t('fs.fail'),2)}
 }
-/* riporta il focus sul gioco: il browser passa tastiera e controller solo alla pagina che ha il focus */
+/* give focus back to the game: browsers only deliver keyboard and gamepad input to the focused page */
 function refocusGame(){
   try{window.focus()}catch(e){}
   const b=!$('ov').hidden&&$('ovc').querySelector('button:not([disabled])');
@@ -1473,10 +1473,10 @@ document.addEventListener('webkitfullscreenchange',onFS);
 $('screen').addEventListener('pointerdown',()=>{try{window.focus()}catch(e){}});
 window.addEventListener('gamepadconnected',()=>{GP.on=false;refocusGame()});
 
-/* ---------- controller (Gamepad API, compatibile con DS4Windows / XInput) ---------- */
+/* ---------- controller (Gamepad API, works with DS4Windows / XInput) ---------- */
 const GP={on:false,prev:{},pg:{}};
 function pollPad(){
-  /* si leggono TUTTI i controller collegati (DS4Windows può esporne due) e si uniscono i comandi */
+  /* read ALL connected pads (DS4Windows can expose two) and merge their input */
   const pads=[];
   try{const l=navigator.getGamepads?navigator.getGamepads():[];for(const p of l){if(p&&p.connected)pads.push(p)}}catch(e){}
   if(!pads.length){GP.on=false;GP.navDir=0;return}
@@ -1487,14 +1487,14 @@ function pollPad(){
   for(const gp of pads){
     const bt=i=>!!(gp.buttons[i]&&(gp.buttons[i].pressed||gp.buttons[i].value>.5)),ax=gp.axes[0]||0,ay=gp.axes[1]||0;
     const o={left:bt(14)||ax<-.45,right:bt(15)||ax>.45,up:bt(12)||ay<-.6,down:bt(13)||ay>.6,a:bt(0),b:bt(1),x:bt(2),rb:bt(5),rt:bt(7),start:bt(9),y:bt(3),lb:bt(4),back:bt(8)};
-    /* menu: conta solo la direzione prevalente della levetta, così una spinta in diagonale non si annulla */
+    /* menus: only the dominant stick axis counts, so a diagonal push does not cancel itself out */
     const big=Math.hypot(ax,ay)>.5,hor=Math.abs(ax)>Math.abs(ay);
     o.nl=bt(14)||(big&&hor&&ax<0);o.nr=bt(15)||(big&&hor&&ax>0);o.nu=bt(12)||(big&&!hor&&ay<0);o.nd=bt(13)||(big&&!hor&&ay>0);
     for(const k of K)if(o[k])s[k]=true;
   }
   const edge=k=>s[k]&&!GP.prev[k];
   const menu=!$('ov').hidden&&G.state!=='cut';
-  /* navigazione nei menu con ripetizione se si tiene premuto */
+  /* menu navigation with auto-repeat while held */
   const nY=(s.nd?1:0)-(s.nu?1:0),nX=(s.nr?1:0)-(s.nl?1:0),nav=nY||nX;
   if(nav!==GP.navDir){GP.navDir=nav;GP.navT=.38;if(nav&&menu)focusMove(nav)}
   else if(nav&&menu){GP.navT-=pdt;if(GP.navT<=0){GP.navT=.13;focusMove(nav)}}
@@ -1520,7 +1520,7 @@ function pollPad(){
   GP.prev=s;
 }
 
-/* =====================  FASE 2A : inventario, oggetti, skin, drop  ===================== */
+/* =====================  PHASE 2A : inventory, items, skins, drops  ===================== */
 const ITEMS={
   w_blaster:{t:'main',dmg:20,cd:.2},
   w_twin:{t:'main',dmg:12,cd:.22,drop:1},
@@ -1564,7 +1564,7 @@ function dmgMul(){return(P&&P.dmgT>0?2:1)*(hasAmu('a_fury')?1.2:1)}
 function iname(id){return t('i.'+id)}
 function idesc(id){const it=ITEMS[id];if(it.t==='skin')return t(id==='sk_gold'?'d.sk_gold':'d.sk');return t('d.'+id)}
 
-/* ---- skin: ricolora gli sprite del giocatore ---- */
+/* ---- skins: recolour the player sprites ---- */
 const _skinCache={};
 function recolorPack(pk,map){
   const c=pk.r,w=c.width,h=c.height,g=c.getContext('2d'),d=g.getImageData(0,0,w,h),px=d.data;
@@ -1587,7 +1587,7 @@ function skinSet(){
   return _skinCache[id];
 }
 
-/* ---- drop ---- */
+/* ---- drops ---- */
 const LOOT_CH={scrap:.2,drone:.3,plant:.3,spitter:.25,shield:.3,bird:0,horror:.3,machine:.25,mosq:.25,tent:.2,alch:.3,guard:.35};
 function lootPool(types){return Object.keys(ITEMS).filter(k=>ITEMS[k].drop&&!Inv.own[k]&&(!types||types.indexOf(ITEMS[k].t)>=0))}
 function rollLoot(e){
@@ -1639,7 +1639,7 @@ function drawItemIcon(id,x,y){
   ctx.globalAlpha=.25+f*.15;ctx.fillStyle=col;ctx.fillRect(x-3,y-3,18,18);ctx.globalAlpha=1;
 }
 
-/* =====================  FASE 2C/2D : blocchi speciali, collezionabili, venditore, miniboss  ===================== */
+/* =====================  PHASE 2C/2D : special blocks, collectibles, vendor, minibosses  ===================== */
 const MINI_Z={1:7,2:4,3:5,4:4};
 const COL_ID={1:'chip',2:'seed',3:'gear'};
 const COL_KINDS=['high','vault','tramp','crumble'];
@@ -1687,7 +1687,7 @@ function buildCollectible(S,b,kind,idx,theme){
   S.pickups.push({id:id,kind:COL_ID[theme],x:cx,y:cy,w:10,h:10});
 }
 
-/* chiamata dai generatori dopo ogni edificio */
+/* called by the level generators after every building */
 function featureHook(S,b,z,i,nB,isCheck){
   const th=S.theme;
   const ci=colAt(th,z,i);
@@ -1695,7 +1695,7 @@ function featureHook(S,b,z,i,nB,isCheck){
   if(th===2&&i===nB-1&&z===3)S.pickups.push({id:'charge',kind:'charge',x:b.x+b.w/2-6,y:b.y-20,w:12,h:12});
   if(th===3&&i===nB-1&&z===1)S.pickups.push({id:'climb',kind:'climb',x:b.x+b.w/2-6,y:b.y-20,w:12,h:12});
   if(th===2&&i===nB-1&&z===6)S.pickups.push({id:'bomb',kind:'bomb',x:b.x+b.w/2-6,y:b.y-20,w:12,h:12});
-  /* piattaforma che cede nei salti lunghi (extra, mai obbligatoria) */
+  /* crumbling platform in long gaps (optional extra, never required) */
   const pb=S.buildings[S.buildings.length-2];
   if(pb&&!isCheck&&!b.colk){
     S.hr=S.hr||mulberry32(th*977+13);
@@ -1706,7 +1706,7 @@ function featureHook(S,b,z,i,nB,isCheck){
     }
   }
 }
-/* sezione miniboss inserita all'inizio di una zona */
+/* miniboss section inserted at the start of a zone */
 function buildMini(S,x,theme,mk,row){
   const z=MINI_Z[theme];
   x+=2;
@@ -1737,7 +1737,7 @@ function miniExit(closed){
   if(!closed&&i>=0)world.solids.splice(i,1);
 }
 
-/* ---------- speciali : stato, update ---------- */
+/* ---------- specials : state, update ---------- */
 function solidAt(x,y){for(const s of world.solids){if(x>=s.x&&x<s.x+s.w&&y>=s.y&&y<s.y+s.h)return s}return null}
 function resetSpecials(){
   for(const s of world.specials){
@@ -1795,7 +1795,7 @@ function updateSpecials(dt){
   }
 }
 
-/* ---------- disegno ---------- */
+/* ---------- drawing ---------- */
 function drawSpecials(cx,cy,pal){
   for(const s of world.specials){
     const x=Math.round(s.x-cx);
@@ -1844,12 +1844,12 @@ function drawVendors(cx,cy){
     const x=Math.round(v.x-cx),y=Math.round(v.y-cy);
     if(x<-30||x>W+30)continue;
     const b=Math.floor(NOW*2)%2;
-    /* banco */
+    /* counter */
     ctx.fillStyle='#0d1126';ctx.fillRect(x-14,y-12,28,12);
     ctx.fillStyle='#6a4d3c';ctx.fillRect(x-13,y-11,26,10);
     ctx.fillStyle='#8a6a55';ctx.fillRect(x-13,y-11,26,2);
     ctx.fillStyle='#ffb020';ctx.fillRect(x-10,y-14,4,3);ctx.fillStyle='#35e8ff';ctx.fillRect(x-3,y-14,4,3);ctx.fillStyle='#ff4fd8';ctx.fillRect(x+5,y-14,4,3);
-    /* venditore */
+    /* vendor */
     const vy=y-12-b;
     ctx.fillStyle='#0d1126';ctx.fillRect(x-5,vy-12,12,13);
     ctx.fillStyle='#d9c27a';ctx.fillRect(x-4,vy-11,10,11);
@@ -1869,7 +1869,7 @@ function nearVendor(){
   return null;
 }
 
-/* =====================  MINIBOSS  ===================== */
+/* =====================  MINIBOSSES  ===================== */
 let mini=null;
 let miniWaves=[];
 function makeMini(){
@@ -1911,7 +1911,7 @@ function updateMini(dt){
   const pcx=P.x+5,mcx=m.x+m.w/2,dx=pcx-mcx;
   m.t+=dt*ts;
   if(m.theme!==2)updateMiniScrap(m,dt,ts,dx);else updateMiniPlant(m,dt,ts,dx);
-  /* ondeX */
+  /* ground waves */
   for(let i=miniWaves.length-1;i>=0;i--){
     const w=miniWaves[i];w.x+=w.vx*dt;w.life-=dt;
     const r={x:w.x-6,y:w.y-10,w:12,h:10};
@@ -2031,7 +2031,7 @@ function drawMini(cx,cy){
   ctx.globalAlpha=1;
 }
 
-/* =====================  FASE 2B : armi, colpo carico, bomba, arrampicata  ===================== */
+/* =====================  PHASE 2B : weapons, charge shot, bomb, wall climb  ===================== */
 const AB_KEYS=['dj','dash','charge','bomb','climb'];
 function newAbil(o){const a={dj:false,dash:false,charge:false,bomb:false,climb:false};if(o)for(const k of AB_KEYS)a[k]=!!o[k];return a}
 function climbMax(){return 100*(hasAmu('a_energy')?1.5:1)}
@@ -2043,7 +2043,7 @@ function makePlayer(){
 function chipCount(){let n=0;collected.forEach(k=>{if(typeof k==='string'&&(k.indexOf('chip')===0||k.indexOf('seed')===0||k.indexOf('gear')===0))n++});return n}
 function abilOwned(k){return(k.kind==='dj'||k.kind==='dash'||k.kind==='charge'||k.kind==='bomb'||k.kind==='climb')&&!!P.abil[k.kind]}
 
-/* ---------- danni condivisi ---------- */
+/* ---------- shared damage ---------- */
 function hitEnemy(e,dmg){
   e.hp-=dmg;e.flash=.12;
   if(e.hp<=0)killEnemy(e);
@@ -2079,7 +2079,7 @@ function areaDamage(x,y,r,dmg,opt){
   wallsInRadius(x,y,opt.wall||r*.7,100);
 }
 
-/* ---------- armi ---------- */
+/* ---------- weapons ---------- */
 function fireMain(mult){
   const p=P,w=ITEMS[Inv.main],dm=dmgMul(),mx=p.x+5+p.face*9,my=p.y+5;
   const f=p.face;
@@ -2173,7 +2173,7 @@ function drawPBombs(cx,cy){
   }
 }
 
-/* ---------- giocatore ---------- */
+/* ---------- player ---------- */
 function wallSide(p){
   const y1=p.y+3,y2=p.y+10;
   if(pointSolid(p.x-1.5,y1)||pointSolid(p.x-1.5,y2))return -1;
@@ -2194,7 +2194,7 @@ function updatePlayer(dt){
   }
   if(In.bombHit){In.bombHit=false;tryBomb()}
   if(In.secHit){In.secHit=false;trySecondary()}
-  /* arrampicata */
+  /* wall climbing */
   const maxE=climbMax();
   if(p.ground){p.energy=Math.min(maxE,p.energy+38*dt);p.cling=false;p.climbLock=false}
   const canClimb=p.abil.climb&&!p.ground&&p.dashT<=0&&p.kb<=0&&!p.climbLock&&p.mantle<=0;
@@ -2238,7 +2238,7 @@ function updatePlayer(dt){
     hurtPlayer(20,p.x+5);P.vy=0;P.vx=0;P.kb=0;
     toast(t('t.fall'),1.4);
   }
-  /* sparo */
+  /* shooting */
   const w=ITEMS[Inv.main],chargeable=p.abil.charge&&!w.auto;
   if(p.dashT>0){In.shootHit=false}
   else if(chargeable){
@@ -2251,7 +2251,7 @@ function updatePlayer(dt){
   }
 }
 
-/* ---------- proiettili ---------- */
+/* ---------- projectiles ---------- */
 function rocketBoom(b){
   const x=b.x+b.w/2,y=b.y+b.h/2;
   areaDamage(x,y,40,b.dmg,{knock:true,wall:44});
@@ -2333,7 +2333,7 @@ function drawBullet(b,cx,cy){
   ctx.fillStyle=b.col||'#e8ffe9';ctx.fillRect(x,y,b.w,b.dmg>20?4:3);
 }
 
-/* ---------- pickup ---------- */
+/* ---------- pickups ---------- */
 function pickupsUpdate(){
   for(const k of world.pickups){
     if(collected.has(k.id)||abilOwned(k))continue;
@@ -2390,7 +2390,7 @@ function drawDrop(d,x,y){
 
 /* ---------- HUD ---------- */
 function drawHUDExtra(){
-  /* denaro + cooldown */
+  /* coins + cooldowns */
   ctx.fillStyle='#07060f';ctx.globalAlpha=.7;ctx.fillRect(4,31,150,12);ctx.globalAlpha=1;
   const icon=(x,on,col,fn)=>{ctx.fillStyle=on?col:'#2b2752';ctx.fillRect(x,33,9,8);if(fn){ctx.fillStyle='#07060f';fn(x)}};
   icon(8,P.abil.charge,'#ffc2f0',x=>{ctx.fillRect(x+1,36,2,2);ctx.fillRect(x+3,34,2,6);ctx.fillRect(x+5,35,3,4)});
@@ -2402,23 +2402,23 @@ function drawHUDExtra(){
     ctx.fillStyle=P.secCd>0?'#5a2a55':'#ff4fd8';ctx.fillRect(46,33,9,8);ctx.fillStyle='#07060f';ctx.fillRect(48,36,5,2);
     if(P.secCd>0){ctx.globalAlpha=.7;ctx.fillRect(46,33,9,Math.round(8*P.secCd/it.cd));ctx.globalAlpha=1}
   }
-  /* monete */
+  /* coins */
   ctx.fillStyle='#ffd23f';ctx.fillRect(60,34,6,6);ctx.fillStyle='#b8860b';ctx.fillRect(62,36,2,2);
   txt(String(Inv.coins),70,33,'#ffd23f');
-  /* energia arrampicata */
+  /* climbing energy */
   if(P.abil.climb&&(P.energy<climbMax()-1||P.cling)){
     const r=P.energy/climbMax();
     ctx.fillStyle='#07060f';ctx.globalAlpha=.7;ctx.fillRect(4,45,70,9);ctx.globalAlpha=1;
     ctx.fillStyle='#0b0a1a';ctx.fillRect(6,47,66,5);
     ctx.fillStyle=r>.3?'#35e8ff':'#ff6a3d';ctx.fillRect(7,48,Math.round(64*r),3);
   }
-  /* carica sopra il giocatore */
+  /* charge meter above the player */
   if(P.charge>.2&&!P.dead){
     const x=Math.round(P.x+5-cam.x),y=Math.round(P.y-9-cam.y),r=P.charge/2,full=P.charge>=2;
     ctx.fillStyle='#07060f';ctx.fillRect(x-9,y,18,4);
     ctx.fillStyle=full?(Math.floor(NOW*16)%2?'#fff':'#ffc2f0'):'#ff4fd8';ctx.fillRect(x-8,y+1,Math.round(16*r),2);
   }
-  /* barra miniboss */
+  /* miniboss bar */
   if(mini&&mini.active&&!mini.dead&&!(boss.active&&!boss.dead)){
     const bw=170,bx=(W-bw)/2,by=H-16,r=Math.max(0,mini.hp)/mini.max;
     txt(miniName(),W/2,by-12,mini.theme===2?'#ff8fc7':'#ff6a3d','center');
@@ -2428,7 +2428,7 @@ function drawHUDExtra(){
   }
 }
 
-/* ---------- tasti nuovi ---------- */
+/* ---------- extra keys ---------- */
 window.addEventListener('keydown',e=>{
   const k=e.key;
   if(G.state!=='play')return;
@@ -2449,7 +2449,7 @@ window.addEventListener('keyup',e=>{
   if(k==='ArrowUp'||k==='w'||k==='W')In.up=0;
 });
 
-/* =====================  FASE 2 : inventario e negozio (interfaccia)  ===================== */
+/* =====================  PHASE 2 : inventory and shop (UI)  ===================== */
 function mkSnap(){if(world&&chipCount()>=12){Inv.colW=Inv.colW||{};Inv.colW[world.theme]=1}return{killed:new Set(killed),collected:new Set(collected),coins:Inv.coins}}
 function spawnAll(){spawnAllOld();resetSpecials();spawnMini();pbombs.length=0;pboom.length=0;resetP3();resetTram()}
 function initFeatures(S){S.specials=[];S.vendors=[];S.wallN=0;S.hr=null;S.mini=null;S.gate=null}
@@ -2497,7 +2497,7 @@ function showInv(tab){
   setMenu(h,acts,false,()=>showInv(tab));
 }
 
-/* ---------- venditore ---------- */
+/* ---------- vendor ---------- */
 function tryInteract(){
   if(G.state!=='play'||G.paused)return;
   if(nearScope()){startScope();return}
@@ -2538,7 +2538,7 @@ function buyItem(id){
   showShop(t('t.bought',iname(id)));
 }
 
-/* =====================  MONDO 2 : sprites, livello, nemici  ===================== */
+/* =====================  WORLD 2 : sprites, level, enemies  ===================== */
 const SP_PLANT=pack(fromRows([
 "....kkkkkkkk....",
 "...kppppppppk...",
@@ -2676,7 +2676,7 @@ function buildLevel2(){
   S.solids.push({x:S.endX-T,y:0,w:T,h:ROWS*T});
 }
 
-/* ---------- nemici del mondo 2 ---------- */
+/* ---------- world 2 enemies ---------- */
 function makeEnemy2(d){
   if(d.type==='plant')return{id:d.id,type:'plant',x:d.x,y:d.y,w:16,h:16,hp:100,flash:0,t:Math.random()*3,bite:0,biteDone:false};
   if(d.type==='spitter')return{id:d.id,type:'spitter',x:d.x,y:d.y,w:12,h:10,hp:50,hx:d.x,ox:d.x,oy:d.y,t:Math.random()*6,st:1+Math.random()*1.2,flash:0,face:-1};
@@ -2760,7 +2760,7 @@ function updateBird(e,dt){
   if(overlapR(e,P))hurtPlayer(10,e.x+5);
 }
 
-/* =====================  MONDO 2 : boss Madre Flora  ===================== */
+/* =====================  WORLD 2 : Mother Flora boss  ===================== */
 let puddles=[],seeds=[],thorns=[],waves=[];
 function makeBossFor(){const b=world.theme===2?makeBoss2():makeBoss();b.max=Math.round(b.max*DIFFS[Cfg.diff].hpMul);b.hp=b.max;return b}
 function makeBoss2(){
@@ -2921,7 +2921,7 @@ function updateHazards(dt){
   }
 }
 
-/* ---------- transizioni ---------- */
+/* ---------- transitions ---------- */
 function startWorld2(){
   const abil=P.abil;
   resetWorld();buildLevel2();
@@ -2941,7 +2941,7 @@ function endWorld2(){
   setMenu('<h2>'+t('win2.h')+'</h2><p>'+t('win2.p')+'</p><ul><li>'+t('stat.time')+': '+fmtTime(G.time)+'</li><li>'+t('stat.deaths')+': '+G.deaths+'</li><li>'+t('stat.kills')+': '+G.kills+'</li></ul><p class="dim">'+t('win2.soon')+'</p><div class="menu">'+btn(t('menu.main'),'main')+'</div>',{main:showMain},false,null);
 }
 
-/* =====================  MONDO 2 : grafica e cutscene  ===================== */
+/* =====================  WORLD 2 : graphics and cutscene  ===================== */
 function makeForest(wid,hei,seed,minH,maxH,cr){
   const c=document.createElement('canvas');c.width=wid;c.height=hei;const g=c.getContext('2d'),r=mulberry32(seed);
   g.fillStyle='#fff';
@@ -3013,18 +3013,18 @@ function drawPlat2(p,cx,cy,pal){
   if(Math.floor(NOW*6+p.x)%2){ctx.fillStyle='#ffe45e';ctx.fillRect(x+6,y+p.h+2,1,1);ctx.fillRect(x+p.w-8,y+p.h+4,1,1)}
 }
 function drawBackdrop2(cx,cy,pal){
-  /* pianeta ad anelli */
+  /* ringed planet */
   const px=((300-cam.x*.02)%560+560)%560-50,py=Math.round(46-cam.y*.05);
   ctx.fillStyle='#f6c7e4';ctx.beginPath();ctx.arc(px,py,22,0,6.283);ctx.fill();
   ctx.fillStyle='#e29bc8';ctx.beginPath();ctx.arc(px+5,py+6,15,0,6.283);ctx.fill();
   ctx.strokeStyle='#fff';ctx.globalAlpha=.55;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(px,py,36,8,-.35,0,6.283);ctx.stroke();ctx.globalAlpha=1;
-  /* polline */
+  /* pollen */
   for(let i=0;i<42;i++){
     const sp=4+hash2(i,3)*10,mx=((hash2(i,1)*W+NOW*sp)%W+W)%W,my=(hash2(i,2)*H+Math.sin(NOW*.8+i)*6+NOW*2*hash2(i,4))%H;
     ctx.fillStyle=(i%3)?'#fff8d0':'#ffc2e4';ctx.globalAlpha=.4+.3*Math.sin(NOW*2+i);ctx.fillRect(Math.round(mx),Math.round(my),1,1);ctx.globalAlpha=1;
   }
   tintedLayer(SKY2_FAR,pal.far,.12,255-cam.y*.28);
-  /* uccelli lontani */
+  /* distant birds */
   for(let i=0;i<5;i++){
     const bx=((hash2(i,7)*600+NOW*(10+i*3))%600+600)%600-100,by=40+hash2(i,8)*80+Math.sin(NOW*2+i)*3,f=Math.floor(NOW*4+i)%2;
     ctx.fillStyle='#103a34';ctx.fillRect(Math.round(bx),Math.round(by)+f,2,1);ctx.fillRect(Math.round(bx)+2,Math.round(by)+1-f,2,1);ctx.fillRect(Math.round(bx)+4,Math.round(by)+f,2,1);
@@ -3039,11 +3039,11 @@ function drawFloraBody(cx,cy){
   ctx.fillStyle='#14502f';ctx.fillRect(bx-9,ry-60,18,H*2);
   ctx.fillStyle='#2fa05a';ctx.fillRect(bx-7,ry-60,12,H*2);
   ctx.fillStyle='#5fd68a';ctx.fillRect(bx-6,ry-60,3,H*2);
-  /* foglie laterali */
+  /* side leaves */
   ctx.fillStyle='#1d7a46';
   ctx.beginPath();ctx.moveTo(bx-8,ry-20);ctx.lineTo(bx-70,ry-48);ctx.lineTo(bx-30,ry-6);ctx.closePath();ctx.fill();
   ctx.beginPath();ctx.moveTo(bx+8,ry-20);ctx.lineTo(bx+70,ry-48);ctx.lineTo(bx+30,ry-6);ctx.closePath();ctx.fill();
-  /* braccia */
+  /* arms */
   const sh=[[bx-30,ry-62],[bx+30,ry-62]];
   B.hands.forEach((h,i)=>{
     const hx=Math.round(h.x+13-cx),hy=Math.round(h.y+8-cy);
@@ -3051,7 +3051,7 @@ function drawFloraBody(cx,cy){
     ctx.quadraticCurveTo((sh[i][0]+hx)/2+(i?16:-16),Math.max(sh[i][1],hy)+12,hx,hy);ctx.stroke();
     ctx.strokeStyle='#2fa05a';ctx.lineWidth=4;ctx.stroke();
   });
-  /* testa */
+  /* head */
   const hy=ry-76+shk;
   for(let k=0;k<10;k++){
     ctx.save();ctx.translate(bx,hy);ctx.rotate(k*.6283);
@@ -3073,7 +3073,7 @@ function drawFloraBody(cx,cy){
 function drawFloraHands(cx,cy){
   const B=boss,A=world.arena;
   if(B.dead)return;
-  /* avviso a terra dello schianto */
+  /* ground warning before the slam */
   if(B.state==='slam'&&B.t>.3&&B.t<1.1&&B.hi>=0&&Math.floor(NOW*16)%2){
     const h=B.hands[B.hi];ctx.fillStyle='#ff3b30';ctx.globalAlpha=.5;ctx.fillRect(Math.round(h.x-cx),Math.round(A.roof-cy)-2,26,2);ctx.globalAlpha=1;
   }
@@ -3143,7 +3143,7 @@ function drawEnemy2(e,x,y){
   }
 }
 
-/* =====================  cutscene : dalla città al Mondo 2  ===================== */
+/* =====================  cutscene : from the city to World 2  ===================== */
 let cutT=0;
 const CUT_LEN=15.5;
 function startCutscene(){
@@ -3186,11 +3186,11 @@ function drawCutscene(){
     ctx.fillStyle='#171c36';ctx.fillRect(0,gy,W,H*2);
     ctx.fillStyle='#3b4575';ctx.fillRect(0,gy,W,3);ctx.fillStyle='#6b78b8';ctx.fillRect(0,gy,W,1);ctx.fillStyle='#ff6a3d';ctx.globalAlpha=.55;ctx.fillRect(0,gy+3,W,1);ctx.globalAlpha=1;
     for(let ix=0;ix<W/8;ix++)for(let iy=0;iy<8;iy++){const hv=hash2(ix,iy+3);ctx.fillStyle=hv>.5?WIN_COLS[Math.floor(hv*9)%5]:'#0f1328';ctx.fillRect(ix*8+4,gy+12+iy*8,4,3)}
-    /* beacon acceso */
+    /* lit beacon */
     const bp=Math.sin(t*4)*.5+.5;
     ctx.fillStyle='#0d1126';ctx.fillRect(22,gy-40,8,40);ctx.fillStyle='#3ddc84';ctx.fillRect(24,gy-40,4,40);
     ctx.globalAlpha=.07+bp*.07;ctx.fillStyle='#c8f560';ctx.fillRect(14,gy-60,24,60);ctx.globalAlpha=1;
-    /* navicella */
+    /* spaceship */
     const sx=240+(lift>0?lift*lift*14:0),sy=gy-26-shipDy*(lift>0?1:0),tilt=lift>0?-Math.min(.55,lift*.18):0;
     const open=t>.6&&t<4.4;
     const fl=lift>0?10+Math.sin(t*40)*4:(t>4.4?3+Math.sin(t*40)*2:0);
@@ -3215,7 +3215,7 @@ function drawCutscene(){
       ctx.fillStyle='#e8f7ee';ctx.globalAlpha=.4+hash2(i,5)*.5;ctx.fillRect(Math.round(sxp),Math.round(syp),Math.round(len),1);
     }
     ctx.globalAlpha=1;
-    /* pianeta */
+    /* planet */
     const pr=14+u*17,pcx=300+Math.max(0,u-3)*8,pcy=104;
     ctx.fillStyle='#2fa8a0';ctx.beginPath();ctx.arc(pcx,pcy,pr,0,6.283);ctx.fill();
     ctx.save();ctx.beginPath();ctx.arc(pcx,pcy,pr,0,6.283);ctx.clip();
@@ -3224,7 +3224,7 @@ function drawCutscene(){
     ctx.fillStyle='#000';ctx.globalAlpha=.35;ctx.beginPath();ctx.arc(pcx-pr*.55,pcy+pr*.1,pr*1.05,0,6.283);ctx.fill();ctx.globalAlpha=1;
     ctx.restore();
     ctx.strokeStyle='#fff';ctx.globalAlpha=.7;ctx.lineWidth=1;ctx.beginPath();ctx.arc(pcx,pcy,pr+2,0,6.283);ctx.stroke();ctx.globalAlpha=1;
-    /* navicella in volo */
+    /* spaceship in flight */
     const shx=40+u*34,shy=130-u*4+Math.sin(u*2)*3;
     drawShip(shx,shy,0,8+Math.sin(t*40)*3,false);
     if(u<1){ctx.fillStyle='#000';ctx.globalAlpha=1-u;ctx.fillRect(0,0,W,H);ctx.globalAlpha=1}
@@ -3242,7 +3242,7 @@ function drawCutscene(){
   if(t>.8&&Math.floor(NOW*2)%2)ptxt(t('cut.skip'),W-6,H-12,8,'#8c94b8','right');
 }
 
-/* =====================  FASE 3 : Mondo 3 "Le Fondamenta" e Mondo 4 "Unity Castle"  ===================== */
+/* =====================  PHASE 3 : World 3 "The Foundations" and World 4 "Unity Castle"  ===================== */
 const PALS3=[
   {top:'#0a0d14',bot:'#1e2a33',acc:'#ff9f1c',far:'#121a22',mid:'#19242e'},
   {top:'#0d0a12',bot:'#2a1f2e',acc:'#7ad1ff',far:'#17121c',mid:'#211a28'},
@@ -3348,7 +3348,7 @@ function buildLevelX(theme){
   S.solids.push({x:S.endX-T,y:0,w:T,h:ROWS*T});
 }
 
-/* ---------- sprite ---------- */
+/* ---------- sprites ---------- */
 function mkSprite(w,h,fn){const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');fn((col,x,y,ww,hh)=>{g.fillStyle=col;g.fillRect(x,y,ww,hh)});return pack(c)}
 const SP_HORROR=mkSprite(18,18,R=>{
   const K='#1a0608',F='#8a2a3a',D='#5a1622',B='#e8dcc0',E='#ffe45e';
@@ -3388,7 +3388,7 @@ const SP_ALCH=mkSprite(14,17,R=>{
   R(K,3,15,3,2);R(K,8,15,3,2);
 });
 
-/* ---------- nemici ---------- */
+/* ---------- enemies ---------- */
 let flasks=[],pools=[],missiles=[],shocks=[],orbs=[];
 function resetP3(){
   flasks=[];pools=[];missiles=[];shocks=[];orbs=[];clearHz();
@@ -3556,7 +3556,7 @@ function drawArmor(cx,cy){
   }
 }
 
-/* ---------- fiaschette, pozze, missili, onde ---------- */
+/* ---------- flasks, pools, missiles, shockwaves ---------- */
 function updateP3(dt){
   updateHz(dt);
   for(let i=flasks.length-1;i>=0;i--){
@@ -3600,7 +3600,7 @@ function updateP3(dt){
     if(o.t>=2)orbs.splice(i,1);
   }
   for(let i=enemies.length-1;i>=0;i--)if(enemies[i].y>WH+200&&enemies[i].minion)enemies.splice(i,1);
-  /* porta del Mondo 3 */
+  /* World 3 great door */
   const g=world.gate;
   if(g&&boss.dead&&!Hell.on&&overlapR(P,g)){
     if(G.card)startCut('door');
@@ -3642,7 +3642,7 @@ function drawP3(cx,cy){
       const k=(o.t-1.7)/.3;ctx.globalAlpha=1-k;ctx.fillStyle='#b58cff';ctx.beginPath();ctx.arc(tx,ty,32*(.5+k*.5),0,6.283);ctx.fill();ctx.globalAlpha=1;
     }
   }
-  /* porta gigante */
+  /* giant door */
   const g=world.gate;
   if(g){
     const x=Math.round(g.x-cx),y=Math.round(g.y-cy);
@@ -3663,7 +3663,7 @@ function drawGate(x,y,open,lit,mid){
   ctx.fillStyle=lit?(Math.floor(NOW*6)%2?'#35e8ff':'#c8ffe0'):'#ff3b30';ctx.fillRect(x+54,y+34,4,6);
 }
 
-/* ---------- grafica dei due mondi ---------- */
+/* ---------- graphics of the two worlds ---------- */
 const SKY3_FAR=makeSkyline(512,170,8,18,90,168,91,0);
 const SKY3_MID=makeSkyline(512,150,12,26,70,148,97,0);
 const SKY4_FAR=makeSkyline(512,150,26,60,50,130,71,.06);
@@ -3722,28 +3722,28 @@ function drawDecor34(d,cx,cy,pal){
   }
 }
 
-/* =====================  FASE 3 : boss OBLIVION (centauro meccanico) e Unity  ===================== */
+/* =====================  PHASE 3 : OBLIVION boss (mechanical centaur) and Unity  ===================== */
 const SP_CENT=mkSprite(78,62,R=>{
   const K='#0a0c14',D='#3a3f52',M='#5d6680',L='#9aa6c4',A='#ff9f1c',RD='#ff3b30',G='#ffd23f';
-  /* zampe */
+  /* legs */
   for(const lx of[8,20,40,52]){R(K,lx,38,7,22);R(D,lx+1,39,5,20);R(M,lx+1,39,2,20);R(K,lx-1,48,9,3);R(L,lx,49,7,1);R(K,lx-1,58,9,4);R(A,lx,59,7,1)}
-  /* corpo */
+  /* body */
   R(K,4,24,56,18);R(D,5,25,54,16);R(M,5,25,54,4);R(K,5,36,54,2);R(A,10,30,6,4);R(A,22,30,6,4);R(A,34,30,6,4);
   R(K,0,26,6,8);R(RD,0,28,3,4);
-  /* busto */
+  /* torso */
   R(K,42,6,18,22);R(D,43,7,16,20);R(M,43,7,16,3);R(K,48,14,8,8);R(G,50,16,4,4);
   R(K,38,8,6,12);R(M,39,9,4,10);R(K,58,8,6,12);R(M,59,9,4,10);
-  /* testa */
+  /* head */
   R(K,46,0,12,8);R(D,47,1,10,6);R(RD,51,3,6,2);R(K,44,0,3,5);R(L,45,0,1,4);
-  /* lancia */
+  /* lance */
   R(K,56,15,22,4);R(L,57,16,18,2);R(G,74,16,4,2);R(K,60,13,4,8);R(A,61,14,2,6);
 });
 const SP_UHEAD=mkSprite(56,54,R=>{
   const K='#07060f',V='#2c184a',P='#4a2a78',L='#7a52b8',G='#ffd23f',E='#ff4d5e';
-  /* corona */
+  /* crown */
   for(const cx of[6,16,26,36,46]){R(K,cx-1,0,6,12);R(G,cx,1,4,10)}
   R(K,3,9,50,5);R(G,4,10,48,3);
-  /* elmo */
+  /* helmet */
   R(K,2,13,52,36);R(V,3,14,50,34);R(P,3,14,50,5);R(P,3,14,5,34);R(L,4,15,48,1);
   R(K,22,20,12,26);R(E,25,22,6,5);R(E,25,30,6,5);R(E,25,38,6,5);R('#ffd0d4',27,23,2,2);R('#ffd0d4',27,31,2,2);R('#ffd0d4',27,39,2,2);
   R(K,8,24,10,3);R(G,9,25,8,1);R(K,38,24,10,3);R(G,39,25,8,1);
@@ -3826,7 +3826,7 @@ function updateCentaur(dt){
     }
     if(B.t>=1.3){B.state='idle';B.cd=1.2}
   }else if(B.state==='jump'){
-    /* balzo sulla posizione del giocatore + onde d'urto all'atterraggio */
+    /* leap onto the player's position + shockwaves on landing */
     const gy=A.roof-B.h;
     if(B.t<.5){B.face=dx>=0?1:-1;B.jx0=B.x;B.jx1=clamp(P.x+5-B.w/2,A.x+8,A.x+A.w-B.w-8)}
     else if(B.t<1.3){const u=(B.t-.5)/.8;B.x=lerp(B.jx0,B.jx1,u);B.y=gy-Math.sin(u*Math.PI)*95;if(overlapR(B,P))hurtPlayer(30,cx)}
@@ -3838,7 +3838,7 @@ function updateCentaur(dt){
     }
     if(B.t>=1.9){B.y=gy;B.state='idle';B.cd=.9}
   }else if(B.state==='sweep'){
-    /* raggio della lancia che spazza dall'alto verso il pavimento */
+    /* lance beam sweeping from the sky down to the floor */
     if(B.t<.7){B.face=dx>=0?1:-1}
     else if(B.t<1.9){
       if(!B.hitDone){B.hitDone=true;sfx(240,1.1,'sawtooth',.06,-120)}
@@ -3850,7 +3850,7 @@ function updateCentaur(dt){
     }
     if(B.t>=2.3){B.state='idle';B.cd=1.1}
   }else if(B.state==='mines'){
-    /* lancia 4 mine che esplodono dopo un attimo */
+    /* throws 4 mines that explode after a moment */
     if(B.t>=.5&&!B.hitDone){
       B.hitDone=true;sfx(220,.3,'square',.05,200);
       const tp=centTip(B);
@@ -3861,7 +3861,7 @@ function updateCentaur(dt){
     }
     if(B.t>=1.2){B.state='idle';B.cd=1}
   }else if(B.state==='flame'){
-    /* lanciafiamme dalla punta della lancia */
+    /* flamethrower from the lance tip */
     if(B.t<.5)B.face=dx>=0?1:-1;
     else if(B.t<1.7){
       if(!B.hitDone){B.hitDone=true;sfx(120,1.2,'sawtooth',.05,80)}
@@ -3870,7 +3870,7 @@ function updateCentaur(dt){
     }
     if(B.t>=2){B.state='idle';B.cd=1;B.fl=0}
   }else if(B.state==='drones'){
-    /* chiama due droni di scorta */
+    /* calls two escort drones */
     if(B.t>=.7&&!B.hitDone){
       B.hitDone=true;sfx(180,.4,'square',.05,300);
       for(const x of[A.x+50,A.x+A.w-50]){if(bossMinions()<3){const e=makeEnemy({id:-1,type:'drone',x:x,y:A.roof-95});e.minion=true;enemies.push(e);burst(x,A.roof-95,14,'#b9c8ee',90,.5)}}
@@ -3964,7 +3964,7 @@ function updateUnity(dt){
       let a;do{a=opts[Math.floor(Math.random()*opts.length)]}while(a===B.last&&Math.random()<.85);
       B.last=a;go(a);
       if(a==='slam')B.tx=clamp(P.x+5,A.lx+18,A.rx-18);
-      /* fase 2: attacchi sovrapposti, piovono orbite extra */
+      /* phase 2: overlapping attacks, extra orbs rain down */
       if(B.hp<B.max/2&&a!=='orbs'&&Math.random()<.4)for(let k=0;k<2;k++)orbs.push({sx:cx,sy:B.y+26,tx:A.lx+16+Math.random()*(A.rx-A.lx-32),ty:A.roof-6,t:-k*.15});
     }
     return;
@@ -4007,7 +4007,7 @@ function updateUnity(dt){
     }
     if(B.t>=1.2){B.state='idle';B.cd=1.8}
   }else if(B.state==='crown'){
-    /* pioggia di punte della corona */
+    /* crown spike rain */
     if(B.t>=.3&&!B.hitDone){
       B.hitDone=true;sfx(700,.4,'triangle',.05,-300);
       const xs=[clamp(P.x+5,A.lx+8,A.rx-8)];let g=0;
@@ -4016,7 +4016,7 @@ function updateUnity(dt){
     }
     if(B.t>=1.6){B.state='idle';B.cd=.9}
   }else if(B.state==='spiral'){
-    /* spirale di proiettili dagli occhi */
+    /* bullet spiral from the eyes */
     if(B.t>=.3){
       const n=Math.floor((B.t-.3)/.08);
       while(B.shots<=n&&B.shots<22){
@@ -4027,7 +4027,7 @@ function updateUnity(dt){
     }
     if(B.t>=2.3){B.state='idle';B.cd=1}
   }else if(B.state==='hands'){
-    /* due guanti giganti spazzano il pavimento: saltali */
+    /* two giant gauntlets sweep the floor: jump over them */
     if(!B.hitDone){
       B.hitDone=true;const f=Math.random()<.5?1:-1;
       uh.push({x:f>0?A.lx-30:A.rx,y:A.roof-22,w:30,h:22,dir:f,sp:150,t:-.7,dmg:20,hit:false},
@@ -4036,11 +4036,11 @@ function updateUnity(dt){
     }
     if(B.t>=2.4){B.state='idle';B.cd=.8}
   }else if(B.state==='vortex'){
-    /* vortice che risucchia VERDE-7 */
+    /* vortex that pulls VERDE-7 in */
     if(B.t>=.4&&!B.hitDone){B.hitDone=true;vort={x:A.lx+40+Math.random()*(A.rx-A.lx-80),y:A.roof-12,t:0,life:3.4};sfx(90,1.5,'sine',.07,40)}
     if(B.t>=1.2){B.state='idle';B.cd=.9}
   }else if(B.state==='pillars'){
-    /* colonne di fuoco in sequenza, con un solo varco sicuro */
+    /* fire pillars in sequence, with a single safe gap */
     if(B.t>=.3&&!B.hitDone){
       B.hitDone=true;
       const n=7,cw=(A.rx-A.lx)/n,skip=1+Math.floor(Math.random()*(n-2)),rev=Math.random()<.5;
@@ -4057,15 +4057,15 @@ function drawUnityBody(cx,cy){
   const sh=B.hp<=0&&B.deathT<3.2?Math.round((Math.random()-.5)*4):0;
   const R=(c,x,y,w,h)=>{ctx.fillStyle=c;ctx.fillRect(mx+x+sh,ry+y,w,h)};
   const K='#07060f',V='#1c1030',P='#2c184a',L='#4a2a78',G='#b8860b';
-  /* mantello e torso */
+  /* cloak and torso */
   R(K,-96,-64,192,200);R(V,-94,-62,188,200);
   R(P,-70,-70,140,200);R(L,-70,-70,140,4);
   for(let k=-60;k<=60;k+=24){R(K,k-1,-58,3,190);R(G,k,-58,1,190)}
-  /* spalle */
+  /* shoulders */
   R(K,-116,-84,50,34);R(P,-114,-82,46,30);R(G,-114,-82,46,3);R(K,66,-84,50,34);R(P,68,-82,46,30);R(G,68,-82,46,3);
-  /* collo */
+  /* neck */
   R(K,-16,-70,32,20);R(V,-14,-68,28,18);
-  /* cuore */
+  /* heart */
   const pu=Math.floor(NOW*3)%2;
   R(K,-12,-40,24,24);R((G.uniOff?'#3a3550':B.state==='regen'?'#7dff7a':(pu?'#ff4d5e':'#c0202f')),-9,-37,18,18);R('#fff',-3,-31,6,6);
 }
@@ -4078,7 +4078,7 @@ function drawUnityFront(cx,cy){
   ctx.drawImage(B.flash>0?SP_UHEAD.wr:SP_UHEAD.r,hx,hy);
   if(B.hp<=0){
     if(B.deathT>=3.2){
-      /* il braccio che punta VERDE-7 */
+      /* the arm pointing at VERDE-7 */
       const px=Math.round(P.x+5-cx),py=Math.round(P.y+4-cy),sx=mx+(px<mx?-80:80),sy=ry-66;
       ctx.strokeStyle='#07060f';ctx.lineWidth=9;ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(lerp(sx,px,.72),lerp(sy,py,.72));ctx.stroke();
       ctx.strokeStyle='#4a2a78';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(lerp(sx,px,.72),lerp(sy,py,.72));ctx.stroke();
@@ -4109,7 +4109,7 @@ function drawUnityFront(cx,cy){
   }
   if(B.state==='summon'&&B.t<.7&&Math.floor(NOW*14)%2){ctx.fillStyle='#ffb020';for(const x of[A.lx+20,(A.lx+A.rx)/2-6,A.rx-32])ctx.fillRect(Math.round(x-cx),ry-2,12,2)}
   if(B.state==='orbs'&&B.t<.5){ctx.fillStyle='#b58cff';const q=3+Math.floor(B.t*14);ctx.fillRect(hx+28-q/2,hy+30-q/2,q,q)}
-  /* conto alla rovescia del laser e della rigenerazione */
+  /* laser and regeneration countdown */
   if(B.state==='regen'){txt('+200 HP '+Math.ceil(5-B.t)+'s',mx,hy-12,'#7dff7a','center')}
 }
 function wrapTxt(s,n){const out=[];let cur='';for(const w of s.split(' ')){if((cur+' '+w).trim().length>n){out.push(cur);cur=w}else cur=(cur+' '+w).trim()}if(cur)out.push(cur);return out}
@@ -4131,7 +4131,7 @@ function drawHud3(){
   if(B.deathT>=9.3){ctx.fillStyle='#fff';ctx.globalAlpha=Math.min(1,(B.deathT-9.3)/1.3);ctx.fillRect(0,0,W,H);ctx.globalAlpha=1}
 }
 
-/* =====================  FASE 3 : passaggi tra mondi, cutscene, finale, testi  ===================== */
+/* =====================  PHASE 3 : world transitions, cutscenes, ending, texts  ===================== */
 (function(){
   const L=['it','en','es','fr'];
   const D={
@@ -4248,7 +4248,7 @@ const CUTS={
       ctx.fillStyle=i%5?'#2a3440':'#4a5560';ctx.globalAlpha=land?.25:.7;ctx.fillRect(x,Math.round(y),1,Math.round(land?2:len));
     }
     ctx.globalAlpha=1;
-    /* detriti del pavimento di Flora */
+    /* debris from Flora's floor */
     if(!land)for(let i=0;i<12;i++){const x=40+hash2(i,21)*300,y=((hash2(i,22)*H-t*(40+hash2(i,23)*60))%H+H)%H;ctx.fillStyle=i%3?'#2fa05a':'#ff8fc7';ctx.fillRect(Math.round(x),Math.round(y),3,2)}
     const py=Math.max(150,H+40-(t-4.4)*90);
     if(t>4.4){
@@ -4286,7 +4286,7 @@ const CUTS={
     if(t<1.2){ctx.fillStyle='#fff';ctx.globalAlpha=1-t/1.2;ctx.fillRect(0,0,W,H);ctx.globalAlpha=1}
     for(let i=0;i<60;i++){ctx.fillStyle=(Math.floor(NOW*2+i)%5)?'#e8f7ee':'#8a7ad0';ctx.globalAlpha=.7;ctx.fillRect(Math.floor(hash2(i,1)*W),Math.floor(hash2(i,2)*130),1,1)}
     ctx.globalAlpha=1;
-    /* fuochi d'artificio */
+    /* fireworks */
     for(let k=Math.max(0,Math.floor(t/.55)-4);k<=Math.floor(t/.55);k++){
       const age=t-k*.55;if(age<0||age>1.6)continue;
       const fx=30+hash2(k,31)*(W-60),fy=20+hash2(k,32)*80,col=FW_COLS[k%6],n=18+Math.floor(hash2(k,33)*10);
@@ -4296,17 +4296,17 @@ const CUTS={
       for(let j=0;j<n;j++){const an=j/n*6.283;ctx.fillRect(Math.round(fx+Math.cos(an)*r),Math.round(fy+Math.sin(an)*r+a2*a2*14),2,2);ctx.fillRect(Math.round(fx+Math.cos(an)*r*.55),Math.round(fy+Math.sin(an)*r*.55+a2*a2*14),1,1)}
       ctx.globalAlpha=1;
     }
-    /* città */
+    /* city */
     tg.globalCompositeOperation='source-over';
     ctx.fillStyle='#0d0a24';
     for(let i=0;i<14;i++){const bw=20+hash2(i,41)*26,bh=30+hash2(i,42)*50,bx=i*29-6;ctx.fillRect(Math.round(bx),Math.round(176-bh),Math.round(bw),Math.round(bh));
       for(let wy=0;wy<bh-8;wy+=7)for(let wx=3;wx<bw-4;wx+=6)if(hash2(i*50+wx,wy)>.5){ctx.fillStyle=WIN_COLS[Math.floor(hash2(wx,wy+i)*5)];ctx.fillRect(Math.round(bx+wx),Math.round(176-bh+4+wy),3,3);ctx.fillStyle='#0d0a24'}}
     ctx.fillStyle='#171c36';ctx.fillRect(0,176,W,40);ctx.fillStyle='#6b78b8';ctx.fillRect(0,176,W,1);
-    /* palco */
+    /* stage */
     ctx.fillStyle='#0d1126';ctx.fillRect(160,160,64,16);ctx.fillStyle='#3b4575';ctx.fillRect(161,161,62,14);ctx.fillStyle='#ffd23f';ctx.fillRect(160,160,64,2);
     const hop=Math.abs(Math.sin(t*5))*10;
     cutVerde(180,160-28-hop,Math.floor(t/1.6)%2?1:-1,2,false);
-    /* abitanti */
+    /* citizens */
     for(let i=0;i<26;i++){
       const x=6+i*14.6+hash2(i,51)*5;if(x>150&&x<226)continue;
       const b=Math.round(Math.abs(Math.sin(t*4+i*1.7))*5),y=176-14-b,robot=i%3===0;
@@ -4325,7 +4325,7 @@ const CUTS={
   }}
 };
 
-/* =====================  FASE 4 : TRAMEZZINO (vero boss finale)  ===================== */
+/* =====================  PHASE 4 : TRAMEZZINO (true final boss)  ===================== */
 (function(){
   const L=['it','en','es','fr'];
   const D={
@@ -4348,19 +4348,19 @@ const CUTS={
   for(const k in D)D[k].forEach((s,i)=>{TX[L[i]][k]=s});
 })();
 
-/* sprite di Tramezzino, ridisegnato dall'immagine fornita: omino blu, sciarpa fucsia */
+/* Tramezzino sprite, redrawn from the provided picture: little blue guy, fuchsia scarf */
 const SP_TRAM=mkSprite(44,56,R=>{
   const K='#0a1a33',B1='#2f9be8',B2='#5cc0ff',B3='#1a5f9e',F='#ff2bd6',F2='#ff9bf0';
-  /* testa */
+  /* head */
   R(K,9,0,26,20);R(B1,10,1,24,18);R(B2,10,1,24,2);R(B3,10,17,24,2);
   R(K,15,5,4,4);R(K,25,5,4,4);R('#fff',15,5,1,1);R('#fff',25,5,1,1);
   R(K,16,11,13,8);R('#000',17,12,11,6);R('#ff5a7a',20,16,5,2);
-  /* sciarpa */
+  /* scarf */
   R(K,11,19,22,6);R(F,12,20,20,4);R(F2,14,20,2,4);R(F2,20,20,2,4);R(F2,26,20,2,4);
   R(K,28,24,6,6);R(F,29,24,4,5);
-  /* corpo */
+  /* body */
   R(K,13,25,18,22);R(B1,14,25,16,21);R(B2,14,25,3,21);R(B3,27,25,3,21);
-  /* gambe e piedoni */
+  /* legs and big feet */
   R(K,15,47,5,6);R(B1,16,47,3,5);R(K,24,47,5,6);R(B1,25,47,3,5);
   R(K,6,52,17,4);R(B1,7,52,15,2);R(B3,7,54,15,1);
   R(K,21,52,17,4);R(B1,22,52,15,2);R(B3,22,54,15,1);
@@ -4487,18 +4487,18 @@ function updateTram(dt){
     }
     if(B.t>=1.9){B.state='idle';B.cd=1}
   }else if(B.state==='cannon'){
-    /* cannone da circo: spara una palla a spicchi che rimbalza per tutta l'arena */
+    /* circus cannon: fires a segmented ball that bounces across the whole arena */
     if(B.t<.05){const fromL=(P.x+5)>(A.lx+A.rx)/2;B.cx0=fromL?A.lx+16:A.rx-16;B.cdir=fromL?1:-1}
     if(B.t<.8)B.face=dx>=0?1:-1;
     else if(!B.hitDone){B.hitDone=true;tcirc.push({k:'ball',x:B.cx0+B.cdir*14,y:A.roof-30,vx:B.cdir*175,vy:-160,r:10,rot:0,hit:false});sfx(90,.4,'sawtooth',.09,-30);G.shake=.35;burst(B.cx0+B.cdir*16,A.roof-30,20,'#ffd23f',150,.5)}
     if(B.t>=1.8){B.state='idle';B.cd=.8}
   }else if(B.state==='hoops'){
-    /* cerchi di fuoco: bisogna saltarci dentro */
+    /* rings of fire: you have to jump through them */
     if(B.t<.5)B.face=dx>=0?1:-1;
     while(B.shots<3&&B.t>=.5+B.shots*.6){B.shots++;tcirc.push({k:'hoop',x:B.x+B.w/2+B.face*20,y:A.roof-26,vx:B.face*140,r:18,hit:false,pass:false});sfx(300,.3,'sawtooth',.05,200)}
     if(B.t>=2.4){B.state='idle';B.cd=.8}
   }else if(B.state==='pies'){
-    /* torte in faccia: la panna a terra rallenta */
+    /* pies in the face: the cream left on the floor slows you down */
     if(B.t<.4)B.face=dx>=0?1:-1;
     while(B.shots<5&&B.t>=.4+B.shots*.22){
       B.shots++;const sx=B.x+B.w/2,sy=B.y+10,tx=clamp(P.x+5+(Math.random()-.5)*70,A.lx+10,A.rx-10),tt=.75;
@@ -4543,14 +4543,14 @@ function tramDeath(dt){
   }
   if(B.hold&&T>=m.rel)B.hold=false;
   B.face=(P.x+5)>=(B.x+B.w/2)?1:-1;
-  /* testo */
+  /* text */
   const f1=t('tram.say1'),f2=t('tram.say2');
   B.sayTxt='';
   if(T>=m.s1&&T<m.up)B.sayTxt=f1.slice(0,Math.min(f1.length,Math.floor((T-m.s1)*18)));
   else if(T>=m.s2&&T<m.rel)B.sayTxt=f2.slice(0,Math.min(f2.length,Math.floor((T-m.s2)*18)));
   B.look=T>=m.up;
   if(T>=m.ufo&&!B.ufoX){B.ufoX=B.x+B.w/2;sfx(300,2,'sine',.05,200)}
-  /* rapimento */
+  /* abduction */
   if(T>=m.rel){
     const u=Math.max(0,T-m.rel-.5);B.y=gy-u*u*62;
     if(Math.random()<.5)burst(B.x+B.w/2,B.y+B.h/2,2,'#fff2a0',50,.5);
@@ -4559,7 +4559,7 @@ function tramDeath(dt){
   if(T>=m.end){B.dead=true;unlock(4);if(Hell.on)return;G.trueEnd=true;startCut('ending')}
 }
 
-/* ---------- disegno ---------- */
+/* ---------- drawing ---------- */
 function tramHands(B,sx,sy){
   const f=B.face,shY=sy+29,fx=sx+f*8,bx=sx-f*8,T=B.t||0;
   let fh=[fx+f*6,shY+12],bh=[bx-f*5,shY+11];
@@ -4594,7 +4594,7 @@ function drawUfo(x,y,beam){
 function drawTramFront(cx,cy){
   const B=boss,A=world.arena;if(B.dead)return;
   drawCirc(cx,cy);
-  /* Unity inerte sullo sfondo (nel Boss Hell è andato in tribuna) */
+  /* Unity lies inert in the background (in Boss Hell he moved to the stand) */
   if(uni&&!world.hellArena){
     const dr=Math.min(8,(NOW-uni.n0)*5);
     ctx.drawImage(SP_UDARK,Math.round(uni.x-4-cx),Math.round(uni.y-9-cy+dr));
@@ -4610,10 +4610,10 @@ function drawTramFront(cx,cy){
     if(T>m.leave){const u=T-m.leave;uy-=u*u*95}
   }
   if(ufoOn&&T>=m.rel&&T<m.leave+1.6)drawUfo(ux,uy,true);
-  /* tramezzino */
+  /* Tramezzino */
   const sx=Math.round(B.x+B.w/2-cx),top=Math.round(B.y+B.h-56-cy+((B.state==='idle'&&B.vx)?Math.round(Math.sin(NOW*14)):0));
   if(B.state==='dash'&&B.t>=.55&&B.t<1.1){ctx.globalAlpha=.3;ctx.drawImage(B.face>0?SP_TRAM.r:SP_TRAM.l,Math.round(sx-22-B.face*18),top);ctx.globalAlpha=1}
-  /* sciarpa lunga (attacco) */
+  /* long scarf (attack) */
   if(B.state==='scarf'||B.state==='halve'&&B.t<2.3){
     if(B.state==='scarf'){
       const r=tramScarfRect(B),rx=Math.round(r.x-cx),ry=Math.round(r.y-cy);
@@ -4633,18 +4633,18 @@ function drawTramFront(cx,cy){
   }
   if(B.state==='punch'&&B.t<.75&&Math.floor(NOW*16)%2){ctx.globalAlpha=.25;ctx.fillStyle='#ff3b30';const fx=B.face>0?B.x+B.w-6:B.x+6-72;ctx.fillRect(Math.round(fx-cx),Math.round(B.y+2-cy),72,B.h-4);ctx.globalAlpha=1}
   if(B.state==='dash'&&B.t<.55&&Math.floor(NOW*16)%2){ctx.globalAlpha=.22;ctx.fillStyle='#ff3b30';ctx.fillRect(Math.round((B.face>0?B.x:A.lx)-cx),Math.round(A.roof-30-cy),Math.round(B.face>0?A.rx-B.x:B.x+B.w-A.lx),30);ctx.globalAlpha=1}
-  /* sciarpa corpo */
+  /* body scarf */
   const nx=sx-B.face*11,ny=top+23,len=B.state==='dash'&&B.t>=.55?20:13;
   for(let i=0;i<len;i++){
     const px=Math.round(nx-B.face*i*2.7),py=Math.round(ny+Math.sin(NOW*9-i*.5)*(1+i*.2)+i*.35);
     ctx.fillStyle='#14101c';ctx.fillRect(px-2,py-2,5,5);ctx.fillStyle=(i%4<2)?'#ff2bd6':'#ff9bf0';ctx.fillRect(px-1,py-1,3,3);
   }
-  /* corpo e braccia */
+  /* body and arms */
   const hurt=B.flash>0;
   if(B.hp<=0&&Math.floor(NOW*20)%2&&B.deathT<1)ctx.globalAlpha=.7;
   spr(SP_TRAM,sx-22,top,hurt,B.face);ctx.globalAlpha=1;
   const hs=tramHands(B,sx,top);
-  /* sciarpa che lega VERDE-7 */
+  /* scarf tying up VERDE-7 */
   if(B.hold){
     const px=Math.round(P.x+5-cx),py=Math.round(P.y+7-cy),f=B.face;
     ctx.strokeStyle='#14101c';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(sx+f*4,top+23);ctx.lineTo(px,py);ctx.stroke();
@@ -4652,7 +4652,7 @@ function drawTramFront(cx,cy){
     ctx.fillStyle='#14101c';ctx.fillRect(px-7,py-3,14,6);ctx.fillStyle='#ff2bd6';ctx.fillRect(px-6,py-2,12,4);ctx.fillStyle='#fff';ctx.fillRect(px-3,py-2,2,4);ctx.fillRect(px+2,py-2,2,4);
   }
   drawArm(hs.sh[1],hs.hands[1]);drawArm(hs.sh[0],hs.hands[0]);
-  /* palline del giocoliere */
+  /* juggling balls */
   if(B.state==='juggle'&&B.hp>0){
     for(let i=B.shots;i<5;i++){
       const bp=juggleBall(B,i),x=Math.round(bp.x-cx),y=Math.round(bp.y-cy);
@@ -4741,7 +4741,7 @@ const Music=(function(){
       const n=LEAD[bar][i];if(n)tone(t,n,.22,'square',.035);
     }
   }
-  /* ---- Mondo 2: musica rilassante e floreale con cinguettii ---- */
+  /* ---- World 2: relaxing floral music with birdsong ---- */
   const GM=[
     [79,0,0,0,76,0,0,0,72,0,74,0,76,0,0,0],
     [81,0,0,0,79,0,76,0,0,0,72,0,76,0,0,0],
@@ -4771,7 +4771,7 @@ const Music=(function(){
     if((i===3||i===11)&&Math.random()<.6)chirp(t+Math.random()*.25,2200+Math.random()*1500,2+Math.floor(Math.random()*3));
   }
 
-  /* ---- strumenti extra per i Mondi 3 e 4 ---- */
+  /* ---- extra instruments for Worlds 3 and 4 ---- */
   function pad(t,n,d,type,v,att,det){
     const o=AC.createOscillator(),g=AC.createGain();
     o.type=type;o.frequency.setValueAtTime(hz(n),t);if(det)o.detune.setValueAtTime(det,t);
@@ -4779,7 +4779,7 @@ const Music=(function(){
     o.connect(g);g.connect(master);o.start(t);o.stop(t+d+.05);
   }
   function vib(t,n,d,v){
-    /* voce sinusoidale tremolante, da carillon stonato */
+    /* wavering sine voice, like an out-of-tune music box */
     const o=AC.createOscillator(),l=AC.createOscillator(),lg=AC.createGain(),g=AC.createGain();
     o.type='sine';o.frequency.setValueAtTime(hz(n),t);
     l.frequency.value=5.5;lg.gain.value=hz(n)*.014;l.connect(lg);lg.connect(o.frequency);
@@ -4793,7 +4793,7 @@ const Music=(function(){
     o.connect(g);g.connect(master);o.start(t);o.stop(t+.55);
   }
   function brass(t,n,d,v,cut){
-    /* ottone: dente di sega filtrato con attacco morbido */
+    /* brass: filtered sawtooth with a soft attack */
     const o=AC.createOscillator(),f=AC.createBiquadFilter(),g=AC.createGain();
     o.type='sawtooth';o.frequency.setValueAtTime(hz(n),t);
     f.type='lowpass';f.frequency.setValueAtTime(cut||1600,t);f.Q.value=1;
@@ -4807,9 +4807,9 @@ const Music=(function(){
     o.connect(g);g.connect(master);o.start(t);o.stop(t+.2);
   }
 
-  /* ---- Mondo 3 "Le Fondamenta": lenta, buia, inquietante ----
-     drone basso con tritono, battito cardiaco, melodia tremolante cromatica,
-     gonfiore dissonante, gocce e cigolii casuali */
+  /* ---- World 3 "The Foundations": slow, dark, unsettling ----
+     low drone with a tritone, heartbeat, wavering chromatic melody,
+     dissonant swells, random drips and creaks */
   const DM=[
     [0,0,0,0,76,0,0,0,0,0,75,0,0,0,0,0],
     [0,0,0,0,0,0,79,0,0,0,0,0,78,0,0,0],
@@ -4827,8 +4827,8 @@ const Music=(function(){
     if(i===12&&Math.random()<.5)hit(t,.5,.015,2500);
   }
 
-  /* ---- Mondo 4 "Unity Castle": marcia regale in Re maggiore ----
-     accordi di ottoni, fanfara di trombe, timpani con rullo, tamburo da parata */
+  /* ---- World 4 "Unity Castle": regal march in D major ----
+     brass chords, trumpet fanfare, timpani rolls, parade snare */
   const CM=[
     [74,0,0,74,74,0,78,0,81,0,0,0,78,0,81,0],
     [79,0,0,0,78,0,76,0,74,0,0,0,76,0,0,0],
@@ -4848,8 +4848,8 @@ const Music=(function(){
     if(i===0&&bar===0)tone(t,98,1.5,'sine',.02);
   }
 
-  /* ---- Bonez: inno divino da scontro finale ----
-     coro "aaah", organo, campane, arpa in arpeggio, timpani e voce soprano; Re minore -> Si bemolle -> Fa -> La */
+  /* ---- Bonez: divine final-battle hymn ----
+     "aaah" choir, organ, bells, harp arpeggios, timpani and soprano lead; D minor -> B flat -> F -> A */
   function choir(t,n,d,v){
     const f=AC.createBiquadFilter(),g=AC.createGain();
     f.type='bandpass';f.frequency.value=900;f.Q.value=1.2;
@@ -4893,7 +4893,7 @@ const Music=(function(){
     start(){try{if(timer)return;ctxA();nextT=AC.currentTime+.06;timer=setInterval(sched,25)}catch(e){}},
     stop(){if(timer){clearInterval(timer);timer=null}},
     mode(m){if(m!==md){md=m;stp=0}},
-    /* solo per test: genera `sec` secondi della traccia `m` in un OfflineAudioContext */
+    /* test only: renders `sec` seconds of track `m` into an OfflineAudioContext */
     _render(ctx,m,sec){
       const A0=AC,M0=master,N0=nbuf,D0=md;
       AC=ctx;master=ctx.createGain();master.gain.value=.5;master.connect(ctx.destination);
@@ -4905,10 +4905,10 @@ const Music=(function(){
   };
 })();
 
-/* =====================  FASE 5 : pericoli dei boss, fix piattaforme, Boss Hell  ===================== */
+/* =====================  PHASE 5 : boss hazards, platform fix, Boss Hell  ===================== */
 let hz=[],uh=[],vort=null;
 function clearHz(){hz=[];uh=[];vort=null}
-/* colonna/punta/proiettile dal cielo: avviso per `warn` secondi, poi colpisce per `act` secondi */
+/* column/spike/projectile from the sky: warns for `warn` seconds, then hits for `act` seconds */
 function addHz(k,x,w,delay,warn,act,dmg,col){hz.push({k:k,x:x,w:w,t:-delay,warn:warn,act:act,dmg:dmg,col:col,hit:false,fx:false})}
 function updateHz(dt){
   const A=world.arena;if(!A){clearHz();return}
@@ -4984,9 +4984,9 @@ function drawHz(cx,cy){
   }
 }
 
-/* ---------- piattaforme: niente doppioni sovrapposti o impilati ---------- */
+/* ---------- platforms: no overlapping or stacked duplicates ---------- */
 function fixPlatforms(S){
-  /* priorità: piattaforme dei collezionabili > piattaforme d'aiuto nei salti > piattaforme che cedono (extra) */
+  /* priority: collectible platforms > gap-helper platforms > crumbling platforms (optional extras) */
   const rank=o=>o.colP?3:o.crumble?1:2;
   const L=S.solids.filter(o=>o.plat),dead=new Set();
   for(let i=0;i<L.length;i++)for(let j=i+1;j<L.length;j++){
@@ -5008,7 +5008,7 @@ function fixPlatforms(S){
   buildLevelX=function(n){world.frank=null;world.hellArena=null;G.secret=false;G.bonezStage=false;G.bonezSeen=false;world.secret=null;bx(n);fixPlatforms(world)};
 }
 
-/* ---------- Boss Hell: tutti i boss di fila, con tutti i potenziamenti ---------- */
+/* ---------- Boss Hell: every boss in a row, with every upgrade ---------- */
 const Hell={on:false,i:0,adv:0,tramStage:false,wait:0,lastS:0,cheer:0};
 const HELL_BOSS=['b.colossus','b.flora','b.centaur','b.unity','b.duo'];
 function startHell(d){
@@ -5025,7 +5025,7 @@ function hellStage(i){
   const th=Math.min(4,i+1),keepHp=i>0&&P?P.hp:null,kx=i===4&&P?P.x:null;
   buildHellArena(th);G.black=false;G.card=false;cutKind=null;
   killed=new Set(['mini'+th]);collected=new Set();
-  /* tra un boss e l'altro: medikit che cura tutto, tranne a Collasso Totale */
+  /* between bosses: a medkit that heals fully, except on Total Meltdown */
   if(i>0&&Cfg.diff!==3){const A=world.arena;world.pickups.push({id:'med'+i,kind:'medkit',x:A.x+Math.round(A.w*.32)-7,y:A.roof-16,w:14,h:12})}
   const cb=world.checks.find(c=>c.id==='cb');
   world.checks.forEach(c=>{c.active=true});checkpoint=cb;
@@ -5040,7 +5040,7 @@ function hellStage(i){
   G.zone=0;G.state='play';G.paused=false;G.shake=0;G.flash=0;G.toastT=0;
   cam.x=P.x-W/2;cam.y=world.arena.roof-(H-40);
   Music.mode(worldMusic());Music.start();
-  /* attesa nell'arena prima del boss: 10 secondi tra un boss e l'altro, 3 per il primo */
+  /* wait in the arena before the boss: 10 seconds between bosses, 3 before the first */
   Hell.wait=i===0?3:10;Hell.lastS=0;
   if(i===4){if(Cfg.diff===3)P.hp=maxHP();Hell.wait=0;Hell.duoCk='fight';Hell.duoSeen=false;G.flash=.9;G.shake=.7;sfx(60,1.2,'sawtooth',.1,-20);Music.mode('bonez')}
 }
@@ -5060,7 +5060,7 @@ function hellStep(dt){
   if(!boss.dead)return;
   if(!Hell.adv){if(Hell.i<4)toast(t(Hell.i>=3?'hell.done':'hell.next'),2.8);Hell.cheer=Hell.i===3?5.5:3.5}
   Hell.adv+=dt;
-  /* dopo Tramezzino sembra la vittoria... ma arriva il Godly Duo */
+  /* after Tramezzino it looks like victory... but the Godly Duo arrives */
   if(Hell.i===3){if(Hell.adv>=5.5)hellStage(4)}
   else if(Hell.i>=4){if(Hell.adv>=1.5)hellWin()}
   else if(Hell.adv>=3)hellStage(Hell.i+1);
@@ -5075,7 +5075,7 @@ function drawHellWait(){
   if(world.pickups.some(k=>k.kind==='medkit'&&!collected.has(k.id))&&Math.floor(NOW*2)%2)ptxt(t('hell.med'),W/2,H-34,8,'#7dff7a','center');
 }
 
-/* ---------- arena del Boss Hell: un grande colosseo ---------- */
+/* ---------- Boss Hell arena: a great colosseum ---------- */
 function buildHellArena(th){
   resetWorld();nextId=1;const S=world;
   S.theme=th;S.nz=1;S.frank=null;S.names=null;S.pals=PALS;initFeatures(S);S.gate=null;S.secret=null;
@@ -5103,10 +5103,10 @@ function buildHellArena(th){
 function drawHellBackdrop(cx,cy){
   const ry=Math.round(world.arena.roof-cy);
   const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#0b0608');g.addColorStop(.6,'#2a120c');g.addColorStop(1,'#4a2010');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-  /* fasci di luce dall'alto */
+  /* light shafts from above */
   for(let i=0;i<5;i++){const x=((i*97-cx*.05)%W+W)%W;ctx.globalAlpha=.05;ctx.fillStyle='#ffb070';ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x+20,0);ctx.lineTo(x+70,H);ctx.lineTo(x+30,H);ctx.fill()}
   ctx.globalAlpha=1;
-  /* spalti: file di arcate con spettatori */
+  /* stands: rows of arches with spectators */
   const tiers=[{o:198,h:38,f:.15,c:'#1a0d0c',a:'#0a0405',sc:.75},{o:158,h:38,f:.25,c:'#20100d',a:'#0c0505',sc:.85},{o:118,h:38,f:.38,c:'#27140f',a:'#0f0606',sc:.95},{o:80,h:38,f:.5,c:'#2e1712',a:'#120808',sc:1.05}];
   for(const L of tiers){
     const ty=ry-L.o;if(ty>H||ty+L.h<0)continue;
@@ -5126,7 +5126,7 @@ function drawHellBackdrop(cx,cy){
       }
     }
   }
-  /* stendardi appesi con lo stemma dell'arena: spada e ingranaggio */
+  /* hanging banners with the arena crest: sword and gear */
   for(let i=0;i<4;i++){
     const bx=Math.round(((i*110+40-cx*.4)%440+440)%440-30),sw=Math.sin(NOW*1.2+i)*1.5;
     ctx.fillStyle='#2a1a12';ctx.fillRect(bx+9,0,2,6);
@@ -5137,7 +5137,7 @@ function drawHellBackdrop(cx,cy){
     for(let k=0;k<6;k++){const a=k*1.047;ctx.fillStyle='#d4a03a';ctx.fillRect(Math.round(ex+Math.cos(a)*6)-1,Math.round(ey+Math.sin(a)*6)-1,2,2)}
     ctx.fillRect(ex,ey-10,1,18);ctx.fillRect(ex-3,ey-5,7,1);
   }
-  /* muro interno dell'arena con punte di ferro e bracieri */
+  /* inner arena wall with iron spikes and braziers */
   const wy=ry-44;
   drawHellBalcony(cx,cy,wy);
   ctx.fillStyle='#3a2216';ctx.fillRect(0,wy,W,H);ctx.fillStyle='#5a3424';ctx.fillRect(0,wy,W,3);
@@ -5205,15 +5205,15 @@ function hellWin(){
   for(const k in D)D[k].forEach((s,i)=>{TX[L[i]][k]=s});
 })();
 
-/* =====================  FASE 6 : versione, easter egg del telescopio  ===================== */
+/* =====================  PHASE 6 : version label, telescope easter egg  ===================== */
 const VERSION='1.9.1';
-/* VERSIONE DI PROVA (temporanea): nel Boss Hell a difficoltà Manutenzione i boss non fanno danno.
-   Per tornare alla versione normale: TEST_NODMG=false. In prova i traguardi non si sbloccano. */
+/* TEST BUILD SWITCH (temporary): in Boss Hell on Maintenance difficulty bosses deal no damage.
+   Normal build: TEST_NODMG=false. In the test build achievements are not unlocked. */
 const TEST_NODMG=false;
 function testNoDmg(){return TEST_NODMG&&Hell.on&&Cfg.diff===0}
 const VER_EL=$('ver');VER_EL.textContent='v'+VERSION;
 
-/* stanza sotterranea: si entra cadendo nel vuoto subito prima del tetto del boss del Mondo 1 */
+/* underground room: reached by dropping into the gap right before the World 1 boss roof */
 function addSecret(S){
   const cb=S.checks.find(c=>c.id==='cb');
   const ap=cb&&S.buildings.find(b=>b.x<=cb.x&&cb.x<b.x+b.w);
@@ -5259,24 +5259,24 @@ function nearScope(){
 function drawSecret(cx,cy){
   const s=world.secret,R=(c,x,y,w,h)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(x-cx),Math.round(y-cy),w,h)};
   ctx.fillStyle='#09060f';ctx.fillRect(0,0,W,H);
-  /* muro di fondo in mattoni */
+  /* brick back wall */
   for(let y=s.ceil;y<s.floor;y+=8)for(let x=s.x+((y/8)%2?0:8);x<s.x+24*T;x+=16){
     R(hash2(x,y)>.5?'#140f20':'#120d1c',x,y,15,7);
   }
-  /* cristalli luminosi */
+  /* glowing crystals */
   for(let i=0;i<7;i++){const x=s.x+20+hash2(i,71)*(24*T-40),y=s.floor-4-hash2(i,72)*8,p=.5+.5*Math.sin(NOW*2+i);
     ctx.globalAlpha=.15+.15*p;R('#7dff7a',x-6,y-10,14,14);ctx.globalAlpha=1;R('#2fa05a',x,y-6,2,6);R('#7dff7a',x,y-8,2,3);R('#c8ffe0',x,y-8,1,1)}
-  /* raggio di luce dal buco nel soffitto */
+  /* light shaft from the hole in the ceiling */
   ctx.globalAlpha=.1+.04*Math.sin(NOW*1.5);R('#c8d8ff',s.x+T,s.ceil,2*T+4,s.floor-s.ceil);ctx.globalAlpha=1;
-  /* roccia: soffitto, pavimento, pareti */
+  /* rock: ceiling, floor, walls */
   for(const r of s.rects){
     R('#1c1626',r.x,r.y,r.w,r.h);
     if(r.kind==='floor'){R('#3a2f52',r.x,r.y,r.w,3);R('#5a4a7a',r.x,r.y,r.w,1)}
     if(r.kind==='ceil'){R('#2e2440',r.x,r.y+r.h-3,r.w,3);for(let x=r.x+6;x<r.x+r.w;x+=13)R('#2e2440',x,r.y+r.h,3,2+Math.floor(hash2(x,9)*5))}
   }
-  /* buco nel soffitto da cui si cade */
+  /* hole in the ceiling you fall through */
   R('#000',s.x+T+4,s.ceil-30,2*T-4,30);R('#2e2440',s.x+T+2,s.ceil-3,2,3);R('#2e2440',s.x+3*T-2,s.ceil-3,2,3);
-  /* telescopio */
+  /* telescope */
   const tx=Math.round(s.scope.x-cx),ty=Math.round(s.floor-cy);
   ctx.strokeStyle='#4a3d2e';ctx.lineWidth=2;ctx.beginPath();
   ctx.moveTo(tx,ty-18);ctx.lineTo(tx-9,ty);ctx.moveTo(tx,ty-18);ctx.lineTo(tx+9,ty);ctx.moveTo(tx,ty-18);ctx.lineTo(tx+1,ty);ctx.stroke();ctx.lineWidth=1;
@@ -5286,7 +5286,7 @@ function drawSecret(cx,cy){
   ctx.fillStyle='#0a0710';ctx.fillRect(-14,-2,4,4);ctx.fillStyle='#8a6a2a';ctx.fillRect(-13,-1,2,2);
   ctx.restore();
   ctx.fillStyle='#ffd23f';ctx.fillRect(tx-1,ty-21,3,3);
-  /* trampolino e giocatore */
+  /* trampoline and player */
   drawSpecials(cx,cy,PALS[0]);
   drawPlayer(cx,cy);drawWhips(cx,cy);
   for(const b of bullets)drawBullet(b,cx,cy);
@@ -5295,7 +5295,7 @@ function drawSecret(cx,cy){
   if(nearScope()&&G.state==='play'){ctx.globalAlpha=.8+.2*Math.sin(NOW*6);txt(t('hud.scope'),tx,ty-48,'#ffd23f','center');ctx.globalAlpha=1}
 }
 
-/* ---------- vista dal telescopio ---------- */
+/* ---------- telescope view ---------- */
 const Scope={t:0,clear:false,len:0};
 function startScope(){
   Scope.clear=fetchS('rp_scope')!=='1';
@@ -5321,7 +5321,7 @@ function drawScope(){
     const g=ctx.createRadialGradient(cxs,cys,8,cxs,cys,RR);g.addColorStop(0,'#0c1636');g.addColorStop(1,'#02030a');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
     for(let i=0;i<110;i++){const sx=cxs-RR+hash2(i,61)*RR*2-t*.6,sy=cys-RR+hash2(i,62)*RR*2;ctx.globalAlpha=.35+.55*Math.abs(Math.sin(NOW*1.7+i));ctx.fillStyle=i%9?'#e8f7ee':'#9ff3ff';ctx.fillRect(Math.round(sx),Math.round(sy),1,1)}
     ctx.globalAlpha=1;
-    /* il pianeta verde, lontano */
+    /* the distant green planet */
     const px=Math.round(cxs+12-t*1.2),py=cys+6,pr=32;
     ctx.globalAlpha=.1;ctx.fillStyle='#7dff7a';ctx.beginPath();ctx.arc(px,py,pr+16,0,6.283);ctx.fill();
     ctx.globalAlpha=.2;ctx.beginPath();ctx.arc(px,py,pr+7,0,6.283);ctx.fill();ctx.globalAlpha=1;
@@ -5336,7 +5336,7 @@ function drawScope(){
     ctx.fillStyle='#c9b49a';ctx.beginPath();ctx.arc(px-48,py-26,4,0,6.283);ctx.fill();ctx.fillStyle='#02030a';ctx.beginPath();ctx.arc(px-46,py-25,3,0,6.283);ctx.fill();
     ctx.globalAlpha=.18;ctx.strokeStyle='#9ff3ff';ctx.beginPath();ctx.moveTo(cxs-RR,cys);ctx.lineTo(cxs+RR,cys);ctx.moveTo(cxs,cys-RR);ctx.lineTo(cxs,cys+RR);ctx.stroke();ctx.globalAlpha=1;
   }else{
-    /* lente appannata */
+    /* fogged-up lens */
     const g=ctx.createRadialGradient(cxs,cys,8,cxs,cys,RR);g.addColorStop(0,'#9aa6b8');g.addColorStop(1,'#4a5260');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
     for(let i=0;i<30;i++){const x=cxs-RR+hash2(i,101)*RR*2+Math.sin(NOW*.5+i)*4,y=cys-RR+hash2(i,102)*RR*2;ctx.globalAlpha=.1+.06*Math.sin(NOW+i);ctx.fillStyle=i%3?'#e0e8f2':'#7a8496';ctx.beginPath();ctx.arc(x,y,12+hash2(i,103)*24,0,6.283);ctx.fill()}
     ctx.globalAlpha=.35;ctx.fillStyle='#e8f0fa';
@@ -5360,8 +5360,8 @@ function t2(){return t.apply(null,arguments)}
   for(const k in D)D[k].forEach((s,i)=>{TX[L[i]][k]=s});
 })();
 
-/* =====================  FASE 7 : boss segreto BONEZ, il Meccanico Reale, e l'arma Tartarus  ===================== */
-/* si sblocca nel Mondo 3 con tutti i 12 ingranaggi: dopo OBLIVION arriva Bonez (nel Boss Hell arriva sempre) */
+/* =====================  PHASE 7 : secret boss BONEZ, the Royal Mechanic, and the Tartarus weapon  ===================== */
+/* unlocked in World 3 with all 12 gears: Bonez shows up after OBLIVION (always in Boss Hell) */
 let bzg=[],whips=[];
 function bonezRoute(){return world.theme===3&&(Hell.on||chipCount()>=12)}
 function makeBonez(){
@@ -5394,7 +5394,7 @@ function updateBzGears(dt){
     if(g.x<A.x+5&&g.vx<0){g.x=A.x+5;g.vx=Math.abs(g.vx);bo=true}
     if(g.x>A.x+A.w-5&&g.vx>0){g.x=A.x+A.w-5;g.vx=-Math.abs(g.vx);bo=true}
     if(g.y<A.roof-190&&g.vy<0){g.vy=Math.abs(g.vy)*.5;bo=true}
-    /* rimbalza 3 volte, al quarto urto si rompe */
+    /* bounces 3 times and breaks on the fourth impact */
     if(bo){g.b++;sfx(900+Math.random()*300,.04,'square',.015,-300);if(g.b>3){burst(g.x,g.y,8,'#ffb020',90,.3);bzg.splice(i,1);continue}}
     const dx=(P.x+5)-g.x,dy=(P.y+6)-g.y;
     if(dx*dx+dy*dy<9*9){hurtPlayer(15,g.x);burst(g.x,g.y,6,'#ffb020',80,.3);bzg.splice(i,1);continue}
@@ -5408,11 +5408,11 @@ function updateBonez(dt){
   updateBzGears(dt);
   const gy=A.roof-B.h;
   if(B.state==='enter'){
-    /* entra da destra e parla: intanto è invulnerabile */
+    /* walks in from the right and talks: invulnerable meanwhile */
     B.hp=B.max;B.t+=dt;P.inv=Math.max(P.inv,.3);B.face=-1;B.y=gy;
     const tx=A.x+A.w-100;
     if(B.x>tx){B.x=Math.max(tx,B.x-110*dt);B.st0=B.t;return}
-    /* il discorso solo la prima volta: ai tentativi successivi si combatte subito */
+    /* the speech only the first time: on retries the fight starts right away */
     const r=G.bonezSeen?{txt:'',done:true}:sayType([t('bz.say1'),t('bz.say2'),t('bz.say3')],B.t-B.st0,24,.9);
     B.say=r.txt;
     if(r.done){G.bonezSeen=true;B.say='';B.state='idle';B.cd=.5;toast(t('b.bonez'),2.4);G.shake=.5;sfx(70,.6,'sawtooth',.09,-30);burst(B.x+B.w/2,B.y+20,30,'#9b5de5',160,.7)}
@@ -5431,13 +5431,13 @@ function updateBonez(dt){
     B.face=dx>=0?1:-1;B.cd-=dt*ts;
     const ad=Math.abs(dx);B.x+=(ad>100?B.face*55:ad<40?-B.face*30:0)*dt;lim();
     if(B.cd<=0){
-      /* il raggio nucleare: al massimo una volta ogni 12 secondi */
+      /* the atomic beam: at most once every 12 seconds */
       const opts=['gears','spikes','bombs','whip','rain','bolts','dash'];if(B.beamT<=0)opts.push('beam');if(bossMinions()<2)opts.push('summon');
       let a;
       if(ad<64&&Math.random()<.6&&B.last!=='punch')a='punch';
       else{do{a=opts[Math.floor(Math.random()*opts.length)]}while(a===B.last&&Math.random()<.9)}
       B.last=a;B.state=a;B.t=0;B.hitDone=false;B.shots=0;B.sx=cx;B.len=0;if(a==='beam')B.beamT=12;
-      /* fase 2: spesso spara anche una raffica dall'occhio mentre attacca */
+      /* phase 2: often fires an eye volley while attacking */
       if(ts>1&&a!=='bolts'&&Math.random()<.35)bonezBolt(B);
     }
     return;
@@ -5445,17 +5445,17 @@ function updateBonez(dt){
   B.t+=dt*ts;
   const done=(at,cd)=>{if(B.t>=at){B.state='idle';B.cd=cd}};
   switch(B.state){
-    case'gears': /* 10 ingranaggi che rimbalzano a caso per l'arena */
+    case'gears': /* 10 gears bouncing randomly around the arena */
       if(B.t>=.35&&!B.hitDone){B.hitDone=true;sfx(500,.3,'square',.05,-200);G.shake=.2;
         for(let k=0;k<10;k++)bzg.push({x:cx,y:B.y+12,vx:(Math.random()-.5)*360,vy:-120-Math.random()*220,b:0,life:7})}
       done(1,.5);break;
-    case'beam': /* mega raggio atomico su metà arena */
+    case'beam': /* mega atomic beam over half the arena */
       if(!B.hitDone){B.hitDone=true;const left=(P.x+5)<A.x+A.w/2;addHz('col',left?A.x:A.x+A.w/2,A.w/2,0,.9,.6,30,'#7dff7a');sfx(200,1.4,'sawtooth',.05,400)}
       done(1.7,.5);break;
-    case'spikes': /* tentacoli-spina che spuntano da terra inseguendoti */
+    case'spikes': /* tentacle spikes rising from the ground and chasing you */
       if(B.t<2.6){const n=Math.floor(B.t/.2);while(B.shots<=n){B.shots++;B.sx+=clamp((P.x+5)-B.sx,-26,26);addHz('tent',B.sx-8,16,0,.3,.35,20,'#9b5de5');hz[hz.length-1].h=46;if(B.shots%2)sfx(180,.1,'sawtooth',.04,-80)}}
       done(2.8,.5);break;
-    case'punch': /* pugno se ti avvicini */
+    case'punch': /* punch if you get close */
       if(B.t<.35)B.face=dx>=0?1:-1;
       else if(!B.hitDone){
         B.hitDone=true;B.x+=B.face*12;lim();G.shake=.35;sfx(80,.3,'sawtooth',.08,-40);
@@ -5463,11 +5463,11 @@ function updateBonez(dt){
         if(overlapR({x:hx,y:B.y+12,w:64,h:B.h-12},P))hurtPlayer(30,cx);
       }
       done(.8,.35);break;
-    case'bombs': /* 3 bombe in punti casuali */
+    case'bombs': /* 3 bombs at random spots */
       if(B.t>=.4&&!B.hitDone){B.hitDone=true;sfx(220,.3,'square',.05,200);
         for(let k=0;k<3;k++){const tx=A.x+24+Math.random()*(A.w-48),y0=B.y+6,vy=-280,g=700,tt=(-vy+Math.sqrt(vy*vy+2*g*(A.roof-y0)))/g;bombs.push({x:cx,y:y0,vx:(tx-cx)/tt,vy:vy,state:'fly',t:0,r:40,hit:false,dmg:25})}}
       done(1,.4);break;
-    case'whip': /* frustata di tentacolo rasoterra fino al muro: saltala */
+    case'whip': /* floor-level tentacle whip all the way to the wall: jump it */
       if(B.t<.5)B.face=dx>=0?1:-1;
       else{
         const full=B.face>0?A.x+A.w-cx:cx-A.x;
@@ -5477,14 +5477,14 @@ function updateBonez(dt){
         if(B.t-dt*ts<.5)sfx(140,.4,'sawtooth',.06,300);
       }
       done(1.3,.4);break;
-    case'rain': /* pioggia di melma che lascia pozze */
+    case'rain': /* slime rain that leaves pools */
       if(B.t>=.3&&!B.hitDone){B.hitDone=true;sfx(300,.3,'triangle',.05,-150);
         for(let k=0;k<6;k++){const tx=A.x+20+Math.random()*(A.w-40),y0=B.y,tt=.8+Math.random()*.3;flasks.push({x:cx,y:y0,vx:(tx-cx)/tt,vy:((A.roof-y0)-.5*520*tt*tt)/tt,t:0,dk:'#1a0f24',lt:'#9b5de5'})}}
       done(.9,.4);break;
-    case'bolts': /* tre raffiche mirate dall'occhio */
+    case'bolts': /* three aimed volleys from the eye */
       while(B.shots<3&&B.t>=.25+B.shots*.25){B.shots++;bonezBolt(B)}
       done(1.1,.4);break;
-    case'dash': /* carica di melma da muro a muro */
+    case'dash': /* slime charge from wall to wall */
       if(B.t<.5)B.face=dx>=0?1:-1;
       else{
         B.x+=B.face*320*ts*dt;if(overlapR(B,P))hurtPlayer(30,cx);
@@ -5494,7 +5494,7 @@ function updateBonez(dt){
       }
       break;
     case'rest':done(.45,.3);break;
-    case'summon': /* richiama due robot operai */
+    case'summon': /* summons two worker robots */
       if(B.t>=.5&&!B.hitDone){B.hitDone=true;sfx(180,.4,'square',.05,300);
         for(const x of[A.x+3*T,A.x+A.w-4*T])if(bossMinions()<3){const e=makeEnemy({id:-1,type:'machine',x:x,y:A.roof-15,min:A.x+6,max:A.x+A.w-6});e.minion=true;enemies.push(e);burst(x+8,A.roof-8,14,'#ffd23f',90,.5)}}
       done(1,.5);break;
@@ -5507,7 +5507,7 @@ function bonezDeath(dt){
   if(T<.8){G.shake=.3;if(Math.random()<.4)burst(B.x+Math.random()*B.w,B.y+Math.random()*B.h,8,'#9b5de5',140,.6);B.y=gy;return}
   if(T<e){B.say=line.slice(0,Math.floor((T-.8)*20));B.y=gy;B.face=(P.x+5)>=(B.x+B.w/2)?1:-1;return}
   B.say='';
-  /* non muore: salta e sprofonda nel vuoto */
+  /* does not die: jumps and sinks into the void */
   if(!B.jump){B.jump=1;B.vy=-330;sfx(300,.3,'square',.05,400);burst(B.x+B.w/2,A.roof,16,'#2a1a3a',120,.5)}
   B.vy+=900*dt;B.y+=B.vy*dt;
   if(B.jump===1&&B.vy>0&&B.y>gy){B.jump=2;G.shake=.4;sfx(70,.5,'sawtooth',.08,-30);burst(B.x+B.w/2,A.roof,40,'#2a1a3a',180,.8);burst(B.x+B.w/2,A.roof,20,'#9b5de5',140,.6)}
@@ -5528,13 +5528,13 @@ function drawSay(name,col,s){
 function drawBonez(cx,cy,ZB){
   const B=ZB||boss,A=world.arena;if(B.dead)return;
   const roofY=Math.round(A.roof-cy),x=Math.round(B.x-cx),y=Math.round(B.y-cy),w=B.w,h=B.h,mx=x+w/2;
-  /* avvisi */
+  /* telegraphs */
   const fl=Math.floor(NOW*16)%2;
   if(B.state==='punch'&&B.t<.35&&fl){ctx.globalAlpha=.25;ctx.fillStyle='#ff3b30';const hx=B.face>0?B.x+B.w-4:B.x+4-64;ctx.fillRect(Math.round(hx-cx),y+12,64,h-12);ctx.globalAlpha=1}
   if(B.state==='dash'&&B.t<.5&&fl){ctx.globalAlpha=.2;ctx.fillStyle='#ff3b30';const x0=B.face>0?B.x:A.x,x1=B.face>0?A.x+A.w:B.x+B.w;ctx.fillRect(Math.round(x0-cx),roofY-40,Math.round(x1-x0),40);ctx.globalAlpha=1}
   if(B.state==='whip'&&B.t<.5&&fl){ctx.globalAlpha=.35;ctx.fillStyle='#ff3b30';const x0=B.face>0?B.x+B.w/2:A.x,x1=B.face>0?A.x+A.w:B.x+B.w/2;ctx.fillRect(Math.round(x0-cx),roofY-12,Math.round(x1-x0),12);ctx.globalAlpha=1}
   ctx.save();ctx.beginPath();ctx.rect(0,0,W,roofY);ctx.clip();
-  /* tentacoli neri dietro la schiena */
+  /* black tentacles behind his back */
   const wob=B.state==='gears'&&B.t<.35?Math.round((Math.random()-.5)*3):0;
   for(let i=0;i<8;i++){
     let px=mx-7+i*2+wob,py=y+26;const base=-2.75+i*.36,len=34+(i%3)*9;
@@ -5544,26 +5544,26 @@ function drawBonez(cx,cy,ZB){
       if(k%3===1){ctx.fillStyle='#2a1a3a';ctx.fillRect(Math.round(px-r),Math.round(py-r),1,1)}
     }
   }
-  /* frustata rasoterra */
+  /* floor whip */
   if(B.state==='whip'&&B.len>2){for(let k=0;k<B.len;k+=3){const xx=mx+B.face*k,yy=roofY-6+Math.round(Math.sin(k*.15-NOW*30)*1.5);ctx.fillStyle='#07060f';ctx.fillRect(Math.round(xx)-3,yy-3,6,6);if(k%9===0){ctx.fillStyle='#9b5de5';ctx.fillRect(Math.round(xx),yy-3,1,1)}}}
-  /* pugno */
+  /* punch */
   if(B.state==='punch'&&B.hitDone&&B.t<.6){const L=60;for(let k=0;k<L;k+=3){const xx=mx+B.face*(w/2-4+k);ctx.fillStyle='#07060f';ctx.fillRect(Math.round(xx)-4,y+24,8,8)}const fx=Math.round(mx+B.face*(w/2-4+L));ctx.fillStyle='#07060f';ctx.fillRect(fx-7,y+21,14,14);ctx.fillStyle='#9b5de5';ctx.fillRect(fx-5,y+22,3,2)}
-  /* corpo di melma: snello e umanoide (testa, collo sottile, busto affusolato, gambe lunghe, braccia ciondolanti) */
+  /* slime body: slender and humanoid (head, thin neck, tapered torso, long legs, dangling arms) */
   const sway=Math.sin(NOW*3)*1.5,bob=Math.round(Math.sin(NOW*2.5));
   const walking=(B.state==='dash'&&B.t>=.5)||(B.state==='idle'&&Math.abs((P.x+5)-(B.x+B.w/2))>100)||(B.state==='enter'&&B.x>world.arena.x+world.arena.w-100);
   const stp=walking?Math.round(Math.sin(NOW*14)*2):0;
   const body=(c,o)=>{
     ctx.fillStyle=c;
     const Rr=(a,b2,w2,h2)=>ctx.fillRect(Math.round(a)-o,Math.round(b2)-o,w2+o*2,h2+o*2);
-    /* testa */
+    /* head */
     Rr(mx-6,y+2+bob,12,1);Rr(mx-8,y+3+bob,16,13);Rr(mx-9,y+5+bob,18,8);Rr(mx-6,y+16+bob,9,2);
-    /* collo e busto */
+    /* neck and torso */
     Rr(mx-2,y+17+bob,4,4);
     Rr(mx-7,y+21,14,4);Rr(mx-6,y+25,12,8);Rr(mx-4,y+33,8,5);Rr(mx-6,y+38,12,3);
-    /* gambe lunghe e piedi a punta */
+    /* long legs and pointed feet */
     Rr(mx-5+stp,y+41,3,13);Rr(mx+2-stp,y+41,3,13);
     Rr(mx-8+stp,y+54,6,4);Rr(mx-10+stp,y+56,2,2);Rr(mx+2-stp,y+54,7,4);Rr(mx+9-stp,y+56,2,2);
-    /* braccia lunghissime fino alle ginocchia */
+    /* very long arms reaching the knees */
     for(const sd of[-1,1]){
       const sx=mx+sd*7,sy=y+22;let hx=mx+sd*(10+sway*.5),hy=y+44+sd*sway;if(B.wave){hx=mx+sd*12;hy=y+2+Math.sin(NOW*10+sd*1.5)*3}
       for(let k=0;k<=8;k++){const u=k/8;Rr(lerp(sx,hx,u)-1,lerp(sy,hy,u)-1,3,3)}
@@ -5571,14 +5571,14 @@ function drawBonez(cx,cy,ZB){
     }
   };
   body('#2a1a3a',1);body('#050408',0);
-  /* gocce di melma da mento, mani e piedi */
+  /* slime drips from chin, hands and feet */
   ctx.fillStyle='#050408';
   for(const[dx0,dy0,k]of[[-3,18+bob,0],[-10-sway*.5,51-sway,1],[10+sway*.5,51+sway,2],[-6,58,3]]){const dl=1+Math.round(((NOW*1.2+k*.31)%1)*5);ctx.fillRect(Math.round(mx+dx0),y+dy0,1,dl)}
   ctx.fillStyle='#3a2a52';ctx.fillRect(mx-6,y+6+bob,1,4);ctx.fillRect(mx-4,y+24,1,7);ctx.fillRect(mx-4,y+43,1,6);
-  /* coroncina da Meccanico Reale */
+  /* small Royal Mechanic crown */
   const cy0=y+bob;
   ctx.fillStyle='#07060f';ctx.fillRect(mx-7,cy0-2,13,5);ctx.fillStyle='#b8860b';ctx.fillRect(mx-6,cy0-1,11,3);ctx.fillStyle='#ffd23f';ctx.fillRect(mx-6,cy0-4,2,3);ctx.fillRect(mx-1,cy0-5,2,4);ctx.fillRect(mx+3,cy0-4,2,3);ctx.fillStyle='#07060f';ctx.fillRect(mx-1,cy0,2,2);
-  /* un solo occhio, spostato a destra (come se a sinistra ce ne fosse un altro) */
+  /* a single eye, placed on the right (as if there were another one on the left) */
   const ex=mx+4,ey=y+9+bob,glow=B.state==='beam'&&B.t<.9;
   ctx.fillStyle=glow?'#7dff7a':'#e8e0d0';ctx.beginPath();ctx.arc(ex,ey,4,0,6.283);ctx.fill();
   const ang=Math.atan2((P.y+6)-(B.y+9),(P.x+5)-(B.x+B.w/2+4)),pxe=Math.round(ex+Math.cos(ang)*1.5),pye=Math.round(ey+Math.sin(ang)*1.5);
@@ -5587,7 +5587,7 @@ function drawBonez(cx,cy,ZB){
   if(glow){ctx.globalAlpha=.25+.2*fl;ctx.fillStyle='#7dff7a';ctx.beginPath();ctx.arc(ex,ey,9,0,6.283);ctx.fill();ctx.globalAlpha=1}
   if(B.flash>0){ctx.globalAlpha=.45;body('#fff',0);ctx.globalAlpha=1}
   ctx.restore();
-  /* ingranaggi rimbalzanti */
+  /* bouncing gears */
   for(const g of bzg){
     const gx=Math.round(g.x-cx),gy2=Math.round(g.y-cy),f=Math.floor(NOW*16+g.vx)%2;
     ctx.fillStyle='#0d1126';ctx.fillRect(gx-5,gy2-4,10,8);ctx.fillRect(gx-4,gy2-5,8,10);
@@ -5597,7 +5597,7 @@ function drawBonez(cx,cy,ZB){
   }
 }
 
-/* ---------- Tartarus: un tentacolo che si allunga e colpisce ---------- */
+/* ---------- Tartarus: a tentacle that stretches out to strike ---------- */
 function whipFire(dm){whips.push({t:0,face:P.face,dmg:Math.round(40*dm),hit:new Set()});sfx(160,.18,'sawtooth',.05,500)}
 function whipLen(w){const k=w.t/.22;return 84*(k<.45?k/.45:k<.6?1:Math.max(0,1-(k-.6)/.4))}
 function whipRect(w){const L=whipLen(w),hx=P.x+5+w.face*6;return{x:w.face>0?hx:hx-L,y:P.y+2,w:L,h:9}}
@@ -5640,9 +5640,9 @@ function drawWhips(cx,cy){
   for(const k in D)D[k].forEach((s,i)=>{TX[L[i]][k]=s});
 })();
 
-/* =====================  FASE 8 : tribuna dei boss sconfitti, luce divina  ===================== */
+/* =====================  PHASE 8 : stand of defeated bosses, divine light  ===================== */
 function secretFight(){return!!(boss&&!boss.dead&&boss.active&&(boss.kind==='bonez'||boss.kind==='tram'||boss.kind==='duo'))}
-/* boss già battuti nel Boss Hell, nell'ordine in cui siedono in tribuna */
+/* bosses already beaten in Boss Hell, in the order they sit in the stand */
 function hellBench(){
   if(!Hell.on||!boss)return[];
   if(boss.kind==='duo')return['colossus','flora','centaur','unity'];
@@ -5655,7 +5655,7 @@ function hellBench(){
 function drawMiniBoss(k,x,base,face,cheer,i,noz){
   const jump=cheer?Math.round(Math.abs(Math.sin(NOW*9+i*1.3))*6):Math.round(Math.sin(NOW*1.1+i)*.6);
   const b=base-jump,fl=face>0;
-  /* braccia alzate quando tifano */
+  /* arms raised while cheering */
   const arms=(ax,ay,w)=>{if(!cheer)return;const up=Math.floor(NOW*8+i)%2;ctx.fillStyle='#07060f';ctx.fillRect(ax-w/2-3,ay-6-up*2,2,7);ctx.fillRect(ax+w/2+1,ay-6-(1-up)*2,2,7)};
   if(k==='colossus'){arms(x,b-20,22);ctx.drawImage(fl?SP_BOSS.r:SP_BOSS.l,x-14,b-28,28,28)}
   else if(k==='centaur'){arms(x+6,b-22,14);ctx.drawImage(fl?SP_CENT.r:SP_CENT.l,x-18,b-29,36,29)}
@@ -5672,9 +5672,9 @@ function drawMiniBoss(k,x,base,face,cheer,i,noz){
     ctx.fillStyle='#050408';ctx.fillRect(x-4,b-26,8,7);ctx.fillRect(x-1,b-19,2,2);ctx.fillRect(x-3,b-17,6,9);ctx.fillRect(x-3,b-8,2,8);ctx.fillRect(x+1,b-8,2,8);
     ctx.fillStyle='#ffd23f';ctx.fillRect(x-3,b-28,6,2);ctx.fillStyle='#e8e0d0';ctx.fillRect(x+1,b-24,2,2);
   }
-  /* annoiati: ogni tanto uno sbadiglia "z" */
+  /* bored: now and then one yawns a "z" */
   if(!cheer&&!noz&&Math.floor(NOW*.4+i*1.7)%4===0){const zy=b-34-((NOW*6+i*5)%10);ctx.fillStyle='#8c94b8';ctx.fillRect(x+6,zy,3,1);ctx.fillRect(x+8,zy+1,1,1);ctx.fillRect(x+7,zy+2,1,1);ctx.fillRect(x+6,zy+3,3,1)}
-  /* tifo sfrenato: punti esclamativi e coriandoli */
+  /* wild cheering: exclamation marks and confetti */
   if(cheer){
     if(Math.floor(NOW*4+i)%2){ctx.fillStyle='#ffd23f';ctx.fillRect(x-1,b-40,2,5);ctx.fillRect(x-1,b-33,2,2)}
     for(let c=0;c<4;c++){const ph=(NOW*1.5+c*.25+i*.37)%1,cx2=x+Math.sin(c*2.1+i)*14,cy2=b-30-ph*-20;ctx.fillStyle=['#ff4fd8','#35e8ff','#ffd23f','#7dff7a'][c];ctx.fillRect(Math.round(cx2),Math.round(cy2-20),2,2)}
@@ -5683,22 +5683,22 @@ function drawMiniBoss(k,x,base,face,cheer,i,noz){
 function drawHellBalcony(cx,cy,wy){
   const A=world.arena,cxw=A.x+A.w/2,bw=210,sx=Math.round(W/2+(cxw-(cx+W/2))*.55),x0=sx-bw/2,top=wy-14;
   if(x0>W||x0+bw<0)return;
-  /* fondo e baldacchino */
+  /* back wall and canopy */
   ctx.fillStyle='#1c0f0b';ctx.fillRect(x0,top-44,bw,44);
   ctx.fillStyle='#6a1420';ctx.fillRect(x0-6,top-52,bw+12,8);
   for(let k=0;k+10<=bw+12;k+=10){ctx.beginPath();ctx.arc(x0-5+k+5,top-44,5,0,Math.PI);ctx.fill()}
   ctx.fillStyle='#d4a03a';ctx.fillRect(x0-6,top-52,bw+12,1);ctx.fillRect(x0-6,top-45,bw+12,1);
   for(const px of[x0-6,x0+bw]){ctx.fillStyle='#5a3a28';ctx.fillRect(px,top-44,6,48);ctx.fillStyle='#7a5238';ctx.fillRect(px+1,top-44,1,48)}
   ctx.fillStyle='#3a2216';ctx.fillRect(x0,top-6,bw,6);ctx.fillStyle='#6a4428';ctx.fillRect(x0,top-6,bw,2);
-  /* i boss sconfitti: distratti con i boss normali, in delirio per i boss segreti */
+  /* defeated bosses: distracted during regular bosses, ecstatic during the secret ones */
   const bench=hellBench(),cheer=secretFight(),px=P?Math.round(P.x+5-cx):W/2;
   bench.forEach((k,i)=>{const x=Math.round(x0+21+i*42);drawMiniBoss(k,x,top-2,cheer?(px>=x?1:-1):(i%2?-1:1)*(Math.floor(NOW*.3+i)%3===0?-1:1),cheer,i)});
-  /* parapetto con drappo e stemma */
+  /* parapet with drape and crest */
   ctx.fillStyle='#4a2c1e';ctx.fillRect(x0-6,top-4,bw+12,10);ctx.fillStyle='#6a4428';ctx.fillRect(x0-6,top-4,bw+12,2);
   ctx.fillStyle='#6a1420';ctx.fillRect(x0+bw/2-24,top-2,48,12);ctx.beginPath();ctx.moveTo(x0+bw/2-24,top+10);ctx.lineTo(x0+bw/2,top+16);ctx.lineTo(x0+bw/2+24,top+10);ctx.fill();
   ctx.fillStyle='#d4a03a';ctx.fillRect(x0+bw/2-1,top,2,12);ctx.fillRect(x0+bw/2-4,top+3,8,1);
 }
-/* luce divina che scende dal cielo durante le battaglie segrete */
+/* divine light coming down from the sky during the secret fights */
 function drawDivineLight(){
   ctx.save();
   const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(255,244,200,.22)');g.addColorStop(1,'rgba(255,244,200,0)');
@@ -5712,7 +5712,7 @@ function drawDivineLight(){
     const ph=(NOW*.12+hash2(i,401))%1,x=hash2(i,402)*W+Math.sin(NOW+i)*6,y=ph*H;
     ctx.globalAlpha=.5*Math.sin(ph*Math.PI);ctx.fillStyle=i%3?'#fff4c8':'#ffd23f';ctx.fillRect(Math.round(x),Math.round(y),1+(i%4===0?1:0),1+(i%4===0?1:0));
   }
-  /* piume che danzano dal cielo durante il Godly Duo */
+  /* feathers dancing down from the sky during the Godly Duo */
   if(boss&&boss.kind==='duo'){
     const up=inFall()&&FALL.mode==='fall';
     for(let i=0;i<16;i++){
@@ -5725,7 +5725,7 @@ function drawDivineLight(){
   ctx.restore();
 }
 
-/* =====================  FASE 9 : attacchi da circo di Tramezzino  ===================== */
+/* =====================  PHASE 9 : Tramezzino circus attacks  ===================== */
 let tcirc=[];
 function updateCirc(dt){
   const A=world.arena;if(!A)return;
@@ -5787,11 +5787,11 @@ function drawCirc(cx,cy){
       ctx.globalAlpha=Math.min(1,o.t);ctx.fillStyle='#fff8f0';ctx.fillRect(x-o.w/2,ry-3,o.w,3);ctx.fillRect(x-o.w/2+3,ry-5,o.w-6,2);ctx.fillStyle='#ffd0e0';ctx.fillRect(x-2,ry-6,4,2);ctx.globalAlpha=1;
     }
   }
-  /* panna addosso: VERDE-7 gocciola ed è più lento */
+  /* cream on VERDE-7: dripping and slower */
   if(P&&P.slowT>0&&!P.dead){ctx.fillStyle='#fff8f0';const px=Math.round(P.x-cx),py=Math.round(P.y-cy);ctx.fillRect(px+1,py-1,8,2);if(Math.floor(NOW*6)%2)ctx.fillRect(px+3,py+13,1,2)}
 }
 
-/* =====================  FASE 9 : Traguardi  ===================== */
+/* =====================  PHASE 9 : Achievements  ===================== */
 const ACH=[
  {id:'w1',n:['Tetti liberati','Rooftops freed','Tejados liberados','Toits libérés'],d:['Completa il Mondo 1.','Complete World 1.','Completa el Mundo 1.','Termine le Monde 1.']},
  {id:'w2',n:['Pollice verde','Green thumb','Mano verde','Main verte'],d:['Completa il Mondo 2.','Complete World 2.','Completa el Mundo 2.','Termine le Monde 2.']},
@@ -5876,7 +5876,7 @@ function showAch(){
   h+=btn(t('menu.back'),'back','alt')+'</div>';
   setMenu(h,acts,true,showAch);
 }
-/* agganci agli eventi del gioco */
+/* hooks into game events */
 {
   const _h=hurtPlayer;hurtPlayer=function(d,sx,soft){
     const h0=P?P.hp:0,d0=P&&P.dead;_h(d,sx,soft);
@@ -5901,9 +5901,9 @@ function showAch(){
   for(const k in D)D[k].forEach((s,i)=>{TX[L[i]][k]=s});
 })();
 
-/* =====================  FASE 10 : boss nascosto del Boss Hell, IL GODLY DUO  ===================== */
-/* dopo Tramezzino sembra tutto finito, poi dal cielo cadono Tramezzino e Bonez insieme:
-   fase 1 a terra (7000 HP condivisi), poi il pavimento crolla e si sopravvive 2 minuti in caduta libera */
+/* =====================  PHASE 10 : Boss Hell hidden boss, THE GODLY DUO  ===================== */
+/* after Tramezzino everything seems over, then Tramezzino and Bonez drop from the sky together:
+   phase 1 on the ground (7000 shared HP), then the floor collapses and you survive 2 minutes of free fall */
 let FALL={t:0,mode:'',deb:[],sp:1,speed:0,bot:0,off:0};
 function inFall(){return!!(Hell.on&&G.fall&&boss&&boss.kind==='duo')}
 function makeDuo(seen){
@@ -5927,7 +5927,7 @@ function duoStart(X,a,fall){
   X.dur=DUO_DUR[a]||1.2;X.hand=X.dur*(fall?.65:.7);
   if(a==='beam')boss.Z.beamT=14;if(a==='beamF')boss.Z.beamT=10;
 }
-/* un attacco di uno dei due; il prossimo parte solo quando questo è quasi finito, così non si sovrappongono mai del tutto */
+/* one attack of either of the two; the next one starts only when this one is nearly over, so they never fully overlap */
 function duoAct(X,dt){
   if(X.state==='idle')return;
   X.t+=dt;
@@ -5980,7 +5980,7 @@ function duoAct(X,dt){
     case'beam':
       if(!X.hitDone){X.hitDone=true;const bw=Math.round(A.w*.45),bx=P.x+5-bw/2;addHz('col',bx,bw,0,1.1,.6,30,'#7dff7a');sfx(200,1.4,'sawtooth',.05,400)}
       break;
-    /* ---- caduta libera: attacchi più forti e veloci ---- */
+    /* ---- free fall: stronger and faster attacks ---- */
     case'juggleF':
       while(X.shots<7&&X.t>=.3+X.shots*.15){const v=aim(cx,X.y+10,230);tballs.push({x:cx,y:X.y+10,vx:v[0],vy:v[1],life:3,col:TBCOL[X.shots%5]});X.shots++;sfx(560+X.shots*40,.1,'square',.05,-120)}
       break;
@@ -6081,7 +6081,7 @@ function updateDuo(dt){
         if(X.state!=='diveF')X.face=(P.x+5)>=X.x+X.w/2?1:-1;
       }
       duoAct(T,dt*ts);duoAct(Z,dt*ts);duoSchedule(dt,ts,true);
-      /* pezzi dei 4 mondi che sfrecciano verso l'alto: avviso rosso in basso, poi arrivano */
+      /* pieces of the 4 worlds rushing upwards: red warning at the bottom, then they arrive */
       FALL.sp-=dt;
       if(FALL.sp<=0){FALL.sp=lerp(1.1,.6,k);FALL.deb.push({k:1+Math.floor(Math.random()*4),x:cam.x+16+Math.random()*(W-60),y:cam.y+H+24,vy:-(170+Math.random()*120+k*80),w:24+Math.floor(Math.random()*22),h:14+Math.floor(Math.random()*8),rot:0,vr:(Math.random()-.5)*2,warn:.7,hit:false})}
       for(let i=FALL.deb.length-1;i>=0;i--){
@@ -6120,7 +6120,7 @@ function updateDuo(dt){
   if(D.phase==='fight'||D.phase==='fall'){if(overlapR(T,P))hurtPlayer(20,T.x+12);if(overlapR(Z,P))hurtPlayer(20,Z.x+13)}
   const x0=Math.min(T.x,Z.x),y0=Math.min(T.y,Z.y);D.x=x0;D.y=y0;D.w=Math.max(T.x+T.w,Z.x+Z.w)-x0;D.h=Math.max(T.y+T.h,Z.y+Z.h)-y0;
 }
-/* caduta libera: VERDE-7 si muove in tutte le direzioni (su = salta/su, giù = giù) */
+/* free fall: VERDE-7 moves in every direction (up = jump/up, down = down) */
 function updateFallPlayer(dt){
   In.jumpHit=false;P.buf=0;P.coy=0;P.air=false;P.cling=false;
   P.vy=((In.down?1:0)-((In.jump||In.up)?1:0))*120-GRAV*dt;
@@ -6136,7 +6136,7 @@ function duoReset(){
   Music.mode('bonez');Music.start();
   if(Hell.duoCk==='fall')duoStartFall(true);
 }
-/* ---------- disegno ---------- */
+/* ---------- drawing ---------- */
 function drawTramDuo(T,cx,cy){
   const sx=Math.round(T.x+T.w/2-cx),top=Math.round(T.y+T.h-56-cy),fall=inFall()&&FALL.mode==='fall';
   const nx=sx-T.face*11,ny=top+23;
@@ -6178,7 +6178,7 @@ function drawRubble(b,cx,cy){
   const cols=[['#171c36','#3b4575'],['#5b3a29','#2fa05a'],['#4a5560','#ff9f1c'],['#403a58','#d4a03a']];
   for(let x=0;x<b.w;x+=12){const c=cols[Math.floor(hash2(x,77)*4)],hh=3+Math.floor(hash2(x,78)*5);ctx.fillStyle=c[0];ctx.fillRect(x0+x,y0-hh+3,12,hh+8);ctx.fillStyle=c[1];ctx.fillRect(x0+x,y0-hh+3,12,2)}
 }
-/* la caduta: cielo celeste in alto, abisso in basso, nuvole, linee di velocità e pezzi dei 4 mondi che volano via */
+/* the fall: heavenly sky above, abyss below, clouds, speed lines and pieces of the 4 worlds flying away */
 function drawFallScene(cx,cy){
   const land=FALL.mode==='land',off=FALL.off||0,sp=FALL.speed;
   const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#fff1c8');g.addColorStop(.35,'#c9a0e8');g.addColorStop(.75,'#3a2a6a');g.addColorStop(1,'#0b0818');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
@@ -6230,10 +6230,10 @@ function drawHudDuo(){
   for(const k in D)D[k].forEach((s,i)=>{TX[L[i]][k]=s});
 })();
 
-/* =====================  FASE 11 : il corridoio finale e FRANK IL VENDITORE  ===================== */
-/* dopo il boss finale (sia Unity sia Tramezzino) c'è una probabilità di entrare nel corridoio dorato:
-   in fondo aspetta Frank, il venditore. 1 HP, ma devia ogni colpo: si sopravvive 4 minuti. */
-const FRANK_CHANCE=.3; /* 30% dopo il boss finale */
+/* =====================  PHASE 11 : the final corridor and FRANK THE VENDOR  ===================== */
+/* after the final boss (Unity or Tramezzino) there is a chance to enter the golden corridor:
+   Frank, the vendor, waits at its end. 1 HP, but he deflects every hit: survive 4 minutes. */
+const FRANK_CHANCE=.3; /* 30% after the final boss */
 let fbl=[],fth=[];
 const FXC=document.createElement('canvas');FXC.width=W;FXC.height=H;const fxg=FXC.getContext('2d');
 function setCanvasFX(m){cv.style.transition='transform .35s';cv.style.transform=m==='flip'?'rotate(180deg)':m==='side'?'rotate(90deg) scale(.5625)':''}
@@ -6272,25 +6272,25 @@ function startFrank(){
   Music.stop();
 }
 function frankPop(txt0){const F=boss;F.pops.push({txt:txt0,x:F.x+F.w/2,y:F.y-6,t:0})}
-/* ogni colpo che lo raggiunge viene deviato in modo assurdo */
+/* every hit that reaches him gets deflected in some silly way */
 function frankDeflect(src){
   const F=boss,A=world.arena;
   if(src&&src.vx!==undefined)src.life=0;
   if(F.dcd>0)return;F.dcd=.25;
   const mins=enemies.filter(e=>e.minion).length,r=Math.random();
   if(r<.34&&mins<5){
-    /* afferra un mostro dal nulla e lo usa come scudo */
+    /* grabs a monster out of nowhere and uses it as a shield */
     const dir=(P.x+5)>=F.x+F.w/2?1:-1,ex=F.x+F.w/2+dir*20,fly=!src||(src.y!==undefined&&src.y<A.roof-24)||Math.random()<.5;
     const ty=fly?['drone','mosq','spitter'][Math.floor(Math.random()*3)]:['scrap','horror'][Math.floor(Math.random()*2)];
     const e=makeEnemy({id:-1,type:ty,x:ex,y:fly?(src&&src.y?src.y-6:A.roof-60):A.roof-(ty==='scrap'?13:16),min:A.x+6,max:A.x+A.w-6});
     e.minion=true;enemies.push(e);burst(ex,e.y+6,16,'#ffd23f',110,.5);frankPop('SCUDO!');sfx(600,.15,'square',.05,300);
   }else if(r<.67||!src||src.vx===undefined){
-    /* si teletrasporta alle spalle di VERDE-7 */
+    /* teleports behind VERDE-7 */
     burst(F.x+F.w/2,F.y+F.h/2,18,'#b58cff',120,.5);
     F.x=clamp(P.x+5-P.face*44-F.w/2,A.x+6,A.x+A.w-F.w-6);
     burst(F.x+F.w/2,F.y+F.h/2,18,'#b58cff',120,.5);frankPop('POOF!');sfx(900,.2,'sine',.05,-500);
   }else{
-    /* rimanda indietro il colpo */
+    /* sends the shot back */
     const a=Math.atan2((P.y+6)-src.y,(P.x+5)-src.x);
     ebullets.push({x:src.x,y:src.y,vx:Math.cos(a)*240,vy:Math.sin(a)*240,r:3,dmg:15,life:2.2,col:'#ffd23f'});
     frankPop('RESO!');sfx(1400,.06,'square',.05,-600);
@@ -6312,7 +6312,7 @@ function throwBoss(q){
 }
 function updateFrankExtras(dt){
   const A=world.arena;
-  /* teste-cannone di Frank */
+  /* Frank-face beam cannons */
   for(let i=fbl.length-1;i>=0;i--){
     const b=fbl[i];b.t+=dt;if(b.t<0)continue;
     if(b.t<.5)b.ang=Math.atan2((P.y+6)-b.y,(P.x+5)-b.x);
@@ -6323,7 +6323,7 @@ function updateFrankExtras(dt){
     }
     if(b.t>=1.45)fbl.splice(i,1);
   }
-  /* i boss della storia lanciati addosso */
+  /* story bosses thrown at the player */
   for(let i=fth.length-1;i>=0;i--){
     const o=fth[i];o.t+=dt;
     if(o.ph==='fly'){
@@ -6341,7 +6341,7 @@ function updateFrankExtras(dt){
   }
 }
 function updateFlipPlayer(dt){
-  /* gravità invertita: VERDE-7 cade verso il soffitto e ci cammina sopra */
+  /* inverted gravity: VERDE-7 falls towards the ceiling and walks on it */
   const onCeil=pointSolid(P.x+2,P.y-1.5)||pointSolid(P.x+P.w-2,P.y-1.5);
   const jump=In.jumpHit;In.jumpHit=false;P.buf=0;P.coy=0;P.air=false;P.bounce=true;
   P.vy-=2*GRAV*dt;
@@ -6366,7 +6366,7 @@ function updateFrank(dt){
   if(F.phase==='fight'){
     F.T+=dt;G.frankCk=Math.min(3,Math.floor(F.T/60));
     const k=Math.min(1,F.T/240),cx=F.x+F.w/2,dx=(P.x+5)-cx;
-    /* ogni quarto di fight ti lancia contro un boss della storia */
+    /* in every quarter of the fight he throws a story boss at you */
     if(F.thrown<4&&F.T>=F.thrown*60+30)throwBoss(F.thrown++);
     if(F.fx){F.fxT-=dt;if(F.fxT<=0)frankEndFX()}else F.fxCd-=dt;
     if(F.state==='idle'){
@@ -6435,9 +6435,9 @@ function frankEnd(){
   G.frankDone=true;G.frankFan=true;G.trueEnd=G.frankTE;world.frank=null;
   startCut('ending');
 }
-/* ---------- disegno ---------- */
+/* ---------- drawing ---------- */
 function drawFrankBody(x,y,face,smile,s){
-  /* x = centro, y = piedi */
+  /* x = centre, y = feet */
   ctx.save();ctx.translate(Math.round(x),Math.round(y));ctx.scale(s||1,s||1);
   const R=(c,a,b,w,h)=>{ctx.fillStyle=c;ctx.fillRect(a,b,w,h)};
   R('#07060f',-4,-6,3,6);R('#07060f',1,-6,3,6);R('#3a2416',-5,-2,4,2);R('#3a2416',1,-2,4,2);
@@ -6471,7 +6471,7 @@ function drawGoldGate(r,cx,cy){
 function drawCorridor(cx,cy){
   const A=world.arena,ry=Math.round(A.roof-cy);
   const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#2a1608');g.addColorStop(1,'#120a04');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-  /* finestre ad arco con il tramonto su Neo-Verdana */
+  /* arched windows with the sunset over Neo-Verdana */
   const step=96,off=-((cx*.6)%step+step)%step;
   for(let x=off-step;x<W+step;x+=step){
     const wx=Math.round(x+28),wy=ry-150,ww=40,wh=110;
@@ -6481,23 +6481,23 @@ function drawCorridor(cx,cy){
     ctx.fillStyle='#3a1a2a';for(let k=0;k<ww;k+=5){const bh=8+Math.floor(hash2(k+Math.floor((x-off)/step)*7,9)*22);ctx.fillRect(wx+k,wy+wh-bh,5,bh)}
     ctx.restore();
     ctx.fillStyle='#4a2c12';ctx.fillRect(wx-3,wy+wh,ww+6,4);ctx.fillStyle='#b8860b';ctx.fillRect(wx+ww/2-1,wy+4,2,wh-4);ctx.fillRect(wx,wy+60,ww,2);
-    /* fascio di luce sul pavimento */
+    /* light shaft on the floor */
     ctx.globalAlpha=.12+.03*Math.sin(NOW+x);ctx.fillStyle='#ffd38a';ctx.beginPath();ctx.moveTo(wx,wy+wh);ctx.lineTo(wx+ww,wy+wh);ctx.lineTo(wx+ww+46,ry);ctx.lineTo(wx+46,ry);ctx.closePath();ctx.fill();ctx.globalAlpha=1;
-    /* colonna tra le finestre */
+    /* column between windows */
     const px=Math.round(x+step-14);ctx.fillStyle='#3a220e';ctx.fillRect(px,ry-170,18,170);ctx.fillStyle='#5a3a1a';ctx.fillRect(px+2,ry-170,3,170);ctx.fillStyle='#b8860b';ctx.fillRect(px-3,ry-172,24,5);ctx.fillRect(px-3,ry-8,24,4);
   }
-  /* polvere dorata sospesa */
+  /* floating golden dust */
   for(let i=0;i<30;i++){const x=((hash2(i,701)*W-cx*.3+NOW*4)%W+W)%W,y=ry-160+((hash2(i,702)*150+NOW*3*(i%3+1))%150);ctx.globalAlpha=.25+.25*Math.sin(NOW*2+i);ctx.fillStyle='#ffe9a8';ctx.fillRect(Math.round(x),Math.round(y),1,1)}
   ctx.globalAlpha=1;
-  /* la bottega di Frank in fondo all'arena */
+  /* Frank's shop at the back of the arena */
   const sx=Math.round(A.x+A.w/2-cx);
   if(sx>-200&&sx<W+200){
     ctx.fillStyle='#07060f';ctx.fillRect(sx-70,ry-132,140,26);ctx.fillStyle='#8a2a2a';ctx.fillRect(sx-68,ry-130,136,22);ctx.fillStyle='#ffd23f';ctx.fillRect(sx-68,ry-130,136,2);ctx.fillRect(sx-68,ry-110,136,2);
     ptxt("FRANK & CO.",sx,ry-125,8,'#ffd23f','center');
   }
-  /* soffitto sopra l'arena */
+  /* ceiling above the arena */
   const c=world.ceil;if(c){const x0=Math.round(c.x-cx);ctx.fillStyle='#2a1608';ctx.fillRect(x0,0,c.w,Math.round(c.y+c.h-cy));ctx.fillStyle='#b8860b';ctx.fillRect(x0,Math.round(c.y+c.h-cy)-3,c.w,3);for(let k=8;k<c.w;k+=32){ctx.fillStyle='#4a2c12';ctx.fillRect(x0+k,Math.round(c.y+c.h-cy)-10,4,7)}}
-  /* pavimento di marmo dorato */
+  /* golden marble floor */
   for(const b of world.buildings){
     const x0=Math.round(b.x-cx);ctx.fillStyle='#3a2410';ctx.fillRect(x0,ry,b.w,H);
     for(let k=0;k<b.w;k+=16){const tx=x0+k;if(tx<-16||tx>W)continue;ctx.fillStyle=(k/16)%2?'#c9a46a':'#a8814a';ctx.fillRect(tx,ry,16,6);ctx.fillStyle=(k/16)%2?'#7a5a2a':'#6a4a22';ctx.fillRect(tx,ry+6,16,6)}
@@ -6505,7 +6505,7 @@ function drawCorridor(cx,cy){
   }
 }
 function drawCorridorFront(cx,cy){
-  /* pilastri in primo piano che scorrono davanti a VERDE-7 */
+  /* foreground pillars scrolling in front of VERDE-7 */
   const A=world.arena,step=260,off=-((cx*1.35)%step+step)%step;
   for(let x=off;x<W+step;x+=step){const wx=x+(cx*1.35)-cx;if(cx+x>A.x-40)continue;ctx.fillStyle='#0b0603';ctx.fillRect(Math.round(x),0,26,H);ctx.fillStyle='#1a0e06';ctx.fillRect(Math.round(x)+20,0,3,H)}
 }
@@ -6516,7 +6516,7 @@ function drawFrankScene(cx,cy){
   if(F&&!F.dead)drawBarrier(world.exitWall,cx,cy);
   for(const d of drops)drawDrop(d,Math.round(d.x-cx),Math.round(d.y-cy));
   for(const e of enemies)drawEnemy(e,cx,cy);
-  /* boss lanciati */
+  /* thrown bosses */
   for(const o of fth){
     if(o.ph==='fly'){const sx=Math.round(o.tx-cx),sy=Math.round(A.roof-cy);ctx.globalAlpha=.35+.25*(Math.floor(NOW*16)%2);ctx.fillStyle='#ff3b30';ctx.fillRect(sx-22,sy-3,44,3);ctx.globalAlpha=1}
     ctx.save();ctx.translate(Math.round(o.x-cx),Math.round(o.y+o.h-cy));ctx.scale(2,2);drawMiniBoss(o.k,0,0,o.dir,false,o.q,true);ctx.restore();
@@ -6551,7 +6551,7 @@ function drawHudFrank(){
     for(let q=1;q<4;q++){ctx.fillStyle='#0b0a1a';ctx.fillRect(bx+Math.round(bw*q/4),by,1,8)}
   }
 }
-/* effetti sullo schermo: taglio a metà e buio */
+/* screen effects: split in half and blackout */
 function frankPostFX(){
   const F=boss;if(!F||F.kind!=='frank'||!F.fx)return;
   if(F.fx==='split'){
@@ -6587,7 +6587,7 @@ function frankPostFX(){
   for(const k in D)D[k].forEach((s,i)=>{TX[L[i]][k]=s});
 })();
 {
-  /* l'incontro con Frank: dopo il boss finale, con probabilità FRANK_CHANCE */
+  /* the Frank encounter: after the final boss, with probability FRANK_CHANCE */
   const _c2=startCut;startCut=function(k){
     if(k==='ending'&&!Hell.on&&!G.frankDone&&Math.random()<FRANK_CHANCE){startFrank();return}
     _c2(k);
@@ -6619,7 +6619,7 @@ window.addEventListener('keydown',e=>{
   if(!e.repeat)press(k);
 });
 window.addEventListener('keyup',e=>{const k=KEYMAP[e.key];if(k)release(k)});
-/* durante il passaggio a/da schermo intero il browser può togliere il focus per un attimo: lì non si mette in pausa */
+/* while switching to/from fullscreen the browser may drop focus for a moment: do not pause then */
 const fsBusy=()=>performance.now()-fsT<1500;
 window.addEventListener('blur',()=>{for(const k of['left','right','jump','shoot','dash'])In[k]=0;if(G.state==='play'&&!fsBusy())setPause(true)});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&G.state==='play'&&!fsBusy())setPause(true)});
