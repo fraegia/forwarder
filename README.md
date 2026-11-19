@@ -1,48 +1,48 @@
 # Rooftop Protocol
 
-Platform/sparatutto in pixel art che gira interamente nel browser: un solo file HTML, nessuna installazione e nessuna build.
+A pixel-art platformer/shooter that runs entirely in the browser: a single HTML file, nothing to install and no build step.
 
-Sei **VERDE-7**, l'ultima unità di manutenzione ancora attiva di Neo-Verdana. Attraversa quattro mondi, sblocca nuove abilità e affronta i boss che hanno preso il controllo della città.
+You are **VERDE-7**, the last maintenance unit still running in Neo-Verdana. Cross four worlds, unlock new abilities and take down the bosses that have seized the city.
 
-## Come giocare
+## How to play
 
-Apri `index.html` in un browser (Chrome, Edge o Firefox), oppure servilo in locale:
+Open `index.html` in a browser (Chrome, Edge or Firefox), or serve it locally:
 
 ```bash
 python3 -m http.server 8000
 ```
 
-e visita http://localhost:8000.
+then visit http://localhost:8000.
 
-Il file si può anche mandare così com'è (per esempio su WhatsApp come documento): su PC e Android si apre nel browser. Serve internet solo per caricare i caratteri. I salvataggi e i traguardi restano nel browser di chi gioca.
+The file can also be shared as-is (for example as a document on WhatsApp): on desktop and Android it opens in the browser. An internet connection is only needed to load the fonts. Saves and achievements stay in each player's browser.
 
-## Comandi
+## Controls
 
-| Azione | Tastiera | Controller |
+| Action | Keyboard | Controller |
 |---|---|---|
-| Muoversi | Frecce / A D | Levetta / croce |
-| Saltare (doppio salto) | Spazio / W | A |
-| Sparare (tieni premuto per il colpo carico) | X / J | X / RT |
-| Scatto | Shift / K | B / RB |
-| Bomba | E | LB |
-| Arma secondaria | Q | Y |
-| Interagire (venditore, telescopio) | R | Su |
-| Inventario | I / Tab | Back |
-| Pausa | P / Esc | Start |
+| Move | Arrows / A D | Stick / D-pad |
+| Jump (double jump) | Space / W | A |
+| Shoot (hold for a charged shot) | X / J | X / RT |
+| Dash | Shift / K | B / RB |
+| Bomb | E | LB |
+| Secondary weapon | Q | Y |
+| Interact (vendor, telescope) | R | Up |
+| Inventory | I / Tab | Back |
+| Pause | P / Esc | Start |
 | Audio | M | |
-| Schermo intero | F | |
+| Fullscreen | F | |
 
-Sui telefoni compare un pad touch sotto lo schermo di gioco.
+On phones a touch pad appears below the game screen.
 
-## Contenuti
+## Content
 
-- **4 mondi:** Tetti di Neo-Verdana, Giardini di Flora, Le Fondamenta, Unity Castle. Ognuno ha collezionabili, un miniboss, un venditore e un boss.
-- **Boss:** Colosso Corazzato, Madre Flora, OBLIVION, Unity, più i boss segreti Bonez, il Meccanico Reale, e Tramezzino.
-- **Boss Hell:** tutti i boss di fila in un grande colosseo. Ha una sorpresa finale.
-- **Traguardi:** 30 obiettivi, alcuni segreti.
-- **4 lingue:** italiano, inglese, spagnolo, francese.
-- **4 difficoltà:** da Manutenzione a Collasso Totale.
+- **4 worlds:** Rooftops of Neo-Verdana, Gardens of Flora, The Foundations, Unity Castle. Each has collectibles, a miniboss, a vendor and a boss.
+- **Bosses:** Armored Colossus, Mother Flora, OBLIVION, Unity, plus the secret bosses Bonez, the Royal Mechanic, and Tramezzino.
+- **Boss Hell:** every boss in a row inside a great colosseum. It ends with a surprise.
+- **Achievements:** 30 goals, some of them secret.
+- **4 languages:** Italian, English, Spanish, French.
+- **4 difficulty levels:** from Maintenance to Total Meltdown.
 
-## Versione
+## Version
 
-La versione corrente è scritta in basso a destra nella schermata iniziale ed è definita dalla costante `VERSION` in `index.html`. Va aggiornata a ogni rilascio.
+The current version is shown in the bottom-right corner of the title screen and is defined by the `VERSION` constant in `index.html`. Update it with every release.
