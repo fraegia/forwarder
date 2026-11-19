@@ -5191,10 +5191,10 @@ function hellWin(){
 })();
 
 /* =====================  FASE 6 : versione, easter egg del telescopio  ===================== */
-const VERSION='1.8.0-test';
+const VERSION='1.8.1';
 /* VERSIONE DI PROVA (temporanea): nel Boss Hell a difficoltà Manutenzione i boss non fanno danno.
    Per tornare alla versione normale: TEST_NODMG=false. In prova i traguardi non si sbloccano. */
-const TEST_NODMG=true;
+const TEST_NODMG=false;
 function testNoDmg(){return TEST_NODMG&&Hell.on&&Cfg.diff===0}
 const VER_EL=$('ver');VER_EL.textContent='v'+VERSION;
 
