@@ -5206,7 +5206,7 @@ function hellWin(){
 })();
 
 /* =====================  PHASE 6 : version label, telescope easter egg  ===================== */
-const VERSION='1.9.1';
+const VERSION='1.9.2';
 /* TEST BUILD SWITCH (temporary): in Boss Hell on Maintenance difficulty bosses deal no damage.
    Normal build: TEST_NODMG=false. In the test build achievements are not unlocked. */
 const TEST_NODMG=false;
@@ -6234,7 +6234,7 @@ function drawHudDuo(){
 /* after the final boss (Unity or Tramezzino) there is a chance to enter the golden corridor:
    Frank, the vendor, waits at its end. 1 HP, but he deflects every hit: survive 4 minutes. */
 const FRANK_CHANCE=.3; /* 30% after the final boss */
-let fbl=[],fth=[];
+let fbl=[],fth=[],fsafe=[];
 const FXC=document.createElement('canvas');FXC.width=W;FXC.height=H;const fxg=FXC.getContext('2d');
 function setCanvasFX(m){cv.style.transition='transform .35s';cv.style.transform=m==='flip'?'rotate(180deg)':m==='side'?'rotate(90deg) scale(.5625)':''}
 function buildFrankWorld(){
@@ -6259,7 +6259,7 @@ function makeFrank(q){
   return{kind:'frank',nameKey:'b.frank',hp:1,max:1,x:A.x+A.w-80,y:A.roof-34,w:20,h:34,active:false,dead:false,flash:0,phase:'intro',pt:0,
     T:(q||0)*60,thrown:(q||0),state:'idle',t:0,cd:1.2,face:-1,fx:null,fxT:0,fxCd:6,dcd:0,pops:[],say:'',dur:0,last:''};
 }
-function resetFrankFX(){fbl=[];fth=[];G.gflip=false;setCanvasFX(null)}
+function resetFrankFX(){fbl=[];fth=[];fsafe=[];G.gflip=false;setCanvasFX(null)}
 function startFrank(){
   G.frankTE=!!G.trueEnd;const abil=P.abil;
   buildFrankWorld();
@@ -6296,7 +6296,7 @@ function frankDeflect(src){
     frankPop('RESO!');sfx(1400,.06,'square',.05,-600);
   }
 }
-const FR_DUR={bags:1,counters:1.6,rail:1.2,rocket:1.2,scatter:1.3,blasters:2.4,flip:.6,side:.6,split:.6,dark:.6,grav:.6};
+const FR_DUR={bags:1,counters:1.6,rail:1.2,rocket:1.2,scatter:1.3,blasters:2.4,fbRing:2,fbWall:3.4,fbCross:2.5,fbChase:2,flip:.6,side:.6,split:.6,dark:.6,grav:.6};
 function frankStartFX(k){
   const F=boss;F.fx=k;F.fxT={flip:6,side:5,split:5,dark:2,grav:6}[k];
   if(k==='flip'||k==='side')setCanvasFX(k);
@@ -6313,16 +6313,25 @@ function throwBoss(q){
 function updateFrankExtras(dt){
   const A=world.arena;
   /* Frank-face beam cannons */
+  /* each FRANKBLASTER: aims (optionally tracking), charges for `ch` s, then fires for `fd` s
+     (optionally sweeping its beam); `hw` is the beam half-width, `len` its length */
   for(let i=fbl.length-1;i>=0;i--){
     const b=fbl[i];b.t+=dt;if(b.t<0)continue;
-    if(b.t<.5)b.ang=Math.atan2((P.y+6)-b.y,(P.x+5)-b.x);
-    if(b.t>=.85&&!b.snd){b.snd=1;sfx(160,.35,'sawtooth',.07,-60);G.shake=Math.max(G.shake,.15)}
-    if(b.t>=.85&&b.t<1.2&&!b.hit){
-      const dx=(P.x+5)-b.x,dy=(P.y+6)-b.y,ca=Math.cos(b.ang),sa=Math.sin(b.ang),al=dx*ca+dy*sa;
-      if(al>0&&Math.abs(-dx*sa+dy*ca)<11){b.hit=true;hurtPlayer(25,b.x)}
+    const ch=b.ch||.85,fd=b.fd||.35;
+    /* arc heads follow VERDE-7 until they lock their aim, so their beams always come down steeply */
+    if(b.fol&&b.t<ch*.6){b.x=clamp(P.x+5+b.fol[0],cam.x+16,cam.x+W-16);b.y=clamp(P.y+6+b.fol[1],A.roof-110,A.roof-30)}
+    if(b.track!==false&&b.t<ch*.6)b.ang=Math.atan2((P.y+6)-b.y,(P.x+5)-b.x);
+    if(b.t>=ch&&!b.snd){b.snd=1;if(!b.quiet)sfx(160,.35,'sawtooth',.07,-60);G.shake=Math.max(G.shake,.15)}
+    if(b.t>=ch&&b.t<ch+fd){
+      if(b.sweep)b.ang+=b.sweep*dt;
+      if(!b.hit){
+        const dx=(P.x+5)-b.x,dy=(P.y+6)-b.y,ca=Math.cos(b.ang),sa=Math.sin(b.ang),al=dx*ca+dy*sa;
+        if(al>0&&al<(b.len||500)&&Math.abs(-dx*sa+dy*ca)<(b.hw||11)){b.hit=true;hurtPlayer(25,b.x)}
+      }
     }
-    if(b.t>=1.45)fbl.splice(i,1);
+    if(b.t>=ch+fd+.25)fbl.splice(i,1);
   }
+  for(let i=fsafe.length-1;i>=0;i--){fsafe[i].t+=dt;if(fsafe[i].t>fsafe[i].life)fsafe.splice(i,1)}
   /* story bosses thrown at the player */
   for(let i=fth.length-1;i>=0;i--){
     const o=fth[i];o.t+=dt;
@@ -6374,7 +6383,8 @@ function updateFrank(dt){
       const want=clamp(P.x+5+(dx>=0?-1:1)*130-F.w/2,A.x+6,A.x+A.w-F.w-6);F.x+=clamp(want-F.x,-70*dt,70*dt);
       F.cd-=dt;
       if(F.cd<=0){
-        const opts=['bags','counters','rail','rocket','scatter','blasters','bags','blasters'];
+        const opts=['bags','counters','rail','rocket','scatter','blasters','bags','fbRing','fbChase'];
+        if(!G.gflip)opts.push('fbWall','fbCross');
         if(!F.fx&&F.fxCd<=0)opts.push('flip','side','split','dark','grav');
         let a;do{a=opts[Math.floor(Math.random()*opts.length)]}while(a===F.last&&Math.random()<.85);
         F.last=a;F.state=a;F.t=0;F.shots=0;F.hitDone=false;F.dur=FR_DUR[a];
@@ -6404,6 +6414,32 @@ function updateFrank(dt){
           if(!F.hitDone){F.hitDone=true;const n=3+(F.T>120?1:0);
             for(let j=0;j<n;j++){const a=Math.random()*6.283,d=120+Math.random()*30;fbl.push({x:clamp(P.x+5+Math.cos(a)*d,cam.x+20,cam.x+W-20),y:clamp(P.y+6+Math.sin(a)*d*.6,A.roof-130,A.roof-20),ang:0,t:-j*.3,hit:false})}
             sfx(300,.4,'sine',.05,200)}
+          break;
+        case'fbRing':
+          /* FRANKBLASTER arc: 7 heads in an arc above VERDE-7, firing one after another from one side to the other */
+          if(!F.hitDone){F.hitDone=true;frankPop('FRANKBLASTER!');const rev=Math.random()<.5;
+            for(let j=0;j<7;j++){const a=Math.PI+.7+(rev?6-j:j)*(Math.PI-1.4)/6;fbl.push({x:clamp(P.x+5+Math.cos(a)*125,cam.x+16,cam.x+W-16),y:clamp(P.y+6+Math.sin(a)*90,A.roof-110,A.roof-30),fol:[Math.cos(a)*125,Math.sin(a)*90],ang:0,t:-j*.14,ch:.9,s:1.5,quiet:j%2===1})}
+            sfx(300,.5,'sine',.05,300)}
+          break;
+        case'fbWall':
+          /* FRANKBLASTER wall: a row of heads under the ceiling fires straight down, only one column is safe (two waves) */
+          if(!F.hitDone){F.hitDone=true;frankPop('FRANKBLASTER!');const n=8,cw=A.w/n;
+            /* the safe column is always 1-2 columns away from where you are, and wave 2 starts once wave 1 is over */
+            let last=clamp(Math.floor((P.x+5-A.x)/cw),0,n-1);
+            for(let w=0;w<2;w++){let gap;do{gap=last+(Math.random()<.5?-1:1)*(1+Math.floor(Math.random()*2))}while(gap<0||gap>=n);last=gap;const d=w*1.65;
+              fsafe.push({x:A.x+gap*cw,w:cw,t:-d,life:1.55});
+              let first=true;for(let j=0;j<n;j++)if(j!==gap){fbl.push({x:A.x+j*cw+cw/2,y:A.roof-104,ang:Math.PI/2,t:-d,ch:1.2,track:false,hw:cw/2,s:1.3,len:110,quiet:!first});first=false}}
+            sfx(260,.5,'sine',.05,200)}
+          break;
+        case'fbCross':
+          /* two giant FRANKBLASTERS in the top corners sweep their beams inward: run to the centre */
+          if(!F.hitDone){F.hitDone=true;frankPop('FRANKBLASTER!');const cxm=A.x+A.w/2,yy=A.roof-96;
+            for(const sd of[-1,1]){const x=sd<0?A.x+22:A.x+A.w-22,start=Math.PI/2-sd*.05,target=Math.atan2(A.roof-yy,(cxm+sd*34)-x);fbl.push({x:x,y:yy,ang:start,t:0,ch:1,fd:1.1,track:false,hw:12,s:2.8,sweep:(target-start)/1.1})}
+            fsafe.push({x:cxm-34,w:68,t:0,life:2.1});sfx(120,1,'sawtooth',.06,100)}
+          break;
+        case'fbChase':
+          /* FRANKBLASTER chase: six fast heads in a row, each one aiming where you are */
+          while(F.shots<6&&F.t>=.2+F.shots*.24){F.shots++;if(F.shots===1)frankPop('FRANKBLASTER!');const a=Math.PI+.7+Math.random()*(Math.PI-1.4),d=125;fbl.push({x:clamp(P.x+5+Math.cos(a)*d,cam.x+16,cam.x+W-16),y:clamp(P.y+6+Math.sin(a)*90,A.roof-110,A.roof-30),fol:[Math.cos(a)*d,Math.sin(a)*90],ang:0,t:0,ch:.7,s:1.5})}
           break;
       }
       if(F.t>=F.dur){F.state='idle';F.cd=lerp(.9,.45,k)}
@@ -6528,11 +6564,14 @@ function drawFrankScene(cx,cy){
   }
   drawBombs(cx,cy);drawP3(cx,cy);
   drawPlayer(cx,cy);drawWhips(cx,cy);
+  /* safe zones of the FRANKBLASTER wall and cross */
+  for(const z of fsafe){if(z.t<0)continue;const x=Math.round(z.x-cx),ry=Math.round(A.roof-cy),f=Math.floor(NOW*8)%2;ctx.globalAlpha=.18+f*.12;ctx.fillStyle='#7dff7a';ctx.fillRect(x,0,Math.round(z.w),ry);ctx.globalAlpha=1;ctx.fillStyle='#7dff7a';ctx.fillRect(x,ry-3,Math.round(z.w),3);if(f){const mx=x+Math.round(z.w/2);ctx.fillRect(mx-1,ry-20,3,8);ctx.beginPath();ctx.moveTo(mx-5,ry-12);ctx.lineTo(mx+6,ry-12);ctx.lineTo(mx,ry-6);ctx.fill()}}
   for(const b of fbl){
-    if(b.t<0)continue;const x=Math.round(b.x-cx),y=Math.round(b.y-cy),ca=Math.cos(b.ang),sa=Math.sin(b.ang);
-    if(b.t>=.5&&b.t<.85&&Math.floor(NOW*20)%2){ctx.strokeStyle='#ffd23f';ctx.setLineDash([3,4]);ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+ca*500,y+sa*500);ctx.stroke();ctx.setLineDash([])}
-    if(b.t>=.85&&b.t<1.45){const k=1-(b.t-.85)/.6,wd=Math.max(2,16*k);ctx.globalAlpha=.9;ctx.strokeStyle='#ffd23f';ctx.lineWidth=wd+6;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+ca*500,y+sa*500);ctx.stroke();ctx.strokeStyle='#fff8e8';ctx.lineWidth=wd;ctx.stroke();ctx.lineWidth=1;ctx.globalAlpha=1}
-    drawFrankHead(x,y,b.ang,b.t>=.8&&b.t<1.3,1.8);
+    if(b.t<0)continue;
+    const ch=b.ch||.85,fd=b.fd||.35,L=b.len||500,hw=b.hw||11,x=Math.round(b.x-cx),y=Math.round(b.y-cy),ca=Math.cos(b.ang),sa=Math.sin(b.ang);
+    if(b.t>=ch*.55&&b.t<ch&&Math.floor(NOW*20)%2){ctx.strokeStyle='#ffd23f';ctx.setLineDash([3,4]);ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+ca*L,y+sa*L);ctx.stroke();ctx.setLineDash([])}
+    if(b.t>=ch&&b.t<ch+fd+.25){const k=b.t<ch+fd?1:1-(b.t-ch-fd)/.25,wd=Math.max(2,hw*1.45*k);ctx.globalAlpha=.9;ctx.strokeStyle='#ffd23f';ctx.lineWidth=wd+6;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+ca*L,y+sa*L);ctx.stroke();ctx.strokeStyle='#fff8e8';ctx.lineWidth=wd;ctx.stroke();ctx.lineWidth=1;ctx.globalAlpha=1}
+    drawFrankHead(x,y,b.ang,b.t>=ch-.05&&b.t<ch+fd+.1,b.s||1.8);
   }
   for(const b of bullets)drawBullet(b,cx,cy);
   for(const b of ebullets){const x=Math.round(b.x-cx),y=Math.round(b.y-cy);ctx.fillStyle=b.col||'#ff2bd6';ctx.globalAlpha=.4;ctx.fillRect(Math.round(x-b.vx*.03)-2,Math.round(y-b.vy*.03)-2,5,5);ctx.globalAlpha=1;ctx.fillStyle=b.col||'#ff2bd6';ctx.fillRect(x-3,y-3,7,7);ctx.fillStyle='#fff';ctx.fillRect(x-1,y-1,3,3)}
