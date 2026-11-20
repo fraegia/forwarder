@@ -402,9 +402,9 @@ function respawn(){
   killed=new Set(snap.killed);collected=new Set(snap.collected);if(snap.coins!==undefined)Inv.coins=snap.coins;
   boss=makeBossFor();setDoor(false);setExit(true);restoreArena();
   spawnAll();
+  Music.mode(worldMusic());
   if(Hell.on&&world.hellArena){setDoor(true);Hell.wait=3;Hell.lastS=0;if(Hell.i===4)duoReset()}
   if(world.frank){boss=makeFrank(G.frankCk||0);resetFrankFX();enemies=enemies.filter(e=>!e.minion);if(G.frankStarted){boss.active=true;boss.phase='fight';boss.seen=true;setDoor(true);Music.mode('frank');Music.start()}}
-  Music.mode(worldMusic());
   G.state='play';G.shake=0;
   cam.x=P.x-W/2;cam.y=clamp(P.y-H/2,0,WH-H);
   toast(t('t.reboot',cpName(checkpoint)),2);
@@ -4896,24 +4896,31 @@ const Music=(function(){
     [77,0,74,77,82,0,77,74,86,0,82,77,74,0,70,0],
     [79,76,79,84,88,0,86,84,86,84,81,79,81,0,0,0]];
   function playFrankBattle(s,t){
-    const bar=(s>>4)&3,i=s&15,r=[38,36,34,36][bar],B=lp%2===1;
-    /* bass: root / octave / fifth pattern in eighths */
-    if(i%2===0)tone(t,r+[0,12,0,7,0,12,10,7][i>>1],.12,'sawtooth',.07);
-    /* drums */
-    if(i===0||i===6||i===10||(B&&i===14))kick(t);
-    if(i===4||i===12)hit(t,.12,.14,1500);
-    hit(t,.025,i%2?.025:.045,8000);
-    /* chord stabs on the offbeats */
+    /* sections cycle A (main) -> B (higher variation) -> C (brass lead over a 16th-note bass) */
+    const bar=(s>>4)&3,i=s&15,r=[38,36,34,36][bar],sec=lp%3;
     const ch=[[62,65,69],[60,64,67],[58,62,65],[60,64,67]][bar];
-    if(i===2||i===7||i===11)for(const n of ch)tone(t,n,.07,'square',.012);
-    /* lead melody */
-    const m=(B?FKB:FKA)[bar][i];if(m)tone(t,m,.13,'square',.04);
-    if(B&&m)tone(t,m-12,.13,'triangle',.025);
-    if(bar===3&&i===15)hit(t,.3,.05,4000);
+    /* epic layer: choir and brass on every chord, timpani, crash at the top of the loop */
+    if(i===0){for(const n of ch)choir(t,n,1.9,.035);brass(t,r+12,1.8,.03,900);timp(t,r,.3);if(bar===0)hit(t,1.2,.06,5000)}
+    if(i===8)timp(t,r,.22);
+    /* driving bass: eighths in A and B, sixteenths in C */
+    if(sec===2||i%2===0)tone(t,r+[0,12,0,7,0,12,10,7][(i>>1)&7]+(sec===2&&i%2?12:0),.11,'sawtooth',.075);
+    /* drums, with a snare build-up before the loop restarts */
+    if(i%4===0||i===6||i===10||(sec>0&&i===14))kick(t);
+    if(i===4||i===12)hit(t,.13,.16,1500);
+    if(bar===3&&i>=8)hit(t,.06,.05+(i-8)*.012,1800);
+    hit(t,.025,i%2?.025:.045,8000);
+    /* brass stabs on the offbeats */
+    if(i===2||i===7||i===11)for(const n of ch)brass(t,n+12,.12,.012,2400);
+    /* lead */
+    const m=(sec===1?FKB:FKA)[bar][i];
+    if(m){
+      if(sec===2){brass(t,m,.2,.045,3000);tone(t,m+12,.12,'square',.015)}
+      else{tone(t,m,.13,'square',.045);if(sec===1)tone(t,m-12,.13,'triangle',.025)}
+    }
   }
 
   function sched(){
-    const sd=60/(md==='boss'?156:md==='garden'?84:md==='gboss'?100:md==='deep'?72:md==='castle'?96:md==='bonez'?120:md==='duofall'?150:md==='frank'?132:128)/4;
+    const sd=60/(md==='boss'?156:md==='garden'?84:md==='gboss'?100:md==='deep'?72:md==='castle'?96:md==='bonez'?120:md==='duofall'?150:md==='frank'?138:128)/4;
     master.gain.value=muted?0:.5;
     let guard=0;
     while(nextT<AC.currentTime+.15&&guard++<16){play(stp,nextT);nextT+=sd;stp=(stp+1)%64;if(!stp)lp++}
@@ -4923,12 +4930,13 @@ const Music=(function(){
     start(){try{if(timer)return;ctxA();nextT=AC.currentTime+.06;timer=setInterval(sched,25)}catch(e){}},
     stop(){if(timer){clearInterval(timer);timer=null}},
     mode(m){if(m!==md){md=m;stp=0}},
+    get md(){return md},get on(){return !!timer},
     /* test only: renders `sec` seconds of track `m` into an OfflineAudioContext */
     _render(ctx,m,sec){
       const A0=AC,M0=master,N0=nbuf,D0=md;
       AC=ctx;master=ctx.createGain();master.gain.value=.5;master.connect(ctx.destination);
       nbuf=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate);const d=nbuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
-      md=m;const sd=60/(m==='boss'?156:m==='garden'?84:m==='gboss'?100:m==='deep'?72:m==='castle'?96:m==='bonez'?120:m==='duofall'?150:m==='frank'?132:128)/4;
+      md=m;const sd=60/(m==='boss'?156:m==='garden'?84:m==='gboss'?100:m==='deep'?72:m==='castle'?96:m==='bonez'?120:m==='duofall'?150:m==='frank'?138:128)/4;
       let tt=.05,st=0;lp=0;while(tt<sec-1){play(st,tt);tt+=sd;st=(st+1)%64;if(!st)lp++}
       AC=A0;master=M0;nbuf=N0;md=D0;
     }
@@ -5236,7 +5244,7 @@ function hellWin(){
 })();
 
 /* =====================  PHASE 6 : version label, telescope easter egg  ===================== */
-const VERSION='1.9.4';
+const VERSION='1.9.5';
 /* TEST BUILD SWITCH (temporary): in Boss Hell on Maintenance difficulty bosses deal no damage.
    Normal build: TEST_NODMG=false. In the test build achievements are not unlocked. */
 const TEST_NODMG=false;
