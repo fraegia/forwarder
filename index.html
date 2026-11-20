@@ -404,7 +404,7 @@ function respawn(){
   spawnAll();
   Music.mode(worldMusic());
   if(Hell.on&&world.hellArena){setDoor(true);Hell.wait=3;Hell.lastS=0;if(Hell.i===4)duoReset()}
-  if(world.frank){boss=makeFrank(G.frankCk||0);resetFrankFX();enemies=enemies.filter(e=>!e.minion);if(G.frankStarted){boss.active=true;boss.phase='fight';boss.seen=true;setDoor(true);Music.mode('frank');Music.start()}}
+  if(world.frank){boss=makeFrank(G.frankCk||0);resetFrankFX();enemies=enemies.filter(e=>!e.minion);if(G.frankStarted){boss.active=true;boss.phase='fight';boss.seen=true;setDoor(true);Music.mode('frank');Music.start()}frankApplyStage(G.frankStarted?G.frankCk||0:0)}
   G.state='play';G.shake=0;
   cam.x=P.x-W/2;cam.y=clamp(P.y-H/2,0,WH-H);
   toast(t('t.reboot',cpName(checkpoint)),2);
@@ -696,7 +696,7 @@ function updateWorld(dt){
 }
 function step(dt){
   G.time+=dt;
-  if(inFall()&&FALL.mode==='fall')updateFallPlayer(dt);else if(G.gflip)updateFlipPlayer(dt);else updatePlayer(dt);
+  if(inFall()&&FALL.mode==='fall')updateFallPlayer(dt);else if(G.fair&&world.frank)updateAirPlayer(dt);else if(G.gflip)updateFlipPlayer(dt);else updatePlayer(dt);
   if(G.state!=='play')return;
   for(const e of enemies.slice()){
     const ex=e.ox!==undefined?e.ox:e.x;
@@ -722,6 +722,7 @@ function stepFx(dt){
   tx=clamp(tx,0,world.endX-W);ty=clamp(ty,0,WH-H);
   if(G.secret&&world.secret){tx=world.secret.x;ty=world.secret.camY}
   if(world.frank)ty=world.arena.roof-(H-40);
+  if(world.frank&&G.fair){tx=world.arena.x+world.arena.w/2-W/2;ty=world.arena.roof-196}
   if(inFall()){tx=world.arena.x+world.arena.w/2-W/2;ty=world.arena.roof-196}
   else if(world.hellArena){tx=clamp(tx,world.hellArena.x0-2*T,world.hellArena.x1+2*T-W);ty=Math.min(ty,world.arena.roof-(H-40))}
   const k=Math.min(1,dt*7);cam.x+=(tx-cam.x)*k;cam.y+=(ty-cam.y)*Math.min(1,dt*5);
@@ -4115,7 +4116,7 @@ function drawUnityFront(cx,cy){
 function wrapTxt(s,n){const out=[];let cur='';for(const w of s.split(' ')){if((cur+' '+w).trim().length>n){out.push(cur);cur=w}else cur=(cur+' '+w).trim()}if(cur)out.push(cur);return out}
 function drawHud3(){
   if(Hell.on&&Hell.wait>0&&G.state==='play')drawHellWait();
-  if(testNoDmg()&&Math.floor(NOW*1.5)%2)txt('TEST · NO DANNI',W/2,H-30,'#7dff7a','center');
+  if(testNoDmg()&&Math.floor(NOW*1.5)%2)txt('TEST · NO DANNI',W/2,6,'#7dff7a','center');
   drawHudDuo();drawHudFrank();
   if(boss&&boss.kind==='bonez'&&boss.say)drawSay('BONEZ','#9b5de5',boss.say);
   drawHudTram();
@@ -5244,11 +5245,11 @@ function hellWin(){
 })();
 
 /* =====================  PHASE 6 : version label, telescope easter egg  ===================== */
-const VERSION='1.9.6';
+const VERSION='1.10.0-test';
 /* TEST BUILD SWITCH (temporary): in Boss Hell on Maintenance difficulty bosses deal no damage.
    Normal build: TEST_NODMG=false. In the test build achievements are not unlocked. */
-const TEST_NODMG=false;
-function testNoDmg(){return TEST_NODMG&&Hell.on&&Cfg.diff===0}
+const TEST_NODMG=true;
+function testNoDmg(){return TEST_NODMG&&((Hell.on&&Cfg.diff===0)||!!world.frank)}
 const VER_EL=$('ver');VER_EL.textContent='v'+VERSION;
 
 /* underground room: reached by dropping into the gap right before the World 1 boss roof */
@@ -6304,7 +6305,7 @@ function fbSound(kind,actx,at){
   }catch(e){}
 }
 const FXC=document.createElement('canvas');FXC.width=W;FXC.height=H;const fxg=FXC.getContext('2d');
-function setCanvasFX(m){cv.style.transition='transform .35s';cv.style.transform=m==='flip'?'rotate(180deg)':m==='side'?'rotate(90deg) scale(.5625)':''}
+function setCanvasFX(m){cv.style.transition='transform .35s';cv.style.transform=m==='flip'?'rotate(180deg)':m==='side'?'rotate(90deg) scale(.5625)':m==='tilt'?'rotate(16deg) scale(.86)':''}
 function buildFrankWorld(){
   resetWorld();nextId=1;const S=world;
   S.theme=4;S.nz=1;S.names=null;S.pals=PALS;initFeatures(S);S.gate=null;S.secret=null;S.hellArena=null;S.frank=true;
@@ -6327,14 +6328,14 @@ function makeFrank(q){
   return{kind:'frank',nameKey:'b.frank',hp:1,max:1,x:A.x+A.w-80,y:A.roof-34,w:20,h:34,active:false,dead:false,flash:0,phase:'intro',pt:0,
     T:(q||0)*60,thrown:(q||0),state:'idle',t:0,cd:1.2,face:-1,fx:null,fxT:0,fxCd:6,dcd:0,pops:[],say:'',dur:0,last:''};
 }
-function resetFrankFX(){fbl=[];fth=[];fsafe=[];G.gflip=false;setCanvasFX(null)}
+function resetFrankFX(){fbl=[];fth=[];fsafe=[];G.fair=false;G.gflip=false;setCanvasFX(null)}
 function startFrank(){
   G.frankTE=!!G.trueEnd;const abil=P.abil;
   buildFrankWorld();
   killed=new Set();collected=new Set();checkpoint=world.checks[0];
   P=makePlayer();P.abil=abil;P.x=checkpoint.spawnX;P.y=checkpoint.spawnY;P.safe={x:P.x,y:P.y};
   snap=mkSnap();boss=makeFrank(0);setDoor(false);setExit(true);spawnAll();enemies=[];drops=[];resetFrankFX();
-  G.frankStarted=false;G.frankCk=0;G.zone=0;
+  G.frankStarted=false;G.frankCk=0;G.zone=0;G.testRun=TEST_NODMG;G.fair=false;
   G.state='play';G.paused=false;G.black=false;cutKind=null;G.shake=0;G.flash=0;G.toastT=0;G.fade=1.6;
   cam.x=0;cam.y=world.arena.roof-(H-40);
   Music.stop();
@@ -6364,7 +6365,7 @@ function frankDeflect(src){
     frankPop('RESO!');sfx(1400,.06,'square',.05,-600);
   }
 }
-const FR_DUR={bags:1,counters:1.6,rail:1.2,rocket:1.2,scatter:1.3,blasters:2.4,fbRing:2,fbWall:3.4,fbCross:2.5,fbChase:2,flip:.6,side:.6,split:.6,dark:.6,grav:.6};
+const FR_DUR={bags:1,counters:1.6,rail:1.2,rocket:1.2,scatter:1.3,blasters:2.4,fbRing:2,fbWall:3.4,fbCross:2.5,fbGiant:2.2,fbChase:2,flip:.6,side:.6,split:.6,dark:.6,grav:.6};
 function frankStartFX(k){
   const F=boss;F.fx=k;F.fxT={flip:6,side:5,split:5,dark:2,grav:6}[k];
   if(k==='flip'||k==='side')setCanvasFX(k);
@@ -6374,8 +6375,9 @@ function frankStartFX(k){
 function frankEndFX(){const F=boss;if(F.fx==='flip'||F.fx==='side')setCanvasFX(null);if(F.fx==='grav')G.gflip=false;F.fx=null;F.fxCd=7}
 function throwBoss(q){
   const F=boss,A=world.arena,k=['colossus','flora','centaur','unity'][q];
-  const x0=F.x+F.w/2,tx=clamp(P.x+5,A.x+30,A.x+A.w-30);
-  fth.push({k:k,q:q,x:x0,y:F.y-10,x0:x0,y0:F.y-10,tx:tx,t:0,ph:'fly',dir:(P.x+5)>=x0?1:-1,w:40,h:44});
+  if(G.fair){const fromL=(P.x+5)>cam.x+W/2,x0=fromL?cam.x-50:cam.x+W+50;fth.push({k:k,q:q,x:x0,y:P.y-20,t:0,ph:'air',dir:fromL?1:-1,w:40,h:44})}
+  else{const x0=F.onGiant?F.gx:F.x+F.w/2,y0=F.onGiant?F.gy-40:F.y-10,tx=clamp(P.x+5,A.x+30,A.x+A.w-30);
+  fth.push({k:k,q:q,x:x0,y:y0,x0:x0,y0:y0,tx:tx,t:0,ph:'fly',dir:(P.x+5)>=x0?1:-1,w:40,h:44})}
   toast(t('fr.throw',t(['b.colossus','b.flora','b.centaur','b.unity'][q])),2.8);sfx(140,.6,'sawtooth',.08,300);G.shake=.4;
 }
 function updateFrankExtras(dt){
@@ -6404,7 +6406,8 @@ function updateFrankExtras(dt){
   /* story bosses thrown at the player */
   for(let i=fth.length-1;i>=0;i--){
     const o=fth[i];o.t+=dt;
-    if(o.ph==='fly'){
+    if(o.ph==='air'){if(o.t<.8)o.y=clamp(P.y-18,cam.y+20,cam.y+H-60);else{o.x+=o.dir*320*dt;if(o.x<cam.x-80||o.x>cam.x+W+80){fth.splice(i,1);continue}}}
+    else if(o.ph==='fly'){
       const u=Math.min(1,o.t/1.1);o.x=lerp(o.x0,o.tx,u);o.y=lerp(o.y0,A.roof-o.h,u)-Math.sin(Math.PI*u)*130;
       if(u>=1){
         o.ph='land';o.t=0;o.y=A.roof-o.h;G.shake=.6;sfx(55,.6,'sawtooth',.1,-30);burst(o.x,A.roof,30,'#c9a46a',170,.7);
@@ -6447,14 +6450,19 @@ function updateFrank(dt){
     /* in every quarter of the fight he throws a story boss at you */
     if(F.thrown<4&&F.T>=F.thrown*60+30)throwBoss(F.thrown++);
     if(F.fx){F.fxT-=dt;if(F.fxT<=0)frankEndFX()}else F.fxCd-=dt;
+    if(frankStageStep(dt))return;
     if(F.state==='idle'){
       F.face=dx>=0?1:-1;
-      const want=clamp(P.x+5+(dx>=0?-1:1)*130-F.w/2,A.x+6,A.x+A.w-F.w-6);F.x+=clamp(want-F.x,-70*dt,70*dt);
+      if(!F.onGiant){const want=clamp(P.x+5+(dx>=0?-1:1)*130-F.w/2,A.x+6,A.x+A.w-F.w-6);F.x+=clamp(want-F.x,-70*dt,70*dt)}
       F.cd-=dt;
       if(F.cd<=0){
-        const opts=['bags','counters','rail','rocket','scatter','blasters','bags','fbRing','fbChase'];
-        if(!G.gflip)opts.push('fbWall','fbCross');
-        if(!F.fx&&F.fxCd<=0)opts.push('flip','side','split','dark','grav');
+        let opts;
+        if(!F.stage){
+          opts=['bags','counters','rail','rocket','scatter','blasters','bags','fbRing','fbChase'];
+          if(!G.gflip)opts.push('fbWall','fbCross');
+          if(!F.fx&&F.fxCd<=0)opts.push('flip','side','split','dark','grav');
+        }else if(F.stage===2)opts=['blasters','fbRing','fbChase','fbGiant','blasters'];
+        else opts=['blasters','fbRing','fbWall','fbCross','fbChase','fbGiant'];
         let a;do{a=opts[Math.floor(Math.random()*opts.length)]}while(a===F.last&&Math.random()<.85);
         F.last=a;F.state=a;F.t=0;F.shots=0;F.hitDone=false;F.dur=FR_DUR[a];
         if(FR_DUR[a]===.6&&a!=='bags')frankStartFX(a);
@@ -6506,6 +6514,11 @@ function updateFrank(dt){
             for(const sd of[-1,1]){const x=sd<0?A.x+22:A.x+A.w-22,start=Math.PI/2-sd*.05,target=Math.atan2(A.roof-yy,(cxm+sd*34)-x);fbl.push({x:x,y:yy,ang:start,t:0,ch:1,fd:1.1,track:false,hw:12,s:2.8,sweep:(target-start)/1.1})}
             fsafe.push({x:cxm-34,w:68,t:0,life:2.1});sfx(120,1,'sawtooth',.06,100)}
           break;
+        case'fbGiant':
+          /* one single huge FRANKBLASTER with a very wide beam: get out of its way */
+          if(!F.hitDone){F.hitDone=true;frankPop('FRANKBLASTER!!');const a=Math.PI+.8+Math.random()*(Math.PI-1.6);
+            fbl.push({x:clamp(P.x+5+Math.cos(a)*150,cam.x+30,cam.x+W-30),y:clamp(P.y+6+Math.sin(a)*110,cam.y+30,A.roof-60),fol:[Math.cos(a)*150,Math.sin(a)*110],ang:0,t:0,ch:1.4,fd:.6,hw:30,s:4.5,len:520});G.shake=.3;sfx(80,1,'sawtooth',.06,40)}
+          break;
         case'fbChase':
           /* FRANKBLASTER chase: six fast heads in a row, each one aiming where you are */
           while(F.shots<6&&F.t>=.2+F.shots*.24){F.shots++;if(F.shots===1)frankPop('FRANKBLASTER!');const a=Math.PI+.7+Math.random()*(Math.PI-1.4),d=125;fbl.push({x:clamp(P.x+5+Math.cos(a)*d,cam.x+16,cam.x+W-16),y:clamp(P.y+6+Math.sin(a)*90,A.roof-110,A.roof-30),fol:[Math.cos(a)*d,Math.sin(a)*90],ang:0,t:0,ch:.7,s:1.5})}
@@ -6515,12 +6528,22 @@ function updateFrank(dt){
     }
     if(overlapR(F,P))hurtPlayer(20,cx);
     if(F.T>=240){
-      F.phase='outro';F.pt=0;F.state='idle';
+      F.phase='snap';F.pt=0;F.state='idle';F.tr=null;
       if(F.fx)frankEndFX();resetFrankFX();
       ebullets=[];bombs=[];clearHz();missiles=[];shocks=[];orbs=[];
       for(const e of enemies.slice())if(e.minion)killEnemy(e);
       Music.stop();
     }
+    return;
+  }
+  if(F.phase==='snap'){
+    P.inv=Math.max(P.inv,.5);
+    if(F.pt>=.6&&!F.snapped){
+      F.snapped=1;G.flash=1;G.shake=.4;sfx(2200,.06,'square',.08,-1500);sfx(1400,.1,'triangle',.06,-900);
+      frankApplyStage(0);P.x=A.x+80;P.y=A.roof-14;P.vx=P.vy=0;cam.x=P.x-W/2;cam.y=A.roof-(H-40);
+      toast('SNAP!',1.6);frankPop('SNAP!');
+    }
+    if(F.pt>=1.8){F.phase='outro';F.pt=0}
     return;
   }
   if(F.phase==='outro'){
@@ -6615,20 +6638,21 @@ function drawCorridorFront(cx,cy){
   for(let x=off;x<W+step;x+=step){const wx=x+(cx*1.35)-cx;if(cx+x>A.x-40)continue;ctx.fillStyle='#0b0603';ctx.fillRect(Math.round(x),0,26,H);ctx.fillStyle='#1a0e06';ctx.fillRect(Math.round(x)+20,0,3,H)}
 }
 function drawFrankScene(cx,cy){
-  const F=boss,A=world.arena;
-  drawCorridor(cx,cy);
-  if(world.door.closed)drawBarrier(world.door,cx,cy);
-  if(F&&!F.dead)drawBarrier(world.exitWall,cx,cy);
+  const F=boss,A=world.arena,st=F&&F.stage||0;
+  if(st===2)drawAirScene(cx,cy);else if(st===3)drawPlanetScene(cx,cy);else drawCorridor(cx,cy);
+  if(F&&!F.dead&&(F.onGiant||(F.tr&&F.tr.k===1&&F.tr.t>=1)))drawGiantFrank(cx,cy);
+  if(st<2){if(world.door.closed)drawBarrier(world.door,cx,cy);if(F&&!F.dead)drawBarrier(world.exitWall,cx,cy)}
   for(const d of drops)drawDrop(d,Math.round(d.x-cx),Math.round(d.y-cy));
   for(const e of enemies)drawEnemy(e,cx,cy);
   /* thrown bosses */
   for(const o of fth){
+    if(o.ph==='air'&&o.t<.8&&Math.floor(NOW*16)%2){ctx.globalAlpha=.25;ctx.fillStyle='#ff3b30';ctx.fillRect(0,Math.round(o.y-cy),W,o.h);ctx.globalAlpha=1}
     if(o.ph==='fly'){const sx=Math.round(o.tx-cx),sy=Math.round(A.roof-cy);ctx.globalAlpha=.35+.25*(Math.floor(NOW*16)%2);ctx.fillStyle='#ff3b30';ctx.fillRect(sx-22,sy-3,44,3);ctx.globalAlpha=1}
     ctx.save();ctx.translate(Math.round(o.x-cx),Math.round(o.y+o.h-cy));ctx.scale(2,2);drawMiniBoss(o.k,0,0,o.dir,false,o.q,true);ctx.restore();
   }
   if(F&&!F.dead&&F.phase!=='vanish'){
     const flick=F.dcd>.15&&Math.floor(NOW*30)%2;
-    if(!flick)drawFrankBody(F.x+F.w/2-cx,F.y+F.h-cy,F.face,F.phase!=='fight'||F.state==='idle',1);
+    if(!flick&&!F.onGiant){ctx.save();ctx.beginPath();ctx.rect(0,0,W,Math.round(A.roof-cy)+1);ctx.clip();drawFrankBody(F.x+F.w/2-cx,F.y+F.h-cy,F.face,F.phase!=='fight'||F.state==='idle',1);ctx.restore()}
     for(const p of F.pops){ctx.globalAlpha=1-p.t;ptxt(p.txt,Math.round(p.x-cx),Math.round(p.y-cy-p.t*16),8,'#ffd23f','center');ctx.globalAlpha=1}
   }
   drawBombs(cx,cy);drawP3(cx,cy);
@@ -6646,7 +6670,7 @@ function drawFrankScene(cx,cy){
   for(const b of ebullets){const x=Math.round(b.x-cx),y=Math.round(b.y-cy);ctx.fillStyle=b.col||'#ff2bd6';ctx.globalAlpha=.4;ctx.fillRect(Math.round(x-b.vx*.03)-2,Math.round(y-b.vy*.03)-2,5,5);ctx.globalAlpha=1;ctx.fillStyle=b.col||'#ff2bd6';ctx.fillRect(x-3,y-3,7,7);ctx.fillStyle='#fff';ctx.fillRect(x-1,y-1,3,3)}
   for(const p of parts){ctx.globalAlpha=clamp(p.life/p.max,0,1);ctx.fillStyle=p.col;ctx.fillRect(Math.round(p.x-cx),Math.round(p.y-cy),p.sz,p.sz)}
   ctx.globalAlpha=1;
-  drawCorridorFront(cx,cy);
+  if(st<2)drawCorridorFront(cx,cy);
 }
 function drawHudFrank(){
   const F=boss;if(!F||F.kind!=='frank'||F.dead)return;
@@ -6701,6 +6725,134 @@ function frankPostFX(){
     _c2(k);
   };
 }
+
+/* =====================  PHASE 12 : Frank's four stages  ===================== */
+/* minute 1: the hall; minute 2: Frank rides a giant FRANKBLASTER in the background and only uses FRANKBLASTERS;
+   minute 3: the screen tilts and VERDE-7 falls into an aerial fight through all 4 worlds;
+   minute 4: landing on HomePlanet; at 4:00 Frank snaps his fingers and everyone is back in the hall */
+function frankApplyStage(q){
+  const F=boss,A=world.arena,fl=world.buildings[0],c=world.ceil;
+  const add=o=>{if(o&&world.solids.indexOf(o)<0)world.solids.push(o)},rem=o=>{const i=world.solids.indexOf(o);if(i>=0)world.solids.splice(i,1)};
+  F.stage=q;F.onGiant=q>=1;G.fair=q===2;world.planet=q===3;
+  if(q===2)rem(fl);else add(fl);
+  if(q>=2)rem(c);else add(c);
+  if(q>=1){F.x=A.x-600;G.gflip=false;if(F.fx)frankEndFX();setCanvasFX(null)}
+  else{F.x=A.x+A.w-80;F.y=A.roof-34}
+  F.gx=A.x+A.w/2;F.gy=q===2?A.roof-140:A.roof-112;F.gRise=1;
+}
+function frankStageStep(dt){
+  const F=boss,A=world.arena;
+  const want=F.T>=180?3:F.T>=120?2:F.T>=60?1:0;
+  if(F.tr){
+    const tr=F.tr;tr.t+=dt;P.inv=Math.max(P.inv,.3);
+    if(tr.k===1){
+      /* Frank hops and jumps down through the floor, then rises riding the giant FRANKBLASTER */
+      if(tr.t<.35)F.y=tr.y0-Math.sin(tr.t/.35*Math.PI/2)*40;
+      else if(tr.t<1)F.y+=(tr.t-.35)*900*dt;
+      if(tr.t>=1){F.onGiant=true;F.x=A.x-600;F.gx=A.x+A.w/2;F.gy=A.roof-112;F.gRise=Math.min(1,(tr.t-1)/1.3)}
+      if(tr.t>=2.4){frankApplyStage(1);F.tr=null;toast(t('fr.giant'),2.6);sfx(70,1,'sawtooth',.09,40);G.shake=.6}
+    }else if(tr.k===2){
+      /* the screen tilts and VERDE-7 falls off the floor */
+      if(tr.t>=.5&&F.stage!==2){frankApplyStage(2);setCanvasFX('tilt');G.flash=.4}
+      if(tr.t>=1.4){setCanvasFX(null);F.tr=null}
+    }else{
+      /* landing on HomePlanet */
+      if(F.stage!==3){frankApplyStage(3);G.flash=.8;G.shake=.6;P.y=Math.min(P.y,A.roof-80);sfx(60,.8,'sawtooth',.09,-30)}
+      if(tr.t>=1){F.tr=null}
+    }
+    return true;
+  }
+  if(want>(F.stage||0)){
+    F.state='idle';F.cd=1.2;if(F.fx)frankEndFX();
+    F.tr={k:want,t:0,y0:F.y};
+    if(want===1){sfx(420,.3,'square',.05,300);frankPop('HOP!')}
+    if(want===2){toast(t('fr.tilt'),2.2);G.shake=.8;sfx(90,1,'sawtooth',.08,-40)}
+    if(want===3)toast('HOMEPLANET',2.6);
+    return true;
+  }
+  if(F.stage===2){const wk=Math.min(3,Math.floor((F.T-120)/15));if(wk!==F.wk){F.wk=wk;toast(t('w'+(wk+1)),2)}}
+  return false;
+}
+function updateAirPlayer(dt){
+  In.jumpHit=false;P.buf=0;P.coy=0;P.air=false;P.cling=false;
+  P.vy=((In.down?1:0)-((In.jump||In.up)?1:0))*120-GRAV*dt;
+  updatePlayer(dt);
+  P.vy=0;P.y=clamp(P.y,cam.y+34,cam.y+H-30);P.x=clamp(P.x,cam.x+4,cam.x+W-14);P.safe={x:P.x,y:P.y};
+}
+/* ---------- drawing ---------- */
+function drawGiantFrank(cx,cy){
+  const F=boss,rise=F.gRise===undefined?1:F.gRise,bob=Math.sin(NOW*1.6)*4;
+  const x=Math.round(F.gx-cx),y=Math.round(F.gy-cy+(1-rise)*240+bob);
+  ctx.globalAlpha=.18+.06*Math.sin(NOW*3);ctx.fillStyle='#ffd23f';ctx.beginPath();ctx.arc(x,y,46,0,6.283);ctx.fill();ctx.globalAlpha=1;
+  const ang=Math.atan2((P.y+6)-(F.gy+bob),(P.x+5)-F.gx)*.35+Math.PI/2*.65;
+  drawFrankHead(x,y,ang,Math.floor(NOW*2)%2===0,4.2);
+  drawFrankBody(x,y-28,(P.x+5)>=F.gx?1:-1,true,1.1);
+}
+function drawAirScene(cx,cy){
+  const F=boss,u=Math.max(0,F.T-120),k=Math.min(3,Math.floor(u/15)),off=u*140;
+  const pal=[PALS[0],PALS2[0],PALS3[0],PALS4[0]][k];
+  const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,pal.top);g.addColorStop(1,pal.bot);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  /* distant silhouettes of the current world drifting upwards */
+  for(let i=0;i<8;i++){const y=((hash2(i,801)*H*2-off*.25)%(H+80)+H+80)%(H+80)-40,x=hash2(i,802)*W;ctx.globalAlpha=.35;ctx.fillStyle=pal.far;ctx.fillRect(Math.round(x),Math.round(y),20+hash2(i,803)*30,6+hash2(i,804)*30);ctx.globalAlpha=1}
+  /* speed lines */
+  for(let i=0;i<40;i++){const v=300+hash2(i,811)*400,y=(H+40)-((off*v/140+hash2(i,812)*2000)%(H+80)),x=hash2(i,813)*W;ctx.globalAlpha=.22;ctx.fillStyle='#fff';ctx.fillRect(Math.round(x),Math.round(y),1,12)}
+  ctx.globalAlpha=1;
+  /* side walls of the current world rushing up, with ledges where its monsters watch in disbelief */
+  const wallC=[['#171c36','#3b4575'],['#5b3a29','#2fa05a'],['#20272f','#ff9f1c'],['#403a58','#d4a03a']][k];
+  const mons=[[SP_SCRAP,SP_DRONE],[SP_PLANT,SP_SPIT],[SP_HORROR,SP_MACH],[SP_GUARD,SP_ALCH]][k];
+  for(const sd of[-1,1]){
+    const x0=sd<0?0:W-34;
+    ctx.fillStyle=wallC[0];ctx.fillRect(x0,0,34,H);ctx.fillStyle=wallC[1];ctx.fillRect(sd<0?x0+32:x0,0,2,H);
+    for(let j=0;j<4;j++){
+      const ly=((j*70-off)%280+280)%280-40,lx=sd<0?x0+34:x0-22;
+      ctx.fillStyle=wallC[1];ctx.fillRect(sd<0?x0+20:x0-8,Math.round(ly),22,4);
+      const sp=mons[(j+(sd>0?1:0))%2],sx=sd<0?x0+20:x0-6;
+      spr(sp,sx,Math.round(ly)-sp.h,false,-sd);
+      /* "!?" bubble */
+      const bx=sx+(sd<0?6:-4),by=Math.round(ly)-sp.h-12;
+      ctx.fillStyle='#fff';ctx.fillRect(bx,by,12,9);ctx.fillRect(bx+(sd<0?2:8),by+9,2,2);
+      ctx.fillStyle='#07060f';ctx.fillRect(bx+3,by+2,1,3);ctx.fillRect(bx+3,by+6,1,1);ctx.fillRect(bx+6,by+2,3,1);ctx.fillRect(bx+8,by+3,1,1);ctx.fillRect(bx+7,by+4,1,1);ctx.fillRect(bx+7,by+6,1,1);
+    }
+  }
+}
+function drawPlanetScene(cx,cy){
+  const A=world.arena,ry=Math.round(A.roof-cy);
+  const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#0f3a5a');g.addColorStop(.7,'#58e0c8');g.addColorStop(1,'#a6f0cf');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  for(let i=0;i<40;i++){ctx.globalAlpha=.5+.4*Math.sin(NOW*2+i);ctx.fillStyle='#e8f7ee';ctx.fillRect(Math.floor(hash2(i,821)*W),Math.floor(hash2(i,822)*70),1,1)}
+  ctx.globalAlpha=1;
+  /* a big moon and soft hills */
+  ctx.fillStyle='#f4ecc8';ctx.beginPath();ctx.arc(60-cx*.02,40,16,0,6.283);ctx.fill();
+  ctx.fillStyle='#2fa05a';for(let i=0;i<6;i++){ctx.beginPath();ctx.ellipse(i*80-((cx*.2)%80),ry-20,70,34,0,Math.PI,0);ctx.fill()}
+  /* little houses */
+  const sx=Math.round(A.x+A.w/2-cx);
+  for(let i=-5;i<=5;i++){
+    if(Math.abs(i)<2)continue;
+    const hx=sx+i*44-14,hh=26+Math.floor(hash2(i,831)*12),col=['#ff8fc7','#7fd8ff','#ffe45e','#c8f560','#b58cff'][(i+10)%5];
+    ctx.fillStyle='#07060f';ctx.fillRect(hx-1,ry-hh-1,30,hh+1);ctx.fillStyle=col;ctx.fillRect(hx,ry-hh,28,hh);
+    ctx.fillStyle='#8a2a2a';ctx.beginPath();ctx.moveTo(hx-3,ry-hh);ctx.lineTo(hx+14,ry-hh-14);ctx.lineTo(hx+31,ry-hh);ctx.fill();
+    ctx.fillStyle='#ffd23f';ctx.fillRect(hx+4,ry-hh+6,6,5);ctx.fillRect(hx+18,ry-hh+6,6,5);ctx.fillStyle='#5b3a29';ctx.fillRect(hx+11,ry-12,7,12);
+  }
+  /* the big hotel in the middle */
+  const hw=96,hh=128,hx=sx-hw/2;
+  ctx.fillStyle='#07060f';ctx.fillRect(hx-2,ry-hh-2,hw+4,hh+2);ctx.fillStyle='#3a2a6a';ctx.fillRect(hx,ry-hh,hw,hh);ctx.fillStyle='#5a4a8a';ctx.fillRect(hx,ry-hh,hw,3);
+  for(let r=0;r<9;r++)for(let c=0;c<7;c++){ctx.fillStyle=hash2(r*7+c,841)>.35?'#ffd23f':'#1a1236';ctx.fillRect(hx+6+c*13,ry-hh+20+r*11,7,6)}
+  ctx.fillStyle='#07060f';ctx.fillRect(hx+hw/2-12,ry-18,24,18);ctx.fillStyle='#ffb020';ctx.fillRect(hx+hw/2-10,ry-16,20,16);
+  const neon=Math.floor(NOW*2)%4?'#ff4fd8':'#ff9bf0';ctx.fillStyle='#07060f';ctx.fillRect(hx+hw/2-34,ry-hh-18,68,14);ptxt('HOTEL',hx+hw/2,ry-hh-15,8,neon,'center');
+  /* grass ground */
+  ctx.fillStyle='#5b3a29';ctx.fillRect(0,ry,W,H-ry);ctx.fillStyle='#2fa05a';ctx.fillRect(0,ry,W,6);ctx.fillStyle='#5fd68a';ctx.fillRect(0,ry,W,2);
+  for(let x=0;x<W;x+=8){if(hash2(x+Math.round(cx),851)>.6){ctx.fillStyle=FLOWER_COLS[Math.floor(hash2(x,852)*5)];ctx.fillRect(x+2,ry-3,3,3)}}
+  /* the HOMEPLANET sign at the far end */
+  const gx=Math.round(A.x+A.w-78-cx);
+  ctx.fillStyle='#3a2416';ctx.fillRect(gx+20,ry-34,4,34);ctx.fillStyle='#07060f';ctx.fillRect(gx-2,ry-48,48,16);ctx.fillStyle='#8a6a3a';ctx.fillRect(gx-1,ry-47,46,14);
+  ptxt('HOME',gx+22,ry-46,8,'#fff8e8','center');ctx.fillStyle='#c9a46a';ctx.fillRect(gx-1,ry-47,46,1);
+  ctx.fillStyle='#07060f';ctx.fillRect(gx-2,ry-32,48,12);ctx.fillStyle='#8a6a3a';ctx.fillRect(gx-1,ry-31,46,10);ptxt('PLANET',gx+22,ry-30,8,'#fff8e8','center');
+}
+(function(){
+  const L=['it','en','es','fr'],D={
+   'fr.giant':['FRANK SALE SUL FRANKBLASTER GIGANTE!','FRANK RIDES THE GIANT FRANKBLASTER!','¡FRANK MONTA EL FRANKBLASTER GIGANTE!','FRANK CHEVAUCHE LE FRANKBLASTER GÉANT !'],
+   'fr.tilt':['LO SCHERMO SI INCLINA!','THE SCREEN TILTS!','¡LA PANTALLA SE INCLINA!','L’ÉCRAN BASCULE !']};
+  for(const k in D)D[k].forEach((s,i)=>{TX[L[i]][k]=s});
+})();
 
 /* ---------- input ---------- */
 const KEYMAP={ArrowLeft:'left',a:'left',A:'left',ArrowRight:'right',d:'right',D:'right',ArrowUp:'jump',w:'jump',W:'jump',' ':'jump',x:'shoot',X:'shoot',j:'shoot',J:'shoot',Shift:'dash',k:'dash',K:'dash'};
