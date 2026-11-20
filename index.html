@@ -1287,7 +1287,7 @@ function loadCfg(){
 }
 function saveCfg(){store('rp_cfg',JSON.stringify({lang:Cfg.lang,diff:Cfg.diff,muted:muted}))}
 function readSlot(i){try{const s=fetchS('rp_slot'+i);if(!s)return null;const d=JSON.parse(s);return d&&d.v===2?d:null}catch(e){return null}}
-function readProg(){const v=parseInt(fetchS('rp_prog')||'1',10);return v>=1?v:1}
+function readProg(){if(TEST_NODMG)return 4;const v=parseInt(fetchS('rp_prog')||'1',10);return v>=1?v:1}
 function unlock(n){if(n>readProg())store('rp_prog',String(n))}
 function saveGame(i){
   try{
@@ -5252,11 +5252,11 @@ function hellWin(){
 })();
 
 /* =====================  PHASE 6 : version label, telescope easter egg  ===================== */
-const VERSION='1.10.1-test';
-/* TEST BUILD SWITCH (temporary): in Boss Hell on Maintenance difficulty bosses deal no damage.
-   Normal build: TEST_NODMG=false. In the test build achievements are not unlocked. */
+const VERSION='1.10.2-test';
+/* TEST BUILD SWITCH (temporary): no damage anywhere in the game, all worlds unlocked in
+   "Select world", achievements are not unlocked. Normal build: TEST_NODMG=false. */
 const TEST_NODMG=true;
-function testNoDmg(){return TEST_NODMG&&((Hell.on&&Cfg.diff===0)||!!world.frank)}
+function testNoDmg(){return TEST_NODMG}
 const VER_EL=$('ver');VER_EL.textContent='v'+VERSION;
 
 /* underground room: reached by dropping into the gap right before the World 1 boss roof */
@@ -5878,7 +5878,7 @@ const Ach=(function(){
 function achSave(){store('rp_ach',JSON.stringify({u:Ach.u,kills:Ach.kills,deaths:Ach.deaths,minis:Ach.minis}))}
 const achQ=[];let achCur=null;
 function achUnlock(id){
-  if(TEST_NODMG&&G.testRun)return;
+  if(TEST_NODMG)return;
   if(Ach.u[id])return;const a=ACH.find(x=>x.id===id);if(!a)return;
   Ach.u[id]=Date.now();achSave();achQ.push(a);
 }
