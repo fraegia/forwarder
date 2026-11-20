@@ -4682,7 +4682,7 @@ function drawHudTram(){
 
 /* ---------- music (original synth track, generated live) ---------- */
 const Music=(function(){
-  let timer=null,stp=0,nextT=0,md='run',master=null,nbuf=null;
+  let timer=null,stp=0,lp=0,nextT=0,md='run',master=null,nbuf=null;
   const hz=n=>440*Math.pow(2,(n-69)/12);
   const LEAD=[
     [76,0,0,72,0,74,0,76, 0,0,79,0,76,0,74,0],
@@ -4722,7 +4722,7 @@ const Music=(function(){
     if(md==='garden'||md==='gboss')return playGarden(s,t);
     if(md==='deep')return playDeep(s,t);
     if(md==='castle')return playCastle(s,t);
-    if(md==='frank'){playCastle(s,t);const i=s&15;if(i%2===1)hit(t,.03,.04,7000);if(i%4===2)tone(t,86+((s>>4)&3)*2,.08,'square',.02);if(i===0)tone(t,98,.6,'sine',.03);return}
+    if(md==='frank')return playFrankBattle(s,t);
     if(md==='bonez'||md==='duofall')return playBonez(s,t);
     const boss=md==='boss',bar=(s>>4)&3,i=s&15;
     const roots=boss?[45,45,41,40]:[45,41,48,43];
@@ -4882,11 +4882,41 @@ const Music=(function(){
     if(md==='duofall'){if(i%4===0)kick(t);if(i%4===2)hit(t,.06,.07,1800);if(i%2===1)hit(t,.02,.03,8000)}
   }
 
+  /* ---- Frank the Vendor: original high-energy chiptune battle theme ----
+     D minor (Dm - C - Bb - C), driving octave bass in eighths, tight drums with syncopated kicks,
+     square lead; the second loop plays a higher, busier variation of the melody */
+  const FKA=[
+    [69,0,72,0,74,0,69,0,77,0,76,74,72,0,69,0],
+    [67,0,72,0,74,0,67,0,76,0,74,72,70,0,67,0],
+    [65,0,70,0,74,0,65,0,77,0,74,70,69,0,65,0],
+    [67,0,72,0,76,0,79,0,81,0,79,76,74,0,72,0]];
+  const FKB=[
+    [81,0,77,81,84,0,81,77,86,0,84,81,77,0,74,0],
+    [79,0,76,79,84,0,79,76,84,0,83,79,76,0,72,0],
+    [77,0,74,77,82,0,77,74,86,0,82,77,74,0,70,0],
+    [79,76,79,84,88,0,86,84,86,84,81,79,81,0,0,0]];
+  function playFrankBattle(s,t){
+    const bar=(s>>4)&3,i=s&15,r=[38,36,34,36][bar],B=lp%2===1;
+    /* bass: root / octave / fifth pattern in eighths */
+    if(i%2===0)tone(t,r+[0,12,0,7,0,12,10,7][i>>1],.12,'sawtooth',.07);
+    /* drums */
+    if(i===0||i===6||i===10||(B&&i===14))kick(t);
+    if(i===4||i===12)hit(t,.12,.14,1500);
+    hit(t,.025,i%2?.025:.045,8000);
+    /* chord stabs on the offbeats */
+    const ch=[[62,65,69],[60,64,67],[58,62,65],[60,64,67]][bar];
+    if(i===2||i===7||i===11)for(const n of ch)tone(t,n,.07,'square',.012);
+    /* lead melody */
+    const m=(B?FKB:FKA)[bar][i];if(m)tone(t,m,.13,'square',.04);
+    if(B&&m)tone(t,m-12,.13,'triangle',.025);
+    if(bar===3&&i===15)hit(t,.3,.05,4000);
+  }
+
   function sched(){
-    const sd=60/(md==='boss'?156:md==='garden'?84:md==='gboss'?100:md==='deep'?72:md==='castle'?96:md==='bonez'?120:md==='duofall'?150:md==='frank'?164:128)/4;
+    const sd=60/(md==='boss'?156:md==='garden'?84:md==='gboss'?100:md==='deep'?72:md==='castle'?96:md==='bonez'?120:md==='duofall'?150:md==='frank'?132:128)/4;
     master.gain.value=muted?0:.5;
     let guard=0;
-    while(nextT<AC.currentTime+.15&&guard++<16){play(stp,nextT);nextT+=sd;stp=(stp+1)%64}
+    while(nextT<AC.currentTime+.15&&guard++<16){play(stp,nextT);nextT+=sd;stp=(stp+1)%64;if(!stp)lp++}
     if(nextT<AC.currentTime-.5)nextT=AC.currentTime+.05;
   }
   return{
@@ -4898,8 +4928,8 @@ const Music=(function(){
       const A0=AC,M0=master,N0=nbuf,D0=md;
       AC=ctx;master=ctx.createGain();master.gain.value=.5;master.connect(ctx.destination);
       nbuf=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate);const d=nbuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
-      md=m;const sd=60/(m==='boss'?156:m==='garden'?84:m==='gboss'?100:m==='deep'?72:m==='castle'?96:m==='bonez'?120:m==='duofall'?150:m==='frank'?164:128)/4;
-      let tt=.05,st=0;while(tt<sec-1){play(st,tt);tt+=sd;st=(st+1)%64}
+      md=m;const sd=60/(m==='boss'?156:m==='garden'?84:m==='gboss'?100:m==='deep'?72:m==='castle'?96:m==='bonez'?120:m==='duofall'?150:m==='frank'?132:128)/4;
+      let tt=.05,st=0;lp=0;while(tt<sec-1){play(st,tt);tt+=sd;st=(st+1)%64;if(!st)lp++}
       AC=A0;master=M0;nbuf=N0;md=D0;
     }
   };
@@ -5206,7 +5236,7 @@ function hellWin(){
 })();
 
 /* =====================  PHASE 6 : version label, telescope easter egg  ===================== */
-const VERSION='1.9.2';
+const VERSION='1.9.3';
 /* TEST BUILD SWITCH (temporary): in Boss Hell on Maintenance difficulty bosses deal no damage.
    Normal build: TEST_NODMG=false. In the test build achievements are not unlocked. */
 const TEST_NODMG=false;
