@@ -5236,7 +5236,7 @@ function hellWin(){
 })();
 
 /* =====================  PHASE 6 : version label, telescope easter egg  ===================== */
-const VERSION='1.9.3';
+const VERSION='1.9.4';
 /* TEST BUILD SWITCH (temporary): in Boss Hell on Maintenance difficulty bosses deal no damage.
    Normal build: TEST_NODMG=false. In the test build achievements are not unlocked. */
 const TEST_NODMG=false;
@@ -6263,7 +6263,7 @@ function drawHudDuo(){
 /* =====================  PHASE 11 : the final corridor and FRANK THE VENDOR  ===================== */
 /* after the final boss (Unity or Tramezzino) there is a chance to enter the golden corridor:
    Frank, the vendor, waits at its end. 1 HP, but he deflects every hit: survive 4 minutes. */
-const FRANK_CHANCE=.3; /* 30% after the final boss */
+const FRANK_CHANCE=1; /* Frank always appears after the final boss */
 let fbl=[],fth=[],fsafe=[];
 const FXC=document.createElement('canvas');FXC.width=W;FXC.height=H;const fxg=FXC.getContext('2d');
 function setCanvasFX(m){cv.style.transition='transform .35s';cv.style.transform=m==='flip'?'rotate(180deg)':m==='side'?'rotate(90deg) scale(.5625)':''}
