@@ -37,7 +37,7 @@ On phones a touch pad appears below the game screen.
 ## Content
 
 - **4 worlds:** Rooftops of Neo-Verdana, Gardens of Flora, The Foundations, Unity Castle. Each has collectibles, a miniboss, a vendor and a boss.
-- **Bosses:** Armored Colossus, Mother Flora, OBLIVION, Unity, plus the secret bosses Bonez, the Royal Mechanic, and Tramezzino.
+- **Bosses:** Armored Colossus, Mother Flora, OBLIVION, Unity, plus the secret bosses Bonez, the Royal Mechanic, Tramezzino and a mysterious encounter after the final boss.
 - **Boss Hell:** every boss in a row inside a great colosseum. It ends with a surprise.
 - **Achievements:** 30 goals, some of them secret.
 - **4 languages:** Italian, English, Spanish, French.
