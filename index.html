@@ -4587,7 +4587,11 @@ function drawUfo(x,y,beam){
   const R=(c,a,b,w,h)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(x+a),Math.round(y+b),w,h)};
   if(beam){ctx.globalAlpha=.22+.08*Math.sin(NOW*22);ctx.fillStyle='#fff2a0';ctx.beginPath();ctx.moveTo(x-12,y+9);ctx.lineTo(x+12,y+9);ctx.lineTo(x+46,H);ctx.lineTo(x-46,H);ctx.fill();ctx.globalAlpha=1}
   R('#07060f',-11,-14,22,13);R('#7fe8ff',-9,-12,18,10);R('#e8fbff',-7,-11,4,3);
-  R('#7dff7a',-4,-8,8,7);R('#07060f',-3,-6,2,2);R('#07060f',1,-6,2,2);
+  /* the pilot: orange alien with a diamond-shaped head (a square rotated 45 degrees) */
+  R('#ff8a1f',-1,-4,3,2);
+  for(let d=-5;d<=5;d++){const w=5-Math.abs(d);R('#07060f',-w-1,-8+d,2*w+3,1)}
+  for(let d=-4;d<=4;d++){const w=4-Math.abs(d);R(d<-1?'#ffb35c':'#ff8a1f',-w,-8+d,2*w+1,1)}
+  R('#07060f',-2,-9,1,2);R('#07060f',2,-9,1,2);R('#c4500a',-1,-6,3,1);
   R('#07060f',-28,-3,56,11);R('#9aa6c4',-26,-1,52,7);R('#e8f7ee',-26,-1,52,2);
   for(let k=-22;k<=22;k+=11)R((Math.floor(NOW*6+k)%2)?'#ffd23f':'#ff4d5e',k-1,3,3,3);
   R('#07060f',-13,8,26,3);R('#4a4f68',-11,8,22,2);
@@ -5252,7 +5256,7 @@ function hellWin(){
 })();
 
 /* =====================  PHASE 6 : version label, telescope easter egg  ===================== */
-const VERSION='1.10.2-test';
+const VERSION='1.10.3-test';
 /* TEST BUILD SWITCH (temporary): no damage anywhere in the game, all worlds unlocked in
    "Select world", achievements are not unlocked. Normal build: TEST_NODMG=false. */
 const TEST_NODMG=true;
