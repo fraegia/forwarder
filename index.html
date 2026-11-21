@@ -219,11 +219,21 @@ function palAt(x){
 const world={specials:[],vendors:[],mini:null,theme:0,nz:16,names:null,pals:null,solids:[],buildings:[],plats:[],defs:[],pickups:[],checks:[],zoneX:[],decor:[],arena:null,door:null,exitWall:null,beacon:null,bossX:1,endX:1,spawn:{x:48,y:200}};
 let nextId=1;
 
+/* World 1 (Rooftops of Neo-Verdana). The rooftop run is still generated from a seed, but every
+   zone now gets hand-designed set pieces that use the city vertically: wind vents, elevators,
+   cable cars, blinking neon signs, radio towers to climb, vent pillars in the gaps and optional
+   elevated routes. SET1 maps "zone:building" to the set piece placed in the gap before that
+   building ('sky' is an optional route on the building itself). */
+const SET1={'0:5':'vent','0:8':'vent','1:4':'cable','1:8':'cable','2:5':'elev','2:8':'pillar',
+  '3:6':'tower','3:9':'neon','4:5':'pillar','4:8':'neon','5:4':'cable','5:7':'sky','6:4':'elev','6:8':'elev',
+  '7:5':'cable','7:8':'neon','8:2':'neon','8:5':'neon','8:8':'pillar','9:5':'elev','9:8':'neon',
+  '10:5':'tower','10:7':'sky','11:5':'cable','11:8':'pillar','12:5':'neon','12:8':'elev',
+  '13:4':'pillar','13:7':'pillar','14:5':'tower','14:8':'cable','15:5':'elev'};
 function buildLevel(){
   nextId=1;
-  const r=mulberry32(20261114);
-  const S=world;S.theme=1;S.nz=ZONES;S.names=ZONE_NAMES;S.pals=PALS;initFeatures(S);
-  let x=4,row=16;
+  const r=mulberry32(20261121);
+  const S=world;S.theme=1;S.nz=ZONES;S.names=ZONE_NAMES;S.pals=PALS;initFeatures(S);S.sets=[];
+  let x=4;
   const bld=(x0,w,rw,z)=>{
     const b={x:x0*T,y:rw*T,w:w*T,h:(ROWS-rw)*T,row:rw,zone:z,seed:Math.floor(r()*1e6)};
     S.buildings.push(b);S.solids.push(b);
@@ -236,18 +246,19 @@ function buildLevel(){
     return b;
   };
   /* start building */
-  let first=bld(0,12,16,0);
+  const first=bld(0,12,16,0);
   let prev=first,prevRow=16;
   S.spawn={x:3*T,y:16*T-14};
   S.checks.push({x:6*T,y:16*T-32,w:T,h:32,id:'c0',active:true,spawnX:6*T,spawnY:16*T-14,name:'cp.start'});S.vendors.push({x:9*T,y:16*T,id:'v0'});
   x=12;
-  let chipCount=0;
+  const skyB=[];
   for(let z=0;z<ZONES;z++){
     const d=z/(ZONES-1);
     S.zoneX.push(x*T);
     const nB=10+(z%2);
-    if(z===MINI_Z[1]){const m=buildMini(S,x,1,bld,prevRow);x=m.x;prevRow=m.row}
+    if(z===MINI_Z[1]){const m=buildMini(S,x,1,bld,prevRow);x=m.x;prevRow=m.row;prev=S.buildings[S.buildings.length-1]}
     for(let i=0;i<nB;i++){
+      const sp=SET1[z+':'+i];
       let gap=2+Math.floor(r()*(z<3?2:z<7?4:6));
       if(i===0)gap=2;
       let w=6+Math.floor(r()*8);if(colAt(S.theme,z,i)>=0)w=Math.max(w,12);
@@ -260,15 +271,23 @@ function buildLevel(){
       if(gap>=3&&z<3&&up>1)dRow=-1;
       if(gap<=4&&up>2)dRow=-2;
       let row2=clamp(prevRow+dRow,11,20);
-      /* platform helping long gaps */
-      if(gap>=4&&r()<(z<7?.45:.3)){
+      let piece=null;
+      if(sp&&sp!=='sky'){
+        const n0=S.specials.length,b0=S.buildings.length;
+        const res=setPiece1(S,sp,z,x,prev,prevRow,r,bld);
+        S.sets.push({kind:sp,z:z,A:prev,sp:S.specials.slice(n0),bl:S.buildings.slice(b0)});
+        x=res.x;row2=res.row;gap=0;piece=sp;if(res.w)w=res.w;
+      }else if(gap>=4&&r()<(z<7?.45:.3)){
+        /* platform helping long gaps */
         const px=(x+Math.floor(gap/2)-1)*T;
         const py=Math.min(prevRow,row2)*T+(r()<.5?0:T);
         const p={x:px,y:py,w:3*T,h:T/2,plat:true};
         S.plats.push(p);S.solids.push(p);
       }
       x+=gap;
-      const b=bld(x,w,row2,z);featureHook(S,b,z,i,nB,isCheck);
+      const b=bld(x,w,row2,z);b.sp=piece;featureHook(S,b,z,i,nB,isCheck);
+      if(piece)S.sets[S.sets.length-1].B=b;
+      if(sp==='sky')skyB.push(b);
       /* checkpoint */
       if(isCheck){
         S.checks.push({x:b.x+5*T,y:b.y-32,w:T,h:32,id:'c'+z,active:false,spawnX:b.x+5*T,spawnY:b.y-14,name:'cp.sector',n:z+1});
@@ -276,17 +295,10 @@ function buildLevel(){
       /* pickups: abilities at end of zones 2 and 6 */
       if(i===nB-1&&z===2)S.pickups.push({id:'dj',kind:'dj',x:b.x+b.w/2-6,y:b.y-20,w:12,h:12});
       if(i===nB-1&&z===6)S.pickups.push({id:'dash',kind:'dash',x:b.x+b.w/2-6,y:b.y-20,w:12,h:12});
-      /* chip on a high platform (needs double jump) */
-      if(false){
-        const pw=3*T,px=b.x+Math.floor((w-3)/2)*T,py=b.y-64;
-        const p={x:px,y:py,w:pw,h:T/2,plat:true};
-        S.plats.push(p);S.solids.push(p);
-        S.pickups.push({id:'chip'+chipCount,kind:'chip',x:px+pw/2-5,y:py-12,w:10,h:10});chipCount++;
-      }
       /* health */
       if(i===4&&z>0&&z%2===1)S.pickups.push({id:'hp'+z,kind:'hp',x:b.x+b.w/2-5,y:b.y-14,w:10,h:10});
-      /* enemies */
-      const safe=b.colk||isCheck||(z===0&&i<2)||(i===nB-1&&(z===2||z===6));
+      /* enemies (landing roofs of vents, elevators and towers stay clear) */
+      const safe=b.colk||isCheck||(z===0&&i<2)||(i===nB-1&&(z===2||z===6))||(piece&&piece!=='cable'&&piece!=='neon');
       if(!safe&&w>=7){
         if(r()<.38+.34*d){
           S.defs.push({id:nextId++,type:'scrap',x:b.x+T*(2+Math.floor(r()*(w-4))),y:b.y-13,min:b.x+T,max:b.x+b.w-T});
@@ -294,13 +306,14 @@ function buildLevel(){
         if(w>=11&&r()<.3+.3*d){
           S.defs.push({id:nextId++,type:'scrap',x:b.x+T*3,y:b.y-13,min:b.x+T,max:b.x+b.w-T});
         }
-        if(z>=1&&r()<.12+.34*d){
+        if(z>=1&&row2>=10&&r()<.12+.34*d){
           S.defs.push({id:nextId++,type:'drone',x:b.x+b.w/2+(r()-.5)*T*4,y:b.y-60-Math.floor(r()*34)});
         }
       }
       prev=b;prevRow=row2;x+=w;
     }
   }
+  for(const b of skyB)skyRoute1(S,b);
   /* approach to boss: safe long roof with pre-boss checkpoint */
   S.zoneX.push(x*T);
   x+=2;
@@ -321,6 +334,171 @@ function buildLevel(){
   /* guard walls so the player cannot fall off the world sides */
   S.solids.push({x:-T,y:0,w:T,h:ROWS*T});
   S.solids.push({x:S.endX-T,y:0,w:T,h:ROWS*T});
+}
+/* builds one World 1 set piece starting at tile x (right after the previous roof) and returns
+   the tile where the next building starts and the row of its roof */
+function setPiece1(S,kind,z,x,prev,prevRow,r,bld){
+  const pY=prevRow*T;
+  if(kind==='vent'){
+    /* wind vent at the end of the roof: blows VERDE-7 up to a much higher roof */
+    const row=Math.max(8,prevRow-5);
+    S._ry=pY;trimDecor(S,prev.x+prev.w-4*T,prev.x+prev.w);
+    S.specials.push({kind:'vent',x:prev.x+prev.w-3*T,y:pY,w:3*T,hgt:(prevRow-row)*T+20,t:0});
+    return{x:x+2,row:row};
+  }
+  if(kind==='elev'){
+    /* glass elevator in a narrow shaft up to a tall tower */
+    const row=Math.max(6,prevRow-7);
+    const L={kind:'lift',vert:true,x:x*T+8,y:pY,w:3*T,h:8,plat:true,ax:x*T+8,ay:pY,bx:x*T+8,by:row*T,wait:1.1,spd:46,t:0};
+    S.specials.push(L);S.solids.push(L);
+    return{x:x+4,row:row,w:7};
+  }
+  if(kind==='cable'){
+    /* cable car across a wide gap */
+    const g=z<7?10:12,row=clamp(prevRow+(r()<.5?-1:1),11,20);
+    const L={kind:'lift',cable:true,x:x*T+2,y:pY,w:3*T,h:8,plat:true,ax:x*T+2,ay:pY,bx:(x+g-3)*T-2,by:row*T,wait:1.2,spd:z<7?52:60,t:0};
+    S.specials.push(L);S.solids.push(L);
+    if(z>=7)S.defs.push({id:nextId++,type:'drone',x:(x+g/2)*T,y:Math.min(pY,row*T)-70});
+    return{x:x+g,row:row};
+  }
+  if(kind==='neon'){
+    /* chain of neon signs that switch on and off in sequence */
+    const g=11,row=clamp(prevRow+(r()<.5?0:-1),11,20),hard=z>=10;
+    const on=hard?2.1:2.6,off=hard?1.2:1.1,stp=hard?.8:.9;
+    for(let k=0;k<3;k++){
+      const ny=Math.round(lerp(pY,row*T,k/2))-T;
+      const s={kind:'neon',x:(x+1.5+k*3.5)*T,y:ny,w:2*T,h:8,plat:true,t:0,on:on,per:on+off,ph:-k*stp,col:k%2?'#35e8ff':'#ff4fd8'};
+      S.specials.push(s);S.solids.push(s);
+    }
+    return{x:x+g,row:row};
+  }
+  if(kind==='pillar'){
+    /* low pillar in the middle of the gap with a vent on top */
+    const g=6,pr=Math.min(23,prevRow+4),row=clamp(prevRow-1-Math.floor(r()*3),9,20);
+    const pl=bld(x+2,2,pr,z);pl.pillar=true;
+    S.decor=S.decor.filter(d=>d.y!==pl.y||d.x<pl.x-T||d.x>pl.x+pl.w+T);
+    S.specials.push({kind:'vent',x:pl.x-T/2,y:pl.y,w:3*T,hgt:(pr-row)*T+20,t:0});
+    return{x:x+g,row:row};
+  }
+  /* radio towers: three roofs that climb up (needs the double jump) */
+  const st=Math.max(2,Math.min(3,Math.floor((prevRow-6)/3)));
+  let xx=x;
+  for(let k=1;k<=2;k++){
+    xx+=2;const tw=bld(xx,4,prevRow-st*k,z);tw.tower=true;xx+=4;
+    S.decor=S.decor.filter(d=>d.y!==tw.y||d.x<tw.x||d.x>tw.x+tw.w);
+    S.decor.push({x:tw.x+T*2,y:tw.y,kind:1,seed:Math.floor(r()*1e5)});
+  }
+  return{x:xx+2,row:prevRow-st*3,w:8};
+}
+/* optional elevated walkway: a vent on the roof leads to a skybridge with a reward */
+function skyRoute1(S,b){
+  const near=S.buildings.filter(o=>o!==b&&o.x<b.x+b.w+26*T&&o.x+o.w>b.x);
+  const top=Math.min(b.y,...near.map(o=>o.y)),by=Math.max(3*T,top-5*T);
+  S._ry=b.y;trimDecor(S,b.x,b.x+5*T);
+  S.specials.push({kind:'vent',x:b.x+T,y:b.y,w:3*T,hgt:b.y-by+8,t:0,sky:true});
+  const made=[];
+  for(let k=0;k<5;k++){
+    const p={x:b.x+4*T+8+k*4*T,y:by,w:3*T,h:T/2,plat:true,sky:true};
+    if(S.solids.some(o=>o.x<p.x+p.w+T&&o.x+o.w>p.x-T&&o.y<p.y+p.h+2*T&&o.y+(o.h||8)>p.y-2*T))break;
+    S.plats.push(p);S.solids.push(p);made.push(p);
+  }
+  if(made.length>=3){const m=made[2];S.pickups.push({id:'sky'+b.x,kind:'hp',x:m.x+m.w/2-5,y:m.y-14,w:10,h:10})}
+}
+/* moving platforms (elevators and cable cars) */
+function liftK(s){
+  const dist=Math.hypot(s.bx-s.ax,s.by-s.ay),mv=dist/s.spd,per=2*(mv+s.wait),c=((s.t%per)+per)%per;
+  if(c<s.wait)return 0;
+  if(c<s.wait+mv){const u=(c-s.wait)/mv;return u*u*(3-2*u)}
+  if(c<2*s.wait+mv)return 1;
+  const u=(c-2*s.wait-mv)/mv;return 1-u*u*(3-2*u);
+}
+function updateSpecials1(s,dt){
+  if(s.kind==='lift'){
+    s.t+=dt;
+    const k=liftK(s),nx=lerp(s.ax,s.bx,k),ny=lerp(s.ay,s.by,k),dx=nx-s.x;
+    const ride=P&&!P.dead&&P.ground===s;
+    s.x=nx;s.y=ny;
+    if(ride){
+      P.x+=dx;P.y=s.y-P.h;
+      for(const o of world.solids)if(o!==s&&overlapR(P,o)){P.x-=dx;break}
+    }else if(P&&!P.dead&&overlapR(P,s)){
+      if(P.y+P.h/2<s.y+s.h/2){P.y=s.y-P.h;if(P.vy>0)P.vy=0}
+      else{P.y=s.y+s.h;if(P.vy<0)P.vy=0}
+    }
+    return;
+  }
+  if(s.kind==='vent'){
+    s.t+=dt;
+    if(!P||P.dead||G.state!=='play'||G.secret)return;
+    const cx=P.x+P.w/2,f=P.y+P.h;
+    if(cx>s.x&&cx<s.x+s.w&&f<=s.y+2&&f>s.y-s.hgt&&P.dashT<=0){
+      P.vy=Math.max(-250,P.vy-2400*dt);P.bounce=true;P.air=true;P.coy=0;
+      if(!G.ventTip){G.ventTip=1;toast(t('t.vent'),2.2)}
+      if(!s.whoosh||NOW-s.whoosh>.5){s.whoosh=NOW;sfx(140,.35,'sawtooth',.025,260)}
+      if(Math.random()<.3)parts.push({x:P.x+Math.random()*P.w,y:P.y+P.h,vx:0,vy:60,life:.3,max:.3,col:'#c8ffe0',sz:1});
+    }
+    return;
+  }
+  if(s.kind==='neon'){
+    s.t+=dt;
+    const c=(((s.t+s.ph)%s.per)+s.per)%s.per,on=c<s.on,i=world.solids.indexOf(s);
+    s.warn=on&&c>s.on-.6;
+    if(on&&i<0&&!(P&&overlapR(P,s))){world.solids.push(s);sfx(900,.05,'square',.02,200)}
+    if(!on&&i>=0){world.solids.splice(i,1);burst(s.x+s.w/2,s.y+4,6,s.col,50,.3)}
+    s.lit=world.solids.indexOf(s)>=0;
+    if(!G.neonTip&&P&&Math.abs(P.x-s.x)<120&&Math.abs(P.y-s.y)<80){G.neonTip=1;toast(t('t.neon'),2.4)}
+  }
+}
+function resetSpecial1(s){
+  if(s.kind==='lift'){s.t=0;s.x=s.ax;s.y=s.ay}
+  else if(s.kind==='vent')s.t=0;
+  else if(s.kind==='neon'){s.t=0;if(world.solids.indexOf(s)<0)world.solids.push(s)}
+}
+function drawSpecial1(s,cx,cy){
+  const x=Math.round(s.x-cx),y=Math.round(s.y-cy),R=(c,a,b,w,h)=>{ctx.fillStyle=c;ctx.fillRect(a,b,w,h)};
+  if(s.kind==='vent'){
+    /* roof grille with spinning blades and rising wind streaks */
+    R('#0d1126',x,y-4,s.w,4);R('#4a5486',x+1,y-3,s.w-2,2);
+    const f=Math.floor(s.t*24)%3;
+    for(let k=2+f;k<s.w-2;k+=3)R('#8da0cf',x+k,y-3,1,2);
+    R(s.sky?'#ffd23f':'#35e8ff',x+2,y-4,s.w-4,1);
+    ctx.globalAlpha=.45;
+    for(let k=0;k<7;k++){
+      const px=x+3+((k*11+s.x)%(s.w-6)),hh=s.hgt,py=y-6-((NOW*150+k*41)%hh);
+      R('#e8fbff',Math.round(px),Math.round(py),1,5+(k%3)*2);
+    }
+    ctx.globalAlpha=1;
+    return;
+  }
+  if(s.kind==='lift'){
+    if(s.vert){
+      /* elevator rail */
+      const ty=Math.round(s.by-cy)-34,by2=Math.round(s.ay-cy)+40;
+      R('#2a3258',x+s.w/2-1,ty,2,by2-ty);R('#4a5486',x+2,ty,s.w-4,2);
+      for(let yy=ty+6;yy<by2;yy+=12)R('#3b4575',x+s.w/2-3,yy,6,1);
+    }
+    if(s.cable){
+      /* cable between two pylons and the hanger of the car */
+      const ax=Math.round(s.ax-cx),bx=Math.round(s.bx+s.w-cx),ay=Math.round(s.ay-cy)-44,by=Math.round(s.by-cy)-44;
+      R('#2a3258',ax-6,ay,2,44);R('#2a3258',bx+4,by,2,44);R('#ff4fd8',ax-7,ay-2,4,2);R('#ff4fd8',bx+3,by-2,4,2);
+      ctx.strokeStyle='#8da0cf';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(ax-5,ay+.5);ctx.lineTo(bx+5,by+.5);ctx.stroke();
+      const hx=x+s.w/2,u=clamp((s.x+s.w/2-s.ax)/Math.max(1,(s.bx+s.w)-s.ax),0,1),hy=Math.round(lerp(ay,by,u));
+      R('#4a5486',hx-1,hy,2,y-hy-10);R('#0d1126',hx-9,y-12,18,10);R('#56668c',hx-8,y-11,16,8);R('#7fe8ff',hx-6,y-10,12,4);
+      R('#3b4575',hx-4,hy-2,8,3);
+    }
+    R('#0d1126',x,y,s.w,s.h);R('#56668c',x+1,y+1,s.w-2,s.h-3);
+    for(let k=0;k<s.w-2;k+=6)R(k%12?'#ffd23f':'#14182e',x+1+k,y,6,2);
+    R('#35e8ff',x+3,y+s.h-2,2,1);R('#35e8ff',x+s.w-5,y+s.h-2,2,1);
+    return;
+  }
+  if(s.kind==='neon'){
+    const lit=s.lit&&!(s.warn&&Math.floor(NOW*14)%2);
+    if(lit){ctx.globalAlpha=.18;R(s.col,x-3,y-3,s.w+6,s.h+6);ctx.globalAlpha=1}
+    R('#0d1126',x,y,s.w,s.h);
+    R(lit?s.col:'#2a2f4a',x+1,y+1,s.w-2,s.h-2);
+    R(lit?'#ffffff':'#3b4060',x+3,y+3,s.w-6,1);
+    R('#4a5486',x+4,y+s.h,1,6);R('#4a5486',x+s.w-5,y+s.h,1,6);
+  }
 }
 /* ---------- game state ---------- */
 const RUN=95,GRAV=950,JUMP=-300,MAXFALL=430,DT=1/120;
@@ -1698,7 +1876,7 @@ function featureHook(S,b,z,i,nB,isCheck){
   if(th===2&&i===nB-1&&z===6)S.pickups.push({id:'bomb',kind:'bomb',x:b.x+b.w/2-6,y:b.y-20,w:12,h:12});
   /* crumbling platform in long gaps (optional extra, never required) */
   const pb=S.buildings[S.buildings.length-2];
-  if(pb&&!isCheck&&!b.colk){
+  if(pb&&!isCheck&&!b.colk&&!b.sp&&!pb.pillar&&!pb.tower){
     S.hr=S.hr||mulberry32(th*977+13);
     const gap=b.x-(pb.x+pb.w);
     if(gap>=5*T&&S.hr()<.4){
@@ -1742,6 +1920,7 @@ function miniExit(closed){
 function solidAt(x,y){for(const s of world.solids){if(x>=s.x&&x<s.x+s.w&&y>=s.y&&y<s.y+s.h)return s}return null}
 function resetSpecials(){
   for(const s of world.specials){
+    if(s.kind==='lift'||s.kind==='vent'||s.kind==='neon'){resetSpecial1(s);continue}
     if(s.kind==='crumble'){s.state=0;s.tm=0;s.fy=0;s.vy=0;if(world.solids.indexOf(s)<0)world.solids.push(s)}
     else if(s.kind==='tramp')s.sq=0;
     else if(s.kind==='brk'){
@@ -1774,6 +1953,7 @@ function wallsInRadius(x,y,r,dmg){
 }
 function updateSpecials(dt){
   for(const s of world.specials){
+    if(s.kind==='lift'||s.kind==='vent'||s.kind==='neon'){updateSpecials1(s,dt);continue}
     if(s.kind==='tramp'){if(s.sq>0)s.sq-=dt;continue}
     if(s.kind==='brk'){if(s.flash>0)s.flash-=dt;continue}
     if(s.kind!=='crumble')continue;
@@ -1800,6 +1980,7 @@ function updateSpecials(dt){
 function drawSpecials(cx,cy,pal){
   for(const s of world.specials){
     const x=Math.round(s.x-cx);
+    if(s.kind==='lift'||s.kind==='vent'||s.kind==='neon'){if(x<W+260&&x+s.w+260>0)drawSpecial1(s,cx,cy);continue}
     if(x>W+20||x+s.w<-20)continue;
     let y=Math.round(s.y-cy);
     if(s.kind==='tramp'){
@@ -5256,7 +5437,7 @@ function hellWin(){
 })();
 
 /* =====================  PHASE 6 : version label, telescope easter egg  ===================== */
-const VERSION='1.10.4';
+const VERSION='1.11.0';
 /* TEST BUILD SWITCH (temporary): no damage anywhere in the game, all worlds unlocked in
    "Select world", achievements are not unlocked. Normal build: TEST_NODMG=false. */
 const TEST_NODMG=false;
@@ -5406,7 +5587,9 @@ function drawScope(){
 }
 function t2(){return t.apply(null,arguments)}
 (function(){
-  const L=['it','en','es','fr'],D={'hud.scope':['R: TELESCOPIO','R: TELESCOPE','R: TELESCOPIO','R : TÉLESCOPE']};
+  const L=['it','en','es','fr'],D={'hud.scope':['R: TELESCOPIO','R: TELESCOPE','R: TELESCOPIO','R : TÉLESCOPE'],
+    't.vent':['LA VENTOLA TI SPINGE IN ALTO!','THE VENT BLOWS YOU UP!','¡EL VENTILADOR TE IMPULSA HACIA ARRIBA!','LA SOUFFLERIE TE PROPULSE VERS LE HAUT !'],
+    't.neon':['LE INSEGNE SI SPENGONO: SALTA A TEMPO!','THE SIGNS SWITCH OFF: TIME YOUR JUMPS!','LOS LETREROS SE APAGAN: ¡SALTA A TIEMPO!','LES ENSEIGNES S’ÉTEIGNENT : SAUTE EN RYTHME !']};
   for(const k in D)D[k].forEach((s,i)=>{TX[L[i]][k]=s});
 })();
 
