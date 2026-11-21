@@ -26,18 +26,19 @@ The file can also be shared as-is (for example as a document on WhatsApp): on de
 | Dash | Shift / K | B / RB |
 | Bomb | E | LB |
 | Secondary weapon | Q | Y |
-| Interact (vendor, telescope) | R | Up |
+| Interact (vendor, inhabitants, telescope) | R | Up |
 | Inventory | I / Tab | Back |
 | Pause | P / Esc | Start |
 | Audio | M | |
 | Fullscreen | F | |
 
-On phones a touch pad appears below the game screen.
+On phones a touch pad appears below the game screen, with movement, ACTION (interact and climb), jump, dash, fire, bomb, secondary weapon, inventory and pause.
 
 ## Content
 
 - **4 worlds:** Rooftops of Neo-Verdana, Gardens of Flora, The Foundations, Unity Castle. Each has collectibles, a miniboss, a vendor and a boss.
-- **Bosses:** Armored Colossus, Mother Flora, OBLIVION, Unity, plus the secret bosses Bonez, the Royal Mechanic, Tramezzino and a mysterious encounter after the final boss.
+- **Bosses:** Armored Colossus, Mother Flora, OBLIVION and Unity, plus the secret bosses Bonez the Royal Mechanic and Tramezzino, and a mysterious encounter after the final boss.
+- **Inhabitants, puzzles and minigames:** people to talk to in Worlds 2-4, sequence puzzles that open gates and a shooting-gallery minigame in each of those worlds.
 - **Pantheon:** every boss in a row inside a great colosseum. It ends with a surprise.
 - **Achievements:** 32 goals, some of them secret.
 - **The God Hunter’s Book:** a bestiary given by a hidden character who appears only to the most dedicated players.

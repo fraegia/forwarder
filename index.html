@@ -46,6 +46,10 @@ button:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
 .pad .grp{display:flex;gap:10px;flex-wrap:wrap}
 .pad button{font-family:var(--px);font-size:12px;min-width:56px;height:56px;background:var(--panel);color:var(--ink);border:2px solid var(--line);touch-action:none}
 .pad button.on{background:#1c3a2c;border-color:var(--green)}
+.pad button.sm{font-size:10px;min-width:48px;height:44px}
+.pad button.act{font-size:8px;padding:0 4px;min-width:64px}
+.pad .grp:first-child{display:grid;grid-template-columns:repeat(2,auto);align-content:start}
+.pad .grp:last-child{justify-content:flex-end;max-width:250px}
 .keys{margin:0;font-size:12px;color:var(--dim);line-height:1.6}
 .keys b{color:var(--ink);font-weight:600}
 
@@ -83,8 +87,8 @@ button.lang:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
     <span class="ver" id="ver"></span>
   </div>
   <div class="pad" id="pad">
-    <div class="grp"><button data-k="left" aria-label="Sinistra">&#9664;</button><button data-k="right" aria-label="Destra">&#9654;</button></div>
-    <div class="grp"><button data-k="dash">SCATTO</button><button data-k="shoot">SPARA</button><button data-k="jump">SALTA</button></div>
+    <div class="grp"><button data-k="left" aria-label="Sinistra">&#9664;</button><button data-k="right" aria-label="Destra">&#9654;</button><button data-k="act" class="act">AZIONE</button><button data-k="down" aria-label="Giù">&#9660;</button></div>
+    <div class="grp"><button data-k="dash">SCATTO</button><button data-k="shoot">SPARA</button><button data-k="jump">SALTA</button><button data-k="bomb" class="sm">BOMBA</button><button data-k="sec" class="sm">ARMA 2</button><button data-k="inv" class="sm" aria-label="Inventario">&#9776;</button><button data-k="pause" class="sm" aria-label="Pausa">II</button></div>
   </div>
   <p class="keys" id="keys"></p>
 </div>
@@ -582,7 +586,7 @@ function moveBody(e,dt){
 }
 
 /* ---------- setup ---------- */
-function makePlayer(){return{x:world.spawn.x,y:world.spawn.y,w:10,h:13,vx:0,vy:0,face:1,hp:100,inv:0,kb:0,coy:0,buf:0,air:true,dashT:0,dashCd:0,shootCd:0,ground:null,anim:0,safe:{x:world.spawn.x,y:world.spawn.y},dead:false,dmgT:0,poisonT:0,abil:{dj:false,dash:false}}}
+/* (an older makePlayer() was removed here: the later definition is the one in use) */
 function makeEnemy(d){const e=makeEnemyRaw(d);if(d.armor){e.hp+=30;e.armor=true}e.hp=Math.max(1,Math.round(e.hp*DIFFS[Cfg.diff].hpMul));return e}
 function makeEnemyRaw(d){
   if(E3[d.type])return makeEnemy3(d);
@@ -634,7 +638,7 @@ function respawn(){
   cam.x=P.x-W/2;cam.y=clamp(P.y-H/2,0,WH-H);
   toast(t('t.reboot',cpName(checkpoint)),2);
 }
-function chipCount(){let n=0;collected.forEach(k=>{if(k.indexOf('chip')===0)n++});return n}
+/* (an older chipCount() was removed here: the later definition is the one in use) */
 
 /* ---------- player ---------- */
 function hurtPlayer(dmg,srcX,soft){
@@ -648,45 +652,7 @@ function hurtPlayer(dmg,srcX,soft){
   burst(P.x+5,P.y+6,8,'#3ddc84',90,.4);sfx(140,.18,'sawtooth',.06,-80);
   if(P.hp<=0){P.dead=true;G.state='dead';G.deadT=0;G.deaths++;burst(P.x+5,P.y+6,40,'#3ddc84',160,.9);burst(P.x+5,P.y+6,20,'#35e8ff',120,.9);sfx(90,.6,'sawtooth',.08,-60)}
 }
-function updatePlayer(dt){
-  const p=P;
-  p.inv=Math.max(0,p.inv-dt);p.kb=Math.max(0,p.kb-dt);p.dmgT=Math.max(0,p.dmgT-dt);p.shootCd-=dt;p.dashCd-=dt;p.buf-=dt;p.anim+=dt;
-  if(In.jumpHit){p.buf=.12;In.jumpHit=false}
-  const dir=(In.right?1:0)-(In.left?1:0);
-  if(dir&&p.dashT<=0&&p.kb<=0)p.face=dir;
-  if(In.dashHit){
-    In.dashHit=false;
-    if(p.abil.dash&&p.dashCd<=0&&p.dashT<=0){p.dashT=.18;p.dashCd=.65;p.inv=Math.max(p.inv,.22);sfx(300,.15,'sawtooth',.05,400);burst(p.x+5,p.y+7,8,'#35e8ff',60,.3)}
-  }
-  if(p.dashT>0){p.dashT-=dt;p.vx=p.face*250;p.vy=0}
-  else{
-    if(p.kb<=0)p.vx=approach(p.vx,dir*RUN,(p.ground?1600:1000)*dt);
-    p.vy=Math.min(p.vy+GRAV*dt,MAXFALL);
-  }
-  if(p.ground){p.coy=.09;p.air=true}else p.coy-=dt;
-  if(p.buf>0){
-    if(p.coy>0){p.vy=JUMP;p.coy=0;p.buf=0;p.ground=null;sfx(420,.12,'square',.04,300)}
-    else if(p.abil.dj&&p.air){p.vy=JUMP*.95;p.air=false;p.buf=0;burst(p.x+5,p.y+13,10,'#c8ffe0',70,.35);sfx(560,.12,'square',.04,380)}
-  }
-  if(!In.jump&&p.vy<-120&&p.dashT<=0)p.vy=-120;
-  moveBody(p,dt);
-  const g=p.ground;
-  if(g&&!g.plat&&g.w>=3*T&&p.x>g.x+10&&p.x+p.w<g.x+g.w-10)p.safe={x:p.x,y:p.y};
-  if(g&&p.vy===0&&p.wasAir){burst(p.x+5,p.y+13,5,'#8c94b8',40,.25)}
-  p.wasAir=!g;
-  if(p.y>WH+30){
-    if(boss.dead&&world.theme===2&&!Hell.on){endWorld2();return}
-    if(trySecret())return;
-    p.x=p.safe.x;p.y=p.safe.y;p.vx=0;p.vy=0;p.inv=0;
-    hurtPlayer(20,p.x+5);P.vy=0;P.vx=0;P.kb=0;
-    toast(t('t.fall'),1.4);
-  }
-  if(In.shoot&&p.shootCd<=0&&bullets.length<5&&p.dashT<=0){
-    p.shootCd=.2;
-    bullets.push({x:p.x+5+p.face*9,y:p.y+5,w:7,h:3,vx:p.face*320,life:.65,dmg:p.dmgT>0?40:20});
-    sfx(900,.07,'square',.03,-500);
-  }
-}
+/* (an older updatePlayer() was removed here: the later definition is the one in use) */
 
 /* ---------- enemies ---------- */
 function killEnemy(e){
@@ -863,34 +829,7 @@ function updateBombs(dt){
 }
 
 /* ---------- projectiles, pickups, world logic ---------- */
-function updateBullets(dt){
-  for(let i=bullets.length-1;i>=0;i--){
-    const b=bullets[i];b.x+=b.vx*dt;b.life-=dt;
-    let dead=b.life<=0;
-    if(!dead&&pointSolid(b.x+(b.vx>0?b.w:0),b.y+1)){dead=true;burst(b.x,b.y,4,'#c8ffe0',50,.2)}
-    if(!dead){
-      for(const e of enemies){
-        if(e.spawnT>0)continue;
-        if(overlapR(b,e)){
-          if(e.type==='shield'&&b.vx*e.face<0){dead=true;burst(b.x,b.y,5,'#35e8ff',70,.25);sfx(1200,.05,'square',.03,-300);e.turnT=0;break}
-          e.hp-=b.dmg;e.flash=.12;dead=true;burst(b.x,b.y,5,'#ffd23f',70,.25);sfx(500,.05,'square',.03,-200);
-          if(e.hp<=0)killEnemy(e);
-          break;
-        }
-      }
-    }
-    if(!dead&&boss.active&&!boss.dead&&boss.hp>0&&bossHit(b)){
-      boss.hp-=b.dmg;boss.flash=.1;dead=true;burst(b.x,b.y,6,'#ffd23f',80,.3);sfx(380,.06,'square',.04,-150);
-    }
-    if(dead)bullets.splice(i,1);
-  }
-  for(let i=ebullets.length-1;i>=0;i--){
-    const b=ebullets[i];b.x+=b.vx*dt;b.y+=b.vy*dt;if(b.g)b.vy+=b.g*dt;b.life-=dt;
-    let dead=b.life<=0||pointSolid(b.x,b.y);
-    if(!dead&&b.x>P.x-b.r&&b.x<P.x+P.w+b.r&&b.y>P.y-b.r&&b.y<P.y+P.h+b.r){hurtPlayer(b.dmg,b.x);dead=true}
-    if(dead){burst(b.x,b.y,5,'#ff2bd6',60,.25);ebullets.splice(i,1)}
-  }
-}
+/* (an older updateBullets() was removed here: the later definition is the one in use) */
 function updateWorld(dt){
   pickupsUpdate();
   for(let i=drops.length-1;i>=0;i--){
@@ -1306,7 +1245,7 @@ it:{
  'cut.skip':'INVIO / SPAZIO: SALTA','cut.w2':'MONDO 2','cut.w2n':'GIARDINI DI FLORA',
  'cp.start':'Inizio','cp.sector':'Settore {0}','cp.boss1':'Prima del Colosso','cp.boss2':'Prima di Madre Flora',
  'win2.h':'MONDO 2 COMPLETATO','win2.p':'Madre Flora esplode e il terreno cede sotto i piedi di VERDE-7. Il robot precipita nel buio, verso il MONDO 3…','win2.soon':'Il Mondo 3 è in arrivo.',
- 'stat.time':'Tempo','stat.deaths':'Riavvii','stat.kills':'Nemici distrutti','pad.dash':'SCATTO','pad.shoot':'SPARA','pad.jump':'SALTA',
+ 'stat.time':'Tempo','stat.deaths':'Riavvii','stat.kills':'Nemici distrutti','pad.dash':'SCATTO','pad.shoot':'SPARA','pad.jump':'SALTA','pad.bomb':'BOMBA','pad.sec':'ARMA 2','pad.act':'AZIONE',
  'keys':'<b>Frecce / A D</b> muovi · <b>Spazio / W</b> salta · <b>X / J</b> spara · <b>Shift / K</b> scatto · <b>P</b> pausa · <b>M</b> audio · <b>F</b> schermo intero · <b>Controller</b>: A salta, X spara, B scatto, Start pausa'
 },
 en:{
@@ -1328,7 +1267,7 @@ en:{
  'cut.skip':'ENTER / SPACE: SKIP','cut.w2':'WORLD 2','cut.w2n':'GARDENS OF FLORA',
  'cp.start':'Start','cp.sector':'Sector {0}','cp.boss1':'Before the Colossus','cp.boss2':'Before Mother Flora',
  'win2.h':'WORLD 2 COMPLETE','win2.p':'Mother Flora explodes and the ground gives way beneath VERDE-7. The robot plunges into the dark, toward WORLD 3…','win2.soon':'World 3 is coming soon.',
- 'stat.time':'Time','stat.deaths':'Reboots','stat.kills':'Enemies destroyed','pad.dash':'DASH','pad.shoot':'FIRE','pad.jump':'JUMP',
+ 'stat.time':'Time','stat.deaths':'Reboots','stat.kills':'Enemies destroyed','pad.dash':'DASH','pad.shoot':'FIRE','pad.jump':'JUMP','pad.bomb':'BOMB','pad.sec':'WEAPON 2','pad.act':'ACTION',
  'keys':'<b>Arrows / A D</b> move · <b>Space / W</b> jump · <b>X / J</b> shoot · <b>Shift / K</b> dash · <b>P</b> pause · <b>M</b> audio · <b>F</b> fullscreen · <b>Controller</b>: A jump, X shoot, B dash, Start pause'
 },
 es:{
@@ -1350,7 +1289,7 @@ es:{
  'cut.skip':'INTRO / ESPACIO: SALTAR','cut.w2':'MUNDO 2','cut.w2n':'JARDINES DE FLORA',
  'cp.start':'Inicio','cp.sector':'Sector {0}','cp.boss1':'Antes del Coloso','cp.boss2':'Antes de Madre Flora',
  'win2.h':'MUNDO 2 COMPLETADO','win2.p':'Madre Flora explota y el suelo cede bajo los pies de VERDE-7. El robot cae en la oscuridad, hacia el MUNDO 3…','win2.soon':'El Mundo 3 llegará pronto.',
- 'stat.time':'Tiempo','stat.deaths':'Reinicios','stat.kills':'Enemigos destruidos','pad.dash':'IMPULSO','pad.shoot':'DISPARO','pad.jump':'SALTO',
+ 'stat.time':'Tiempo','stat.deaths':'Reinicios','stat.kills':'Enemigos destruidos','pad.dash':'IMPULSO','pad.shoot':'DISPARO','pad.jump':'SALTO','pad.bomb':'BOMBA','pad.sec':'ARMA 2','pad.act':'ACCIÓN',
  'keys':'<b>Flechas / A D</b> mover · <b>Espacio / W</b> saltar · <b>X / J</b> disparar · <b>Shift / K</b> impulso · <b>P</b> pausa · <b>M</b> audio · <b>F</b> pantalla completa · <b>Mando</b>: A salta, X dispara, B impulso, Start pausa'
 },
 fr:{
@@ -1372,7 +1311,7 @@ fr:{
  'cut.skip':'ENTRÉE / ESPACE : PASSER','cut.w2':'MONDE 2','cut.w2n':'JARDINS DE FLORA',
  'cp.start':'Début','cp.sector':'Secteur {0}','cp.boss1':'Avant le Colosse','cp.boss2':'Avant Mère Flora',
  'win2.h':'MONDE 2 TERMINÉ','win2.p':'Mère Flora explose et le sol cède sous les pieds de VERDE-7. Le robot chute dans l’obscurité, vers le MONDE 3…','win2.soon':'Le Monde 3 arrive bientôt.',
- 'stat.time':'Temps','stat.deaths':'Redémarrages','stat.kills':'Ennemis détruits','pad.dash':'DASH','pad.shoot':'TIR','pad.jump':'SAUT',
+ 'stat.time':'Temps','stat.deaths':'Redémarrages','stat.kills':'Ennemis détruits','pad.dash':'DASH','pad.shoot':'TIR','pad.jump':'SAUT','pad.bomb':'BOMBE','pad.sec':'ARME 2','pad.act':'ACTION',
  'keys':'<b>Flèches / A D</b> bouger · <b>Espace / W</b> sauter · <b>X / J</b> tirer · <b>Shift / K</b> dash · <b>P</b> pause · <b>M</b> audio · <b>F</b> plein écran · <b>Manette</b> : A saut, X tir, B dash, Start pause'
 }};
 const ZN={
@@ -1480,7 +1419,7 @@ function cpName(c){return c.name==='cp.sector'?t('cp.sector',c.n):t(c.name)}
    'shop.bye':['Esci','Leave','Salir','Quitter'],
    'cp.mini':['Prima del miniboss','Before the miniboss','Antes del minijefe','Avant le mini-boss'],
    'cp.post':['Dopo il miniboss','After the miniboss','Después del minijefe','Après le mini-boss'],
-   'keys2':[' · <b>E</b> bomba · <b>Q</b> arma secondaria · <b>I</b> inventario · <b>R</b> venditore',' · <b>E</b> bomb · <b>Q</b> secondary · <b>I</b> inventory · <b>R</b> vendor',' · <b>E</b> bomba · <b>Q</b> secundaria · <b>I</b> inventario · <b>R</b> vendedor',' · <b>E</b> bombe · <b>Q</b> secondaire · <b>I</b> inventaire · <b>R</b> marchand']
+   'keys2':[' · <b>E</b> bomba · <b>Q</b> arma secondaria · <b>I</b> inventario · <b>R</b> interagisci (venditore, abitanti, telescopio)',' · <b>E</b> bomb · <b>Q</b> secondary · <b>I</b> inventory · <b>R</b> interact (vendor, inhabitants, telescope)',' · <b>E</b> bomba · <b>Q</b> secundaria · <b>I</b> inventario · <b>R</b> interactuar (vendedor, habitantes, telescopio)',' · <b>E</b> bombe · <b>Q</b> secondaire · <b>I</b> inventaire · <b>R</b> interagir (marchand, habitants, télescope)']
   };
   for(const k in D)D[k].forEach((s,i)=>{TX[L[i]][k]=s});
   /* the new keys are appended to the controls hint shown below the game */
@@ -1659,7 +1598,7 @@ function startGame(){showMain()}
 function applyStatic(){
   $('tagline').textContent=t('menu.tag');
   $('keys').innerHTML=t('keys');
-  document.querySelectorAll('#pad button[data-k]').forEach(b=>{const k=b.dataset.k;if(k==='dash'||k==='shoot'||k==='jump')b.textContent=t('pad.'+k)});
+  document.querySelectorAll('#pad button[data-k]').forEach(b=>{const k=b.dataset.k;if(k==='dash'||k==='shoot'||k==='jump'||k==='bomb'||k==='sec'||k==='act')b.textContent=t('pad.'+k)});
   $('fsb').textContent=fsEl()?t('fs.exit'):t('fs.enter');
   document.documentElement.lang=Cfg.lang;
 }
@@ -2995,7 +2934,7 @@ function updateBird(e,dt){
 
 /* =====================  WORLD 2 : Mother Flora boss  ===================== */
 let puddles=[],seeds=[],thorns=[],waves=[];
-function makeBossFor(){const b=world.theme===2?makeBoss2():makeBoss();b.max=Math.round(b.max*DIFFS[Cfg.diff].hpMul);b.hp=b.max;return b}
+/* (an older makeBossFor() was removed here: the later definition is the one in use) */
 function makeBoss2(){
   const a=world.arena;
   const mk=x=>({x:x,y:a.roof-26,w:26,h:22,flash:0,tx:x,ty:a.roof-26});
@@ -3155,24 +3094,8 @@ function updateHazards(dt){
 }
 
 /* ---------- transitions ---------- */
-function startWorld2(){
-  const abil=P.abil;
-  resetWorld();buildLevel2();
-  killed=new Set();collected=new Set();
-  world.checks.forEach(c=>c.active=c.id==='c0');checkpoint=world.checks[0];
-  P=makePlayer();P.abil=abil;
-  snap={killed:new Set(),collected:new Set(),coins:Inv.coins};
-  boss=makeBossFor();setDoor(false);setExit(true);
-  spawnAll();
-  G.zone=0;G.state='play';G.paused=false;G.shake=0;
-  cam.x=0;cam.y=clamp(P.y-H/2,0,WH-H);
-  Music.mode('garden');Music.start();
-  toast(t('t.world2',zname(0)),3);unlock(2);if(Cfg.slot>=0)saveGame(Cfg.slot);
-}
-function endWorld2(){
-  G.state='win';Music.stop();sfx(660,.6,'triangle',.07,400);
-  setMenu('<h2>'+t('win2.h')+'</h2><p>'+t('win2.p')+'</p><ul><li>'+t('stat.time')+': '+fmtTime(G.time)+'</li><li>'+t('stat.deaths')+': '+G.deaths+'</li><li>'+t('stat.kills')+': '+G.kills+'</li></ul><p class="dim">'+t('win2.soon')+'</p><div class="menu">'+btn(t('menu.main'),'main')+'</div>',{main:showMain},false,null);
-}
+/* (an older startWorld2() was removed here: the later definition is the one in use) */
+/* (an older endWorld2() was removed here: the later definition is the one in use) */
 
 /* =====================  WORLD 2 : graphics and cutscene  ===================== */
 function makeForest(wid,hei,seed,minH,maxH,cr){
@@ -5729,10 +5652,10 @@ function hellWin(){
 })();
 
 /* =====================  PHASE 6 : version label, telescope easter egg  ===================== */
-const VERSION='1.18.1-test';
+const VERSION='1.19.0';
 /* TEST BUILD SWITCH (temporary): no damage anywhere in the game, all worlds unlocked in
    "Select world", achievements are not unlocked. Normal build: TEST_NODMG=false. */
-const TEST_NODMG=true;
+const TEST_NODMG=false;
 function testNoDmg(){return TEST_NODMG}
 const VER_EL=$('ver');VER_EL.textContent='v'+VERSION;
 
@@ -7350,12 +7273,19 @@ function drawPlanetScene(cx,cy){
 /* ---------- input ---------- */
 const KEYMAP={ArrowLeft:'left',a:'left',A:'left',ArrowRight:'right',d:'right',D:'right',ArrowUp:'jump',w:'jump',W:'jump',' ':'jump',x:'shoot',X:'shoot',j:'shoot',J:'shoot',Shift:'dash',k:'dash',K:'dash'};
 function press(k){
+  /* extra touch buttons */
+  if(k==='act'){In.up=1;tryInteract();return}
+  if(k==='down'){In.down=1;return}
+  if(k==='bomb'){In.bombHit=true;return}
+  if(k==='sec'){In.secHit=true;return}
+  if(k==='inv'){if(G.state==='play'||G.inv||G.shop)toggleInv();return}
+  if(k==='pause'){togglePause();return}
   if(k==='jump'&&!In.jump)In.jumpHit=true;
   if(k==='dash'&&!In.dash)In.dashHit=true;
   if(k==='shoot'&&!In.shoot)In.shootHit=true;
   In[k]=1;
 }
-function release(k){In[k]=0}
+function release(k){if(k==='act'){In.up=0;return}if(k==='down'){In.down=0;return}if(k==='bomb'||k==='sec'||k==='inv'||k==='pause')return;In[k]=0}
 window.addEventListener('keydown',e=>{
   if(!$('ov').hidden&&G.state!=='cut'){
     if(e.key==='ArrowDown'||e.key==='ArrowUp'||e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();focusMove(e.key==='ArrowDown'||e.key==='ArrowRight'?1:-1);return}
@@ -7386,14 +7316,6 @@ document.querySelectorAll('#pad button').forEach(b=>{
 /* ---------- screens ---------- */
 function showOv(html){$('ovc').innerHTML=html;$('ov').hidden=false;const b=$('ovc').querySelector('button');if(b)b.focus({preventScroll:true})}
 function hideOv(){$('ov').hidden=true}
-function showWin(){
-  Music.stop();
-  const ch=chipCount();
-  showOv('<h2>CITTÀ LIBERATA</h2><p>Il Colosso è a pezzi e il beacon dell’ultima torre trasmette di nuovo. VERDE-7 ha completato il protocollo.</p>'+
-    '<ul><li>Tempo: '+fmtTime(G.time)+'</li><li>Riavvii: '+G.deaths+'</li><li>Nemici distrutti: '+G.kills+'</li><li>Chip dati: '+ch+'/12</li></ul>'+
-    '<button class="go" id="again">GIOCA ANCORA</button>');
-  $('again').onclick=startGame;
-}
 function showTitle(){
   showOv('<h2>ROOFTOP PROTOCOL</h2>'+
     '<p>La città di Neo-Verdana è invasa da rottami e droni impazziti. Tu sei <b>VERDE-7</b>, l’ultima unità di manutenzione ancora attiva. Attraversa i 16 settori dei tetti, sblocca nuove abilità e abbatti il Colosso Corazzato in cima alla torre.</p>'+
@@ -7724,6 +7646,8 @@ D3.turret=function(e,x,y){
 };
 const _hitE=hitEnemy;hitEnemy=function(e,dmg){if(e.type==='worm'&&e.st!=='out')return;_hitE(e,dmg)};
 
+/* on touch screens the interact prompts show the ▲ button instead of the R key */
+(function(){try{if(matchMedia('(pointer:coarse)').matches)for(const l of['it','en','es','fr'])for(const k of['hud.talk','hud.chat','hud.scope'])if(TX[l][k])TX[l][k]=TX[l][k].replace(/^R ?:/,(TX[l]['pad.act']||'AZIONE')+':')}catch(e){}})();
 /* ---------- hooks into the main loop ---------- */
 const _stepX=step;
 step=function(dt){
@@ -7947,7 +7871,7 @@ function hunterReqs(){
 }
 /* TEST BUILD SWITCH (temporary): the Hunter is active without requirements and also stands on the
    first roof of World 1. Normal build: HUNTER_TEST=false. */
-const HUNTER_TEST=true;
+const HUNTER_TEST=false;
 function hunterReady(){return !hasBook()&&!Hell.on&&(HUNTER_TEST||hunterReqs().every(Boolean))}
 function addHunter(S){
   const st=(S.sets||[]).find(q=>q.kind==='tower'&&q.z===14);
