@@ -1513,7 +1513,7 @@ function unlock(n){if(n>readProg())store('rp_prog',String(n))}
 function saveGame(i){
   try{
     const d={w:world.theme,cp:checkpoint.id,act:world.checks.filter(c=>c.active).map(c=>c.id),diff:Cfg.diff,time:Math.round(G.time),deaths:G.deaths,kills:G.kills,z:G.zone,
-      v:2,abil:newAbil(P.abil),inv:{own:Inv.own,main:Inv.main,sec:Inv.sec,amu:Inv.amu,skin:Inv.skin,coins:snap.coins!==undefined?snap.coins:Inv.coins,plate:Inv.plate,colW:Inv.colW||{},scope:Inv.scope?1:0},killed:Array.from(snap.killed),collected:Array.from(snap.collected),date:Date.now()};
+      v:2,abil:newAbil(P.abil),inv:{own:Inv.own,main:Inv.main,sec:Inv.sec,amu:Inv.amu,skin:Inv.skin,coins:snap.coins!==undefined?snap.coins:Inv.coins,plate:Inv.plate,colW:Inv.colW||{},scope:Inv.scope?1:0,mgw:Inv.mgw||{}},killed:Array.from(snap.killed),collected:Array.from(snap.collected),date:Date.now()};
     store('rp_slot'+i,JSON.stringify(d));
   }catch(e){}
 }
@@ -1527,7 +1527,7 @@ function launch(o){
   const L=o.load;
   const ab=L?L.abil:(o.world>=4?{dj:1,dash:1,charge:1,bomb:1,climb:1}:o.world>=3?{dj:1,dash:1,charge:1,bomb:1}:o.world>=2?{dj:1,dash:1}:{});
   Inv=freshInv();
-  if(L&&L.inv){Inv.own=Object.assign({w_blaster:1,sk_green:1},L.inv.own);Inv.main=L.inv.main||'w_blaster';Inv.sec=L.inv.sec||null;Inv.amu=(L.inv.amu||[null,null]).slice(0,2);while(Inv.amu.length<2)Inv.amu.push(null);Inv.skin=L.inv.skin||'sk_green';Inv.coins=L.inv.coins||0;Inv.plate=!!L.inv.plate;Inv.colW=L.inv.colW||{};Inv.scope=L.inv.scope?1:0}
+  if(L&&L.inv){Inv.own=Object.assign({w_blaster:1,sk_green:1},L.inv.own);Inv.main=L.inv.main||'w_blaster';Inv.sec=L.inv.sec||null;Inv.amu=(L.inv.amu||[null,null]).slice(0,2);while(Inv.amu.length<2)Inv.amu.push(null);Inv.skin=L.inv.skin||'sk_green';Inv.coins=L.inv.coins||0;Inv.plate=!!L.inv.plate;Inv.colW=L.inv.colW||{};Inv.scope=L.inv.scope?1:0;Inv.mgw=L.inv.mgw||{}}
   G.inv=false;G.shop=false;
   buildWorld(o.world);G.black=false;G.card=false;cutKind=null;
   killed=new Set(L?L.killed:[]);collected=new Set(L?L.collected:[]);
@@ -1584,9 +1584,9 @@ function showMain(){
   G.state='title';G.paused=false;Music.stop();G.toastT=0;G.black=false;cutKind=null;
   if(world.theme!==1){resetWorld();buildLevel();newGame();G.state='title'}
   Hell.on=false;
-  const acts={new:()=>flowNew(1),load:showLoad,worlds:showWorlds,hell:()=>pickDiff(d=>startHell(d),showMain),ach:()=>showAch(),opt:()=>showOptions(showMain)};
+  const acts={new:()=>flowNew(1),load:showLoad,worlds:showWorlds,hell:()=>pickDiff(d=>startHell(d),showMain),ach:()=>showAch(),opt:()=>showOptions(showMain),book:()=>showBook(showMain)};
   setMenu('<h2>ROOFTOP PROTOCOL</h2><p class="dim">'+t('menu.tag')+'</p><div class="menu">'+
-    btn(t('menu.new'),'new')+btn(t('menu.load'),'load','alt')+btn(t('menu.worlds'),'worlds','alt')+btn(t('menu.hell'),'hell','alt')+btn(t('menu.ach'),'ach','alt')+btn(t('menu.options'),'opt','alt')+'</div>'+langRow(),acts,true,showMain);
+    btn(t('menu.new'),'new')+btn(t('menu.load'),'load','alt')+btn(t('menu.worlds'),'worlds','alt')+btn(t('menu.hell'),'hell','alt')+btn(t('menu.ach'),'ach','alt')+(hasBook()?btn('✦ '+t('menu.book'),'book','alt'):'')+btn(t('menu.options'),'opt','alt')+'</div>'+langRow(),acts,true,showMain);
 }
 function pickDiff(next,back){
   const acts={back:back};
@@ -1777,7 +1777,7 @@ const SKIN_PAL={
   sk_violet:{g:'#b58cff',G:'#6a40c0',h:'#eadfff',c:'#c8f560',a:'#ffb020'},
   sk_gold:{k:'#2a1a00',g:'#ffcf33',G:'#b8860b',h:'#fff4b0',c:'#fff4b0',a:'#ffcf33'}
 };
-function freshInv(){return{own:{w_blaster:1,sk_green:1},main:'w_blaster',sec:null,amu:[null,null],skin:'sk_green',coins:0,plate:false,colW:{},scope:0}}
+function freshInv(){return{own:{w_blaster:1,sk_green:1},main:'w_blaster',sec:null,amu:[null,null],skin:'sk_green',coins:0,plate:false,colW:{},scope:0,mgw:{}}}
 let Inv=freshInv();
 function ownsAll(){return SHOP_IDS.every(k=>Inv.own[k])}
 function hasAmu(id){return Inv.amu[0]===id||Inv.amu[1]===id}
@@ -2122,7 +2122,7 @@ function updateMini(dt){
     if(Math.random()<.1)sfx(80+Math.random()*80,.25,'sawtooth',.06,-40);
     G.shake=.2;
     if(m.deathT>1.8){
-      m.dead=true;killed.add('mini'+m.theme);
+      m.dead=true;killed.add('mini'+m.theme);if(typeof jrAdd==='function')jrAdd('mini'+m.theme);
       miniDoor(false);miniExit(false);Music.mode(worldMusic());
       miniWaves=[];ebullets=[];
       burst(m.x+m.w/2,m.y+m.h/2,60,'#ffb020',200,1);G.flash=.4;
@@ -2696,6 +2696,7 @@ function showInv(tab){
   let h='<h2>'+t('inv.title')+'</h2><p class="dim small">'+t('inv.stats',maxHP(),String(Math.round(dm*10)/10),Inv.coins)+'</p>';
   h+='<div class="langrow">'+['w','a','s'].map(k=>'<button class="lang'+(k===tab?' sel':'')+'" data-a="tab:'+k+'">'+t('inv.tab.'+k)+'</button>').join('')+'</div>';
   ['w','a','s'].forEach(k=>{acts['tab:'+k]=()=>showInv(k)});
+  if(hasBook()){acts.book=()=>showBook(()=>showInv(tab));h+='<div class="menu">'+btn('✦ '+t('menu.book'),'book','alt')+'</div>'}
   const row=(id,sel)=>{
     acts['e:'+id]=()=>{equipItem(id);showInv(tab)};
     return btn('<b>'+iname(id)+'</b>'+(sel?' · '+t('inv.eq'):'')+'<br><span class="small">'+idesc(id)+'</span>','e:'+id,'slot'+(sel?' sel':''));
@@ -3662,7 +3663,7 @@ function buildLevelX(theme){
     for(let k=0;k<8;k++){const sg=mk(x+k*3,3,16,NZ-1);sg.seg=true;segs.push(sg)}
     const ax=segs[0].x,aw=24*T,roof=16*T,cx=ax+aw/2;
     S.arena={x:ax,y:roof,w:aw,roof:roof,trigger:ax+3*T,segs:segs,lx:ax,rx:ax+aw};
-    for(const px of[cx-88,cx+40]){const p={x:px,y:roof-52,w:48,h:8,plat:true};S.plats.push(p);S.solids.push(p)}
+    /* no floating platforms: Unity is fought from the ground (needs the double jump to reach the head) */
     endT=x+24;
   }
   S.bossX=S.arena.x;
@@ -5684,7 +5685,7 @@ function hellWin(){
 })();
 
 /* =====================  PHASE 6 : version label, telescope easter egg  ===================== */
-const VERSION='1.16.0';
+const VERSION='1.17.0';
 /* TEST BUILD SWITCH (temporary): no damage anywhere in the game, all worlds unlocked in
    "Select world", achievements are not unlocked. Normal build: TEST_NODMG=false. */
 const TEST_NODMG=false;
@@ -6143,11 +6144,13 @@ function drawMiniBoss(k,x,base,face,cheer,i,noz){
   else if(k==='unity'){arms(x,b-14,26);ctx.drawImage(SP_UHEAD.r,x-13,b-25,26,25)}
   else if(k==='flora'){
     arms(x,b-12,16);
-    ctx.fillStyle='#2fa05a';ctx.fillRect(x-1,b-10,3,10);
-    for(let p=0;p<8;p++){const a=p*.785+NOW*(cheer?3:.3);ctx.fillStyle=p%2?'#ff8fc7':'#ff5fa8';ctx.fillRect(Math.round(x+Math.cos(a)*9)-2,Math.round(b-18+Math.sin(a)*9)-2,4,4)}
-    ctx.fillStyle='#d6336c';ctx.beginPath();ctx.arc(x,b-18,7,0,6.283);ctx.fill();
-    ctx.fillStyle='#fff8e8';ctx.fillRect(x-4,b-21,3,3);ctx.fillRect(x+1,b-21,3,3);ctx.fillStyle='#14102a';ctx.fillRect(x-3,b-20,1,1);ctx.fillRect(x+2,b-20,1,1);
-    ctx.fillStyle='#2a0a1a';ctx.fillRect(x-3,b-15,6,cheer?3:1);
+    /* small Mother Flora: leaf skirt, bodice with the Heart, pale face, petal crown */
+    const F=(c,a,y,w,h)=>{ctx.fillStyle=c;ctx.fillRect(x+a,b+y,w,h)};
+    F('#4a2e1a',-1,-6,3,6);F('#1d7a46',-7,-8,6,3);F('#2fa05a',1,-8,6,3);F('#5fd68a',-4,-6,3,2);F('#1d7a46',2,-6,3,2);
+    F('#0c2418',-4,-15,8,8);F('#2fa05a',-3,-14,6,7);F('#ffe45e',-1,-12,2,2);
+    for(let p=0;p<7;p++){const a=-Math.PI+.3+p*.42,r=9;F(p%2?'#ff8fc7':'#ff5fa8',Math.round(Math.cos(a)*r)-2,-21+Math.round(Math.sin(a)*r)-2,4,4)}
+    F('#0c2418',-4,-25,8,9);F('#c8f0b0',-3,-24,6,7);F('#3f7a2e',-5,-22,1,6);F('#3f7a2e',4,-22,1,6);
+    F('#6a2a8a',-2,-22,1,1);F('#6a2a8a',1,-22,1,1);F('#0c2418',-1,-19,2,cheer?2:1);
   }else if(k==='bonez'){
     arms(x,b-16,8);
     ctx.fillStyle='#050408';ctx.fillRect(x-4,b-26,8,7);ctx.fillRect(x-1,b-19,2,2);ctx.fillRect(x-3,b-17,6,9);ctx.fillRect(x-3,b-8,2,8);ctx.fillRect(x+1,b-8,2,8);
@@ -7859,6 +7862,246 @@ function drawBossBar(B,frac,label,style,sub){
   if(sub){txt(sub,W/2,top,'#fff4c8','center');if(label)txt(label,W/2,top-11,nameCol,'center')}
   else if(label)txt(label,W/2,top,nameCol,'center');
 }
+/* =====================  THE GOD HUNTER'S BOOK  =====================
+   A hidden inhabitant, the Hunter, appears on top of the radio tower in World 1 ("Antenna Ridge")
+   only when all of these are true: the Pantheon has been completed, all 36 collectibles of
+   Worlds 1-3 are collected in this save, the three minigames are won in this save and Bonez has
+   been defeated. He gives the God Hunter's Book and vanishes like a glitch.
+   The book is a bestiary: every creature you defeat gets an entry with its portrait and a
+   description; after enough kills the Hunter's notes unlock. Kills are counted from now on in
+   every mode and stored in the browser, like achievements. */
+const JR=[
+  {id:'scrap',w:1,need:30},{id:'drone',w:1,need:20},{id:'mini1',w:1,need:1,mb:1},{id:'colossus',w:1,need:1,boss:1},
+  {id:'plant',w:2,need:15},{id:'spitter',w:2,need:15},{id:'shield',w:2,need:10},{id:'bird',w:2,need:15},{id:'hopper',w:2,need:12},{id:'mini2',w:2,need:1,mb:1},{id:'flora',w:2,need:1,boss:1},
+  {id:'horror',w:3,need:15},{id:'machine',w:3,need:12},{id:'mosq',w:3,need:15},{id:'tent',w:3,need:12},{id:'worm',w:3,need:10},{id:'mini3',w:3,need:1,mb:1},{id:'centaur',w:3,need:1,boss:1},{id:'bonez',w:3,need:1,boss:1},
+  {id:'alch',w:4,need:12},{id:'guard',w:4,need:10},{id:'turret',w:4,need:8},{id:'mini4',w:4,need:1,mb:1},{id:'unity',w:4,need:1,boss:1},{id:'tram',w:4,need:1,boss:1},
+  {id:'duo',w:5,need:1,boss:1},{id:'frank',w:5,need:1,boss:1}];
+const Jr=(function(){let o={};try{o=JSON.parse(fetchS('rp_jr')||'{}')||{}}catch(e){o={}}return o})();
+function jrSave(){try{store('rp_jr',JSON.stringify(Jr))}catch(e){}}
+function jrAdd(id){
+  if(!JR.some(e=>e.id===id))return;
+  const first=!Jr[id];Jr[id]=(Jr[id]||0)+1;jrSave();
+  const e=JR.find(q=>q.id===id);
+  if(hasBook()&&(first||Jr[id]===e.need))toast(t(first?'jr.new':'jr.done',jrName(id)),2.2);
+  if(hasBook()&&JR.every(q=>(Jr[q.id]||0)>=q.need))achUnlock('jrfull');
+}
+function hasBook(){return fetchS('rp_book')==='1'}
+function jrName(id){return t('jr.'+id+'.n')}
+/* the Hunter appears only when every requirement is met */
+function hunterReqs(){
+  return [!!(Ach.u&&Ach.u.hell),!!(Inv.colW&&Inv.colW[1]&&Inv.colW[2]&&Inv.colW[3]),!!(Inv.mgw&&Inv.mgw[2]&&Inv.mgw[3]&&Inv.mgw[4]),(Jr.bonez||0)>=1];
+}
+function hunterReady(){return !hasBook()&&!Hell.on&&hunterReqs().every(Boolean)}
+function addHunter(S){
+  const st=(S.sets||[]).find(q=>q.kind==='tower'&&q.z===14);
+  if(!st||!st.B)return;
+  S.npcs.push({k:'hunter',x:st.B.x+st.B.w-3*T,y:st.B.y,id:'hunter',hunter:true});
+}
+const _bl1=buildLevel;buildLevel=function(){_bl1();addHunter(world)};
+NPCS.hunter={col:'#c8c0d8',hat:'hunter',name:'IL CACCIATORE',glitch:1,lines:5};
+/* npc helpers: hidden hunter, custom line count */
+const _nearN=nearNpc;nearNpc=function(){const n=_nearN();if(n&&n.hunter&&(!hunterReady()||G.glitch))return null;return n};
+const _npcL=npcLines;npcLines=function(n){const d=NPCS[n.k];if(d&&d.lines){const a=[];for(let i=1;i<=d.lines;i++)a.push('npc.'+n.k+'.'+i);return a}return _npcL(n)};
+const _startT=startTalk;startTalk=function(n,keys,after){if(n&&n.hunter&&!keys){_startT(n,npcLines(n),hunterGive);Music.stop();return}_startT(n,keys,after)};
+function hunterGive(){
+  store('rp_book','1');achUnlock('hunter');
+  toast(t('jr.got'),3.4);sfx(880,.6,'square',.06,900);
+  const n=world.npcs.find(q=>q.hunter);G.glitch={n:n,t:0};
+}
+function glitchStep(dt){
+  const g=G.glitch;if(!g)return;g.t+=dt;
+  if(Math.random()<.35)sfx(80+Math.random()*1800,.04,Math.random()<.5?'square':'sawtooth',.03,(Math.random()-.5)*2000);
+  if(g.t>1.8){const i=world.npcs.indexOf(g.n);if(i>=0)world.npcs.splice(i,1);G.glitch=null;Music.mode(worldMusic());Music.start();burst(g.n.x,g.n.y-10,30,'#ffffff',160,.6)}
+}
+function drawHunter(n,cx,cy){
+  const x=Math.round(n.x-cx),y=Math.round(n.y-cy);if(x<-40||x>W+40)return;
+  const g=G.glitch,gt=g?g.t:0;
+  const R=(c,a,b,w,h)=>{ctx.fillStyle=c;ctx.fillRect(x+a,y+b,w,h)};
+  const jit=g?Math.round((Math.random()-.5)*gt*16):(Math.random()<.04?Math.round((Math.random()-.5)*4):0);
+  if(g&&Math.random()<gt/1.8)return;
+  ctx.save();ctx.translate(jit,0);
+  /* tattered hood and cloak, a mask with one cyan eye, a spear-bow on the back */
+  R('#3a3450',8,-30,2,30);R('#e8d4ff',8,-32,2,2);
+  R('#07060f',-8,-24,16,24);R('#2a2440',-7,-23,14,22);R('#3a3450',-7,-23,14,3);
+  for(let k=0;k<5;k++)R('#07060f',-7+k*3,-2+(k%2),2,3);
+  R('#07060f',-6,-32,12,10);R('#2a2440',-5,-31,10,8);R('#d8d0e8',-3,-28,6,5);R('#07060f',-2,-27,2,2);R('#35e8ff',1,-27,2,2);
+  R('#8a6a55',-9,-14,18,2);R('#ffd23f',-1,-14,2,2);
+  /* corrupted pixels */
+  const cols=['#ff00ff','#00ffff','#ffffff','#00ff66'];
+  const nn=g?12+Math.floor(gt*30):3;
+  for(let k=0;k<nn;k++){if(!g&&Math.random()>.3)continue;R(cols[k%4],Math.round((Math.random()-.5)*(g?40:18)),-34+Math.floor(Math.random()*36),1+Math.floor(Math.random()*(g?6:2)),1)}
+  ctx.restore();
+  if(!g&&!G.talk&&nearNpc()===n){ctx.globalAlpha=.8+.2*Math.sin(NOW*6);txt(t('hud.chat'),x,y-46,'#c8c0d8','center');ctx.globalAlpha=1}
+}
+const _drawNpc=drawNpc;drawNpc=function(n,cx,cy){if(n.hunter){if(hunterReady()||G.glitch&&G.glitch.n===n)drawHunter(n,cx,cy);return}_drawNpc(n,cx,cy)};
+/* glitchy name in the dialogue box */
+const _drawTalk=drawTalk;drawTalk=function(){
+  const T0=G.talk;if(T0&&T0.n&&T0.n.hunter){const d=NPCS.hunter,full=talkText(),gl='#@%&$?01';
+    const nm=d.name.split('').map(c=>c!==' '&&Math.random()<.12?gl[Math.floor(Math.random()*gl.length)]:c).join('');
+    drawSay(nm,d.col,full.slice(0,Math.floor(T0.t*40)));
+    if(Math.random()<.08){ctx.fillStyle='#00ffff';ctx.globalAlpha=.4;ctx.fillRect(12+Math.random()*(W-60),48+Math.random()*30,30+Math.random()*40,2);ctx.globalAlpha=1}
+    return}
+  _drawTalk();
+};
+/* whole-screen glitch while he vanishes */
+function drawGlitchFX(){
+  const g=G.glitch;if(!g)return;
+  const k=Math.min(1,g.t/1.2),n=3+Math.floor(k*10);
+  for(let i=0;i<n;i++){const y=Math.floor(Math.random()*H),h=2+Math.floor(Math.random()*10),dx=Math.round((Math.random()-.5)*k*40);ctx.drawImage(cv,0,y,W,h,dx,y,W,h)}
+  for(let i=0;i<n*2;i++){ctx.fillStyle=['#ff00ff','#00ffff','#ffffff'][i%3];ctx.globalAlpha=.5;ctx.fillRect(Math.random()*W,Math.random()*H,4+Math.random()*30,1+Math.random()*3);ctx.globalAlpha=1}
+  if(Math.floor(g.t*8)%2)txt('ERR0R: ENTITY_NOT_FOUND',W/2,H/2-30,'#ff00ff','center');
+}
+const _stepB=step;step=function(dt){_stepB(dt);if(G.glitch)glitchStep(dt);jrBossCheck()};
+const _drawB=draw;draw=function(){_drawB();if(G.state==='play')drawGlitchFX()};
+/* kill tracking */
+const _killE=killEnemy;killEnemy=function(e){_killE(e);if(e&&e.type)jrAdd(e.type)};
+function jrBossCheck(){
+  const B=boss;if(!B||B._jr)return;
+  if(B.kind==='duo'||B.kind==='frank')return;
+  if(B.active&&B.hp<=0&&B.max>1){B._jr=1;jrAdd(B.kind||'colossus')}
+}
+const _achU=achUnlock;achUnlock=function(id){_achU(id);if(id==='duo')jrAdd('duo');if(id==='frank')jrAdd('frank')};
+/* minigame wins are remembered in the save */
+const _mgF=mgFinish;mgFinish=function(){const M=G.mg,win=M&&M.hits>=M.need;if(win){Inv.mgw=Inv.mgw||{};Inv.mgw[world.theme]=1}_mgF()};
+
+/* ---------- portraits ---------- */
+const JRP={};
+function jrPortraits(){
+  if(JRP.done)return;
+  const saved=ctx.getImageData(0,0,W,H),S=48,cx0=W/2,cy0=H/2+8;
+  const grab=id=>{const c=document.createElement('canvas');c.width=S;c.height=S;c.getContext('2d').drawImage(cv,cx0-S/2,cy0-S/2-8,S,S,0,0,S,S);JRP[id]=c.toDataURL()};
+  for(const e of JR){
+    ctx.clearRect(0,0,W,H);ctx.save();
+    try{
+      if(!e.boss&&!e.mb){
+        const d={id:-5,type:e.id,x:0,y:0,min:-999,max:999};const en=makeEnemyRaw(d);
+        if(en.type==='worm'){en.st='out';en.t=1;en.y=en.roof-24;en.h=24}
+        if(en.type==='tent'){en.state='up';en.up=30;en.x=cam.x-5;en.base=cam.y+16;en.h=30;ctx.translate(cx0,cy0);ctx.scale(1.3,1.3);D3.tent(en,0,0);ctx.restore();grab(e.id);continue}
+        if(en.type==='hopper'){ctx.translate(cx0-2,cy0);ctx.scale(2.4,2.4);drawEnemy(en,en.x+en.w/2,en.y+en.h/2);ctx.restore();grab(e.id);continue}
+        if(en.type==='drone'||en.type==='spitter'||en.type==='mosq'){en.ox=0;en.oy=0}
+        const sc=en.h>20?1.6:en.h>13?2.4:3;ctx.translate(cx0,cy0);ctx.scale(sc,sc);
+        drawEnemy(en,en.x+en.w/2,en.y+en.h/2+(en.type==='worm'?-8:0));
+      }else if(e.mb){
+        const th=+e.id.slice(4),SPM=th===3?SP_HORROR:th===4?SP_GUARD:th===1?SP_SCRAP:null;
+        ctx.translate(cx0,cy0);
+        if(SPM)ctx.drawImage(SPM.r,-SPM.w*1.2,-SPM.h*1.2,SPM.w*2.4,SPM.h*2.4);
+        else{ctx.scale(2.2,2.2);const en=makeEnemyRaw({id:-5,type:'plant',x:0,y:0});drawEnemy(en,8,8)}
+      }else if(['colossus','flora','centaur','unity','bonez'].includes(e.id)){
+        ctx.translate(cx0,cy0+20);ctx.scale(1.55,1.55);drawMiniBoss(e.id,0,0,1,false,0,true);
+      }else jrDrawSpecial(e.id,cx0,cy0);
+    }catch(err){}
+    ctx.restore();grab(e.id);
+  }
+  ctx.putImageData(saved,0,0);JRP.done=true;
+}
+function jrDrawSpecial(id,x,y){
+  const R=(c,a,b,w,h)=>{ctx.fillStyle=c;ctx.fillRect(x+a,y+b,w,h)};
+  if(id==='tram'){
+    R('#07060f',-5,-22,10,10);R('#e8f0ff',-4,-21,8,8);R('#07060f',-3,-19,2,2);R('#07060f',1,-19,2,2);R('#ff3b30',-1,-16,2,2);
+    R('#07060f',-7,-28,14,6);R('#b58cff',-6,-27,12,4);R('#ffd23f',-1,-30,2,3);
+    R('#07060f',-6,-12,12,20);R('#7fd8ff',-5,-11,10,18);R('#ff4fd8',-8,-12,16,3);R('#ff4fd8',4,-10,3,8);
+    R('#07060f',-5,8,3,10);R('#07060f',2,8,3,10);R('#07060f',-10,-8,4,12);R('#07060f',6,-8,4,12);
+  }else if(id==='duo'){
+    for(const[s,c]of[[-1,'#ffd23f'],[1,'#e8f0ff']]){const o=s*11;
+      ctx.globalAlpha=.6;R('#fff6c8',o-12,-14,6,14);R('#fff6c8',o+6,-14,6,14);ctx.globalAlpha=1;
+      R('#ffd23f',o-4,-26,8,1);R('#07060f',o-4,-22,8,8);R(c,o-3,-21,6,6);R('#07060f',o-2,-19,1,1);R('#07060f',o+1,-19,1,1);
+      R('#07060f',o-5,-14,10,20);R(c,o-4,-13,8,18);R('#07060f',o-4,6,3,8);R('#07060f',o+1,6,3,8);}
+  }else if(id==='frank'){
+    R('#0d1126',-6,-18,12,13);R('#d9c27a',-5,-17,10,11);R('#07060f',-4,-14,3,3);R('#07060f',1,-14,3,3);R('#ff3b30',-4,-13,1,1);R('#ff3b30',1,-13,1,1);
+    R('#8a2a2a',-7,-20,14,3);R('#8a2a2a',-4,-23,8,3);R('#ffd23f',-4,-9,8,1);
+    R('#0d1126',-7,-5,14,16);R('#6a4d3c',-6,-4,12,14);R('#ffd23f',-1,-2,2,2);R('#ffd23f',-1,2,2,2);
+    R('#ffd23f',-14,-4,6,6);R('#fff2a0',-13,-3,2,2);
+  }
+}
+
+/* ---------- the book screen ---------- */
+function jrCount(){return JR.filter(e=>(Jr[e.id]||0)>=e.need).length}
+function showBook(back){
+  jrPortraits();
+  const acts={back:back},li=Math.max(0,LANGS.indexOf(Cfg.lang));
+  const seen=JR.filter(e=>Jr[e.id]).length;
+  let h='<h2>'+t('jr.title')+'</h2><p class="dim small">'+t('jr.prog',seen,JR.length,jrCount())+'</p><div class="menu">'+btn(t('menu.back'),'back','alt');
+  let w=0;
+  for(const e of JR){
+    if(e.w!==w){w=e.w;h+='<p class="dim small">'+t('jr.w'+w)+'</p>'}
+    const k=Jr[e.id]||0,done=k>=e.need;
+    acts['j:'+e.id]=()=>showEntry(e,back);
+    const img=k?'<img src="'+JRP[e.id]+'" width="40" height="40" style="image-rendering:pixelated;vertical-align:middle;margin-right:8px;float:left">':'<img src="'+JRP[e.id]+'" width="40" height="40" style="image-rendering:pixelated;vertical-align:middle;margin-right:8px;float:left;filter:brightness(0) opacity(.5)">';
+    h+=btn(img+'<b>'+(done?'✦ ':'')+(k?jrName(e.id):'???')+'</b><br><span class="small">'+(k?t('jr.kills',k)+(done?'':' · '+t('jr.need',e.need-k)):t('jr.unknown'))+'</span>','j:'+e.id,'slot'+(done?' sel':''));
+  }
+  h+=btn(t('menu.back'),'back','alt')+'</div>';
+  setMenu(h,acts,true,()=>showBook(back));
+}
+function showEntry(e,back){
+  const k=Jr[e.id]||0,done=k>=e.need,acts={back:()=>showBook(back)};
+  let h='<h2>'+(k?jrName(e.id):'???')+'</h2>';
+  h+='<div style="text-align:center"><img src="'+JRP[e.id]+'" width="144" height="144" style="image-rendering:pixelated;'+(k?'':'filter:brightness(0) opacity(.5)')+'"></div>';
+  h+='<p class="dim small">'+t('jr.kills',k)+(done?' · ✦ '+t('jr.complete'):' · '+t('jr.need',Math.max(0,e.need-k)))+'</p>';
+  if(k)h+='<p>'+t('jr.'+e.id+'.d')+'</p>';else h+='<p class="dim">'+t('jr.unknownL')+'</p>';
+  h+='<p class="small"><b>'+t('jr.notes')+'</b><br>'+(done?'<i>«'+t('jr.'+e.id+'.h')+'»</i>':'<span class="dim">'+t('jr.locked',e.need)+'</span>')+'</p>';
+  h+='<div class="menu">'+btn(t('menu.back'),'back','alt')+'</div>';
+  setMenu(h,acts,true,()=>showEntry(e,back));
+}
+ACH.push(
+ {id:'hunter',sec:1,n:['Cacciatore di Dei','God Hunter','Cazador de Dioses','Chasseur de Dieux'],d:['Ricevi il Libro del Cacciatore di Dei.','Receive the God Hunter’s Book.','Recibe el Libro del Cazador de Dioses.','Reçois le Livre du Chasseur de Dieux.']},
+ {id:'jrfull',sec:1,n:['Il libro è completo','The book is complete','El libro está completo','Le livre est complet'],d:['Completa tutte le voci del Libro del Cacciatore di Dei.','Complete every entry of the God Hunter’s Book.','Completa todas las entradas del Libro del Cazador de Dioses.','Complète toutes les entrées du Livre du Chasseur de Dieux.']});
+(function(){
+  const L=['it','en','es','fr'],D={
+  'jr.title':['LIBRO DEL CACCIATORE DI DEI','THE GOD HUNTER’S BOOK','LIBRO DEL CAZADOR DE DIOSES','LIVRE DU CHASSEUR DE DIEUX'],
+  'menu.book':['Libro del Cacciatore','Hunter’s Book','Libro del Cazador','Livre du Chasseur'],
+  'jr.got':['HAI OTTENUTO: LIBRO DEL CACCIATORE DI DEI','YOU GOT: THE GOD HUNTER’S BOOK','OBTUVISTE: LIBRO DEL CAZADOR DE DIOSES','OBTENU : LIVRE DU CHASSEUR DE DIEUX'],
+  'jr.new':['NUOVA VOCE NEL LIBRO: {0}','NEW BOOK ENTRY: {0}','NUEVA ENTRADA: {0}','NOUVELLE ENTRÉE : {0}'],
+  'jr.done':['VOCE COMPLETATA: {0}','ENTRY COMPLETE: {0}','ENTRADA COMPLETA: {0}','ENTRÉE COMPLÈTE : {0}'],
+  'jr.prog':['Creature scoperte {0}/{1} · Voci complete {2}','Creatures found {0}/{1} · Entries complete {2}','Criaturas descubiertas {0}/{1} · Entradas completas {2}','Créatures découvertes {0}/{1} · Entrées complètes {2}'],
+  'jr.kills':['Abbattuti: {0}','Defeated: {0}','Derrotados: {0}','Vaincus : {0}'],
+  'jr.need':['ancora {0} per le note','{0} more for the notes','{0} más para las notas','encore {0} pour les notes'],
+  'jr.complete':['VOCE COMPLETA','ENTRY COMPLETE','ENTRADA COMPLETA','ENTRÉE COMPLÈTE'],
+  'jr.unknown':['Non ancora incontrato.','Not encountered yet.','Aún no encontrado.','Pas encore rencontré.'],
+  'jr.unknownL':['Le pagine sono vuote. Abbatti questa creatura per scoprirla.','The pages are blank. Defeat this creature to discover it.','Las páginas están en blanco. Derrota a esta criatura para descubrirla.','Les pages sont vides. Vaincs cette créature pour la découvrir.'],
+  'jr.notes':['NOTE DEL CACCIATORE','HUNTER’S NOTES','NOTAS DEL CAZADOR','NOTES DU CHASSEUR'],
+  'jr.locked':['Abbattine {0} per leggere le note.','Defeat {0} to read the notes.','Derrota {0} para leer las notas.','Vaincs-en {0} pour lire les notes.'],
+  'jr.w1':['TETTI DI NEO-VERDANA','ROOFTOPS OF NEO-VERDANA','AZOTEAS DE NEO-VERDANA','TOITS DE NEO-VERDANA'],
+  'jr.w2':['GIARDINI DI FLORA','GARDENS OF FLORA','JARDINES DE FLORA','JARDINS DE FLORA'],
+  'jr.w3':['LE FONDAMENTA','THE FOUNDATIONS','LOS CIMIENTOS','LES FONDATIONS'],
+  'jr.w4':['CASTELLO DI UNITY','UNITY CASTLE','CASTILLO DE UNITY','CHÂTEAU DE UNITY'],
+  'jr.w5':['OLTRE','BEYOND','MÁS ALLÁ','AU-DELÀ'],
+  'npc.hunter.1':['...TU. SÌ, PROPRIO TU. HAI ABBATTUTO GLI DÈI DI QUESTA CITTÀ, UNO DOPO L’ALTRO.','...YOU. YES, YOU. YOU HAVE STRUCK DOWN THE GODS OF THIS CITY, ONE AFTER ANOTHER.','...TÚ. SÍ, TÚ. HAS DERRIBADO A LOS DIOSES DE ESTA CIUDAD, UNO TRAS OTRO.','...TOI. OUI, TOI. TU AS ABATTU LES DIEUX DE CETTE VILLE, L’UN APRÈS L’AUTRE.'],
+  'npc.hunter.2':['IO LI HO CACCIATI PRIMA DI TE. LI HO STUDIATI, DISEGNATI, CONTATI.','I HUNTED THEM BEFORE YOU. I STUDIED THEM, DREW THEM, COUNTED THEM.','YO LOS CACÉ ANTES QUE TÚ. LOS ESTUDIÉ, LOS DIBUJÉ, LOS CONTÉ.','JE LES AI CHASSÉS AVANT TOI. JE LES AI ÉTUDIÉS, DESSINÉS, COMPTÉS.'],
+  'npc.hunter.3':['MA IL MIO CODICE SI STA ROMPENDO. NON DOVREI NEMMENO ESSERE QUI.','BUT MY CODE IS BREAKING APART. I SHOULD NOT EVEN BE HERE.','PERO MI CÓDIGO SE ESTÁ ROMPIENDO. NI SIQUIERA DEBERÍA ESTAR AQUÍ.','MAIS MON CODE SE BRISE. JE NE DEVRAIS MÊME PAS ÊTRE ICI.'],
+  'npc.hunter.4':['PRENDI IL MIO LIBRO. OGNI CREATURA CHE ABBATTI VERRÀ SCRITTA DA SOLA SULLE SUE PAGINE.','TAKE MY BOOK. EVERY CREATURE YOU DEFEAT WILL WRITE ITSELF INTO ITS PAGES.','TOMA MI LIBRO. CADA CRIATURA QUE DERROTES SE ESCRIBIRÁ SOLA EN SUS PÁGINAS.','PRENDS MON LIVRE. CHAQUE CRÉATURE QUE TU VAINCS S’ÉCRIRA D’ELLE-MÊME DANS SES PAGES.'],
+  'npc.hunter.5':['RIEMPILO, CACCIATORE... E FORSE QUALCUNO SI RICORDERÀ DI M-M-ME...','FILL IT, HUNTER... AND MAYBE SOMEONE WILL REMEMBER M-M-ME...','LLÉNALO, CAZADOR... Y QUIZÁ ALGUIEN SE ACUERDE DE M-M-MÍ...','REMPLIS-LE, CHASSEUR... ET PEUT-ÊTRE QUE QUELQU’UN SE SOUVIENDRA DE M-M-MOI...']};
+  /* bestiary: name, description, hunter's note */
+  const E={
+  scrap:[['ROTTAME','SCRAPPER','CHATARRERO','FERRAILLEUR'],['Robot di scarto rimesso in piedi dai cavi di Unity. Pattuglia i tetti e carica chi si avvicina.','A junk robot set back on its feet by Unity’s cables. It patrols the roofs and charges anyone nearby.','Un robot de desecho puesto en pie por los cables de Unity. Patrulla las azoteas y embiste a quien se acerque.','Un robot de rebut remis debout par les câbles de Unity. Il patrouille les toits et charge quiconque approche.'],['Stupidi, ma tanti. Ne ho contati più di quanti ne potessi rompere.','Stupid, but many. I counted more of them than I could ever break.','Tontos, pero muchos. Conté más de los que podía romper.','Stupides, mais nombreux. J’en ai compté plus que je ne pouvais en briser.']],
+  drone:[['DRONE SENTINELLA','SENTRY DRONE','DRON CENTINELA','DRONE SENTINELLE'],['Occhio volante della città. Prende la mira a lungo, poi spara un raggio sottile.','The city’s flying eye. It aims for a long time, then fires a thin beam.','El ojo volador de la ciudad. Apunta largo rato y luego dispara un rayo fino.','L’œil volant de la ville. Il vise longtemps, puis tire un mince rayon.'],['Quando la sua lente diventa rossa, non stare fermo. Mai.','When its lens turns red, do not stand still. Ever.','Cuando su lente se vuelve roja, no te quedes quieto. Nunca.','Quand sa lentille devient rouge, ne reste pas immobile. Jamais.']],
+  mini1:[['ROTTAME TITANO','SCRAP TITAN','TITÁN CHATARRA','TITAN DE FERRAILLE'],['Mille rottami fusi in un solo corpo. Guardiano del Ponte dei Cavi.','A thousand scrappers fused into one body. Guardian of the Cable Bridge.','Mil chatarreros fundidos en un solo cuerpo. Guardián del Puente de Cables.','Mille ferrailleurs fondus en un seul corps. Gardien du Pont des Câbles.'],['Pesante. Lento a girarsi. Stagli alle spalle e colpisci.','Heavy. Slow to turn. Stay behind it and strike.','Pesado. Lento al girar. Ponte a su espalda y golpea.','Lourd. Lent à se retourner. Reste dans son dos et frappe.']],
+  colossus:[['COLOSSO CORAZZATO','ARMORED COLOSSUS','COLOSO BLINDADO','COLOSSE BLINDÉ'],['La prima grande macchina di Unity. Regnava sui tetti con pugni e missili.','Unity’s first great machine. It ruled the rooftops with fists and missiles.','La primera gran máquina de Unity. Reinaba en las azoteas con puños y misiles.','La première grande machine de Unity. Elle régnait sur les toits avec poings et missiles.'],['Un dio di latta. Il primo che ho visto cadere. Non l’ultimo.','A tin god. The first I saw fall. Not the last.','Un dios de hojalata. El primero que vi caer. No el último.','Un dieu de fer-blanc. Le premier que j’ai vu tomber. Pas le dernier.']],
+  plant:[['FIORE MORDACE','BITING BLOOM','FLOR MORDAZ','FLEUR MORDANTE'],['Un fiore di Flora con troppi denti. Resta immobile e azzanna chi passa.','One of Flora’s flowers with too many teeth. It stays still and bites anyone passing.','Una flor de Flora con demasiados dientes. Se queda quieta y muerde a quien pasa.','Une fleur de Flora avec trop de dents. Elle reste immobile et mord quiconque passe.'],['Non annusarlo. Fidati.','Do not smell it. Trust me.','No la huelas. Confía en mí.','Ne la sens pas. Crois-moi.']],
+  spitter:[['SPUTASEMI','SEED SPITTER','ESCUPESEMILLAS','CRACHE-GRAINES'],['Piccolo baccello volante che sputa semi velenosi dall’alto.','A small flying pod that spits poisoned seeds from above.','Una pequeña vaina voladora que escupe semillas venenosas desde arriba.','Une petite cosse volante qui crache des graines empoisonnées d’en haut.'],['Prende le distanze apposta. Codardo, ma preciso.','It keeps its distance on purpose. Cowardly, but precise.','Mantiene la distancia a propósito. Cobarde, pero preciso.','Il garde ses distances exprès. Lâche, mais précis.']],
+  shield:[['SCUDO DI CORTECCIA','BARK SHIELD','ESCUDO DE CORTEZA','BOUCLIER D’ÉCORCE'],['Guerriero del bosco dietro uno scudo di corteccia. Davanti è impenetrabile.','A forest warrior behind a bark shield. From the front it is impenetrable.','Un guerrero del bosque tras un escudo de corteza. De frente es impenetrable.','Un guerrier des bois derrière un bouclier d’écorce. De face, il est impénétrable.'],['Si gira piano. Più piano di quanto creda.','It turns slowly. Slower than it thinks.','Se gira despacio. Más despacio de lo que cree.','Il se retourne lentement. Plus lentement qu’il ne le croit.']],
+  bird:[['PASSERO D’ARGENTO','SILVER SPARROW','GORRIÓN DE PLATA','MOINEAU D’ARGENT'],['Uccellino che aspetta immobile e poi si lancia in picchiata.','A little bird that waits motionless, then dives at you.','Un pajarito que espera inmóvil y luego se lanza en picado.','Un petit oiseau qui attend immobile, puis plonge sur toi.'],['Un colpo solo e cade. Ma ne arrivano sempre altri.','One hit and it falls. But more always come.','Un golpe y cae. Pero siempre llegan más.','Un coup et il tombe. Mais il en arrive toujours d’autres.']],
+  hopper:[['RANA SPINOSA','SPINY FROG','RANA ESPINOSA','GRENOUILLE ÉPINEUSE'],['Rana coperta di spine che salta addosso a chi si avvicina.','A frog covered in spines that leaps at anyone nearby.','Una rana cubierta de espinas que salta sobre quien se acerca.','Une grenouille couverte d’épines qui bondit sur quiconque approche.'],['Colpiscila quando atterra: in aria è tutta spine.','Hit it when it lands: in the air it is all spines.','Golpéala cuando aterrice: en el aire es todo espinas.','Frappe-la quand elle atterrit : en l’air, elle n’est qu’épines.']],
+  mini2:[['GRAN MANGIATORE','GREAT DEVOURER','GRAN DEVORADOR','GRAND DÉVOREUR'],['Il più vecchio fiore del giardino. Ha mangiato tutto ciò che cresceva intorno a sé.','The oldest flower in the garden. It ate everything that grew around it.','La flor más vieja del jardín. Se comió todo lo que crecía a su alrededor.','La plus vieille fleur du jardin. Elle a mangé tout ce qui poussait autour d’elle.'],['Ha fame anche adesso. Soprattutto adesso.','It is hungry even now. Especially now.','Tiene hambre incluso ahora. Sobre todo ahora.','Il a faim même maintenant. Surtout maintenant.']],
+  flora:[['MADRE FLORA','MOTHER FLORA','MADRE FLORA','MÈRE FLORA'],['Regina dei giardini sospesi. Un tempo gentile, ora piegata dalla voce di Unity.','Queen of the hanging gardens. Once kind, now bent by Unity’s voice.','Reina de los jardines colgantes. Antes amable, ahora doblegada por la voz de Unity.','Reine des jardins suspendus. Autrefois douce, aujourd’hui pliée par la voix de Unity.'],['Il suo cuore batteva ancora quando è caduta. Ho sentito il polline piangere.','Her heart was still beating when she fell. I heard the pollen weep.','Su corazón aún latía cuando cayó. Oí llorar al polen.','Son cœur battait encore quand elle est tombée. J’ai entendu le pollen pleurer.']],
+  horror:[['ORRORE','HORROR','HORROR','HORREUR'],['Ammasso di carne e ossa nato nel buio delle fondamenta.','A mass of flesh and bone born in the dark of the foundations.','Una masa de carne y hueso nacida en la oscuridad de los cimientos.','Un amas de chair et d’os né dans le noir des fondations.'],['Non chiedermi cosa fosse prima. Non lo voglio sapere.','Do not ask me what it was before. I do not want to know.','No me preguntes qué era antes. No quiero saberlo.','Ne me demande pas ce que c’était avant. Je ne veux pas le savoir.']],
+  machine:[['OPERAIO MECCANICO','WORKER MACHINE','OBRERO MECÁNICO','OUVRIER MÉCANIQUE'],['Robot da cantiere ancora fedele agli ordini di scavo di OBLIVION.','A construction robot still loyal to OBLIVION’s digging orders.','Un robot de obra aún fiel a las órdenes de excavación de OBLIVION.','Un robot de chantier encore fidèle aux ordres de forage d’OBLIVION.'],['Lavora anche mentre lo colpisci. Ammirevole, quasi.','It keeps working while you hit it. Almost admirable.','Sigue trabajando mientras lo golpeas. Casi admirable.','Il continue de travailler pendant que tu le frappes. Presque admirable.']],
+  mosq:[['ZANZARA DELLE FOGNE','SEWER MOSQUITO','MOSQUITO DE LAS CLOACAS','MOUSTIQUE DES ÉGOUTS'],['Insetto enorme e ronzante che vive nell’umido delle fondamenta.','A huge buzzing insect living in the damp of the foundations.','Un insecto enorme y zumbador que vive en la humedad de los cimientos.','Un énorme insecte bourdonnant qui vit dans l’humidité des fondations.'],['Il ronzio arriva sempre un attimo prima della puntura.','The buzz always comes a moment before the sting.','El zumbido siempre llega un instante antes de la picadura.','Le bourdonnement arrive toujours un instant avant la piqûre.']],
+  tent:[['TENTACOLO','TENTACLE','TENTÁCULO','TENTACULE'],['Un tentacolo nero che spunta dal pavimento. Nessuno sa a cosa sia attaccato.','A black tentacle rising from the floor. Nobody knows what it is attached to.','Un tentáculo negro que sale del suelo. Nadie sabe a qué está unido.','Un tentacule noir qui surgit du sol. Personne ne sait à quoi il est rattaché.'],['Ho scavato per scoprirlo. Ho smesso di scavare.','I dug to find out. I stopped digging.','Excavé para averiguarlo. Dejé de excavar.','J’ai creusé pour le découvrir. J’ai arrêté de creuser.']],
+  worm:[['VERME DELLE FONDAMENTA','FOUNDATION WORM','GUSANO DE LOS CIMIENTOS','VER DES FONDATIONS'],['Verme gigante che nuota nel cemento e spunta sotto i piedi di chi cammina.','A giant worm that swims through concrete and bursts out under walkers’ feet.','Un gusano gigante que nada en el cemento y sale bajo los pies de quien camina.','Un ver géant qui nage dans le béton et surgit sous les pieds des marcheurs.'],['Sotto terra è intoccabile. Fuori, è solo un verme.','Underground it is untouchable. Outside, it is just a worm.','Bajo tierra es intocable. Fuera, solo es un gusano.','Sous terre, il est intouchable. Dehors, ce n’est qu’un ver.']],
+  mini3:[['ORRORE MAGGIORE','GREATER HORROR','HORROR MAYOR','HORREUR MAJEURE'],['Il più grande degli orrori. Custodisce il pozzo verticale.','The largest of the horrors. It guards the vertical shaft.','El mayor de los horrores. Custodia el pozo vertical.','La plus grande des horreurs. Elle garde le puits vertical.'],['Più grande non vuol dire più forte. Vuol dire più lento.','Bigger does not mean stronger. It means slower.','Más grande no significa más fuerte. Significa más lento.','Plus grand ne veut pas dire plus fort. Ça veut dire plus lent.']],
+  centaur:[['OBLIVION','OBLIVION','OBLIVION','OBLIVION'],['Macchina scavatrice dalle mille braccia. Voleva far crollare Neo-Verdana dalle radici.','A digging machine with a thousand arms. It wanted to bring Neo-Verdana down from its roots.','Una máquina excavadora de mil brazos. Quería derrumbar Neo-Verdana desde sus raíces.','Une foreuse aux mille bras. Elle voulait abattre Neo-Verdana par ses racines.'],['Il suo nome significa dimenticanza. Io non l’ho dimenticato.','Its name means forgetting. I have not forgotten it.','Su nombre significa olvido. Yo no lo he olvidado.','Son nom signifie oubli. Moi, je ne l’ai pas oublié.']],
+  bonez:[['BONEZ, IL MECCANICO REALE','BONEZ, THE ROYAL MECHANIC','BONEZ, EL MECÁNICO REAL','BONEZ, LE MÉCANICIEN ROYAL'],['Scheletro esile che ripara il mondo con gli attrezzi di un re. Appare solo a chi raccoglie ogni ingranaggio.','A slender skeleton who fixes the world with a king’s tools. He shows himself only to those who gather every gear.','Un esqueleto esbelto que repara el mundo con herramientas de rey. Solo aparece a quien reúne cada engranaje.','Un squelette élancé qui répare le monde avec les outils d’un roi. Il n’apparaît qu’à qui rassemble chaque engrenage.'],['Mi ha fatto una domanda, tanto tempo fa. Non ho ancora una risposta.','He asked me a question, long ago. I still have no answer.','Me hizo una pregunta hace mucho. Todavía no tengo respuesta.','Il m’a posé une question, il y a longtemps. Je n’ai toujours pas de réponse.']],
+  alch:[['ALCHIMISTA','ALCHEMIST','ALQUIMISTA','ALCHIMISTE'],['Servo del castello che lancia ampolle di veleno ribollente.','A castle servant who hurls flasks of bubbling poison.','Un sirviente del castillo que lanza frascos de veneno burbujeante.','Un serviteur du château qui lance des fioles de poison bouillonnant.'],['Le sue pozzanghere restano a terra. Guarda dove metti i piedi.','Its puddles stay on the ground. Watch your step.','Sus charcos se quedan en el suelo. Mira dónde pisas.','Ses flaques restent au sol. Regarde où tu mets les pieds.']],
+  guard:[['GUARDIA REALE','ROYAL GUARD','GUARDIA REAL','GARDE ROYAL'],['Soldato corazzato del castello di Unity, armato di lancia.','An armored soldier of Unity Castle, armed with a spear.','Un soldado acorazado del castillo de Unity, armado con lanza.','Un soldat en armure du château de Unity, armé d’une lance.'],['Obbedisce a un re che non lo ha mai guardato in faccia.','It obeys a king who never once looked at its face.','Obedece a un rey que nunca lo miró a la cara.','Il obéit à un roi qui ne l’a jamais regardé en face.']],
+  turret:[['CANNONE REALE','ROYAL CANNON','CAÑÓN REAL','CANON ROYAL'],['Cannone dei bastioni che spara palle infuocate ad arco.','A rampart cannon that lobs fiery balls in an arc.','Un cañón de las murallas que dispara bolas ardientes en parábola.','Un canon des remparts qui tire des boulets enflammés en cloche.'],['Non mira dove sei. Mira dove sarai. Sorprendilo.','It does not aim where you are. It aims where you will be. Surprise it.','No apunta a donde estás. Apunta a donde estarás. Sorpréndelo.','Il ne vise pas là où tu es. Il vise là où tu seras. Surprends-le.']],
+  mini4:[['CAPITANO DELLA GUARDIA','CAPTAIN OF THE GUARD','CAPITÁN DE LA GUARDIA','CAPITAINE DE LA GARDE'],['Il più fedele dei soldati di Unity. Comanda le mura del castello.','The most loyal of Unity’s soldiers. He commands the castle walls.','El más fiel de los soldados de Unity. Manda en las murallas del castillo.','Le plus fidèle des soldats de Unity. Il commande les murs du château.'],['La fedeltà è un’armatura pesante.','Loyalty is heavy armor.','La lealtad es una armadura pesada.','La loyauté est une lourde armure.']],
+  unity:[['UNITY','UNITY','UNITY','UNITY'],['Essere d’ombra che ha unito la città sotto un solo pensiero: il suo.','A being of shadow that united the city under a single thought: its own.','Un ser de sombra que unió la ciudad bajo un solo pensamiento: el suyo.','Un être d’ombre qui a uni la ville sous une seule pensée : la sienne.'],['Il suo occhio vede tutto. Tranne chi gli sta davanti.','Its eye sees everything. Except whoever stands before it.','Su ojo lo ve todo. Excepto a quien tiene delante.','Son œil voit tout. Sauf celui qui se tient devant lui.']],
+  tram:[['TRAMEZZINO','TRAMEZZINO','TRAMEZZINO','TRAMEZZINO'],['Giullare del circo che ride più forte quando la folla tace.','A circus jester who laughs loudest when the crowd falls silent.','Un bufón de circo que ríe más fuerte cuando el público calla.','Un bouffon de cirque qui rit le plus fort quand la foule se tait.'],['Lo spettacolo è finito. Lui no.','The show is over. He is not.','El espectáculo terminó. Él no.','Le spectacle est fini. Lui, non.']],
+  duo:[['IL GODLY DUO','THE GODLY DUO','EL GODLY DUO','LE GODLY DUO'],['Due divinità che vegliano sul Pantheon. Fanno crollare il mondo sotto chi le sfida.','Two deities who watch over the Pantheon. They collapse the world under their challengers.','Dos deidades que velan el Panteón. Derrumban el mundo bajo quien las desafía.','Deux divinités qui veillent sur le Panthéon. Elles effondrent le monde sous leurs adversaires.'],['Ho visto la città dall’alto mentre cadevo. Era bellissima.','I saw the city from above as I fell. It was beautiful.','Vi la ciudad desde arriba mientras caía. Era preciosa.','J’ai vu la ville d’en haut en tombant. Elle était magnifique.']],
+  frank:[['FRANK IL VENDITORE','FRANK THE VENDOR','FRANK EL VENDEDOR','FRANK LE MARCHAND'],['Il venditore dei tetti. Ha sempre un prodotto per te. E un conto in sospeso.','The rooftop vendor. He always has a product for you. And a score to settle.','El vendedor de las azoteas. Siempre tiene un producto para ti. Y una cuenta pendiente.','Le marchand des toits. Il a toujours un produit pour toi. Et un compte à régler.'],['Ha un solo punto vita. Non è mai bastato a nessuno.','He has a single hit point. It has never been enough for anyone.','Tiene un solo punto de vida. Nunca le ha bastado a nadie.','Il n’a qu’un seul point de vie. Ça n’a jamais suffi à personne.']]};
+  for(const k in D)D[k].forEach((s,i)=>{TX[L[i]][k]=s});
+  for(const id in E){const[n,d,h]=E[id];L.forEach((l,i)=>{TX[l]['jr.'+id+'.n']=n[i];TX[l]['jr.'+id+'.d']=d[i];TX[l]['jr.'+id+'.h']=h[i]})}
+})();
 function frame(t){
   requestAnimationFrame(frame);
   const now=t/1000,dt=Math.min(.05,now-lastT);lastT=now;NOW=now;pollPad();
