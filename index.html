@@ -431,10 +431,13 @@ function updateSpecials1(s,dt){
     s.t+=dt;
     if(!P||P.dead||G.state!=='play'||G.secret)return;
     const cx=P.x+P.w/2,f=P.y+P.h;
-    if(cx>s.x&&cx<s.x+s.w&&f<=s.y+2&&f>s.y-s.hgt&&P.dashT<=0){
+    const inV=cx>s.x&&cx<s.x+s.w&&f<=s.y+2&&f>s.y-s.hgt&&P.dashT<=0;
+    if(!inV)s.inside=false;
+    if(inV){
       P.vy=Math.max(-250,P.vy-2400*dt);P.bounce=true;P.air=true;P.coy=0;
       if(!G.ventTip){G.ventTip=1;toast(t('t.vent'),2.2)}
-      if(!s.whoosh||NOW-s.whoosh>.5){s.whoosh=NOW;sfx(140,.35,'sawtooth',.025,260)}
+      if(!s.inside)sfx(140,.35,'sawtooth',.025,260);
+      s.inside=true;
       if(Math.random()<.3)parts.push({x:P.x+Math.random()*P.w,y:P.y+P.h,vx:0,vy:60,life:.3,max:.3,col:'#c8ffe0',sz:1});
     }
     return;
@@ -443,7 +446,7 @@ function updateSpecials1(s,dt){
     s.t+=dt;
     const c=(((s.t+s.ph)%s.per)+s.per)%s.per,on=c<s.on,i=world.solids.indexOf(s);
     s.warn=on&&c>s.on-.6;
-    if(on&&i<0&&!(P&&overlapR(P,s))){world.solids.push(s);sfx(900,.05,'square',.02,200)}
+    if(on&&i<0&&!(P&&overlapR(P,s))){world.solids.push(s)}
     if(!on&&i>=0){world.solids.splice(i,1);burst(s.x+s.w/2,s.y+4,6,s.col,50,.3)}
     s.lit=world.solids.indexOf(s)>=0;
     if(!G.neonTip&&P&&Math.abs(P.x-s.x)<120&&Math.abs(P.y-s.y)<80){G.neonTip=1;toast(t('t.neon'),2.4)}
@@ -5437,7 +5440,7 @@ function hellWin(){
 })();
 
 /* =====================  PHASE 6 : version label, telescope easter egg  ===================== */
-const VERSION='1.11.0';
+const VERSION='1.11.1';
 /* TEST BUILD SWITCH (temporary): no damage anywhere in the game, all worlds unlocked in
    "Select world", achievements are not unlocked. Normal build: TEST_NODMG=false. */
 const TEST_NODMG=false;
