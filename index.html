@@ -5685,7 +5685,7 @@ function hellWin(){
 })();
 
 /* =====================  PHASE 6 : version label, telescope easter egg  ===================== */
-const VERSION='1.17.3-test';
+const VERSION='1.17.4-test';
 /* TEST BUILD SWITCH (temporary): no damage anywhere in the game, all worlds unlocked in
    "Select world", achievements are not unlocked. Normal build: TEST_NODMG=false. */
 const TEST_NODMG=false;
@@ -8004,14 +8004,14 @@ function jrPortraits(){
         ctx.translate(cx0,cy0+20);ctx.scale(1.55,1.55);drawMiniBoss(e.id,0,0,1,false,0,true);
       }else if(e.id==='duo'){
         /* the Godly Duo is the divine form of Bonez and Tramezzino: both with halo and wings */
-        const wing=(x,y,s)=>{for(let k=0;k<3;k++){const len=12-k*3;ctx.fillStyle='#07060f';ctx.fillRect(s<0?x-len-1:x,y+k*4-1,len+1,4);ctx.fillStyle=k%2?'#fff6c8':'#ffffff';ctx.fillRect(s<0?x-len:x,y+k*4,len,2)}};
+        const wing=(x,y,s)=>{for(let k=0;k<3;k++){const len=6-k*2;ctx.fillStyle='#07060f';ctx.fillRect(s<0?x-len-1:x,y+k*4-1,len+1,4);ctx.fillStyle=k%2?'#fff6c8':'#ffffff';ctx.fillRect(s<0?x-len:x,y+k*4,len,2)}};
         const halo=(x,y)=>{ctx.fillStyle='#ffd23f';ctx.fillRect(x-5,y,10,1);ctx.fillRect(x-6,y+1,1,1);ctx.fillRect(x+5,y+1,1,1)};
         ctx.globalAlpha=.14;ctx.fillStyle='#ffd23f';ctx.beginPath();ctx.ellipse(cx0,cy0-4,22,24,0,0,6.283);ctx.fill();ctx.globalAlpha=1;
-        wing(cx0-17,cy0-12,-1);wing(cx0+17,cy0-12,1);
-        ctx.save();ctx.translate(cx0-9,cy0+18);ctx.scale(1.25,1.25);drawMiniBoss('bonez',0,0,1,false,0,true);ctx.restore();
-        halo(cx0-9,cy0-21);
-        jrDrawSpecial('tramS',cx0+10,cy0+4);
-        halo(cx0+10,cy0-25);
+        wing(cx0-18,cy0-12,-1);wing(cx0+18,cy0-12,1);
+        ctx.save();ctx.translate(cx0-7,cy0+14);ctx.scale(1.2,1.2);drawMiniBoss('bonez',0,0,1,false,0,true);ctx.restore();
+        halo(cx0-7,cy0-24);
+        jrDrawSpecial('tramS',cx0+7,cy0+5);
+        halo(cx0+7,cy0-22);
       }else jrDrawSpecial(e.id,cx0,cy0);
     }catch(err){}
     ctx.restore();grab(e.id);
@@ -8022,9 +8022,9 @@ function jrDrawSpecial(id,x,y){
   const R=(c,a,b,w,h)=>{ctx.fillStyle=c;ctx.fillRect(x+a,y+b,w,h)};
   if(id==='tram'||id==='tramS'){
     /* the real Tramezzino sprite with his scarf */
-    const sc=id==='tram'?.8:.6,w=SP_TRAM.r.width*sc,h=SP_TRAM.r.height*sc;
+    const sc=id==='tram'?.8:.52,w=SP_TRAM.r.width*sc,h=SP_TRAM.r.height*sc;
     y-=8;const nx=x+6*sc,ny=y-h/2+21*sc;
-    for(let i=0;i<10;i++){const px=Math.round(nx+i*2.7*sc*1.4),py=Math.round(ny+i*.5+Math.sin(i*.9)*1.5);ctx.fillStyle='#14101c';ctx.fillRect(px-2,py-2,4,4);ctx.fillStyle=(i%4<2)?'#ff2bd6':'#ff9bf0';ctx.fillRect(px-1,py-1,2,2)}
+    for(let i=0;i<(id==='tram'?10:4);i++){const px=Math.round(nx+i*2.7*sc*1.4),py=Math.round(ny+i*.5+Math.sin(i*.9)*1.5);ctx.fillStyle='#14101c';ctx.fillRect(px-2,py-2,4,4);ctx.fillStyle=(i%4<2)?'#ff2bd6':'#ff9bf0';ctx.fillRect(px-1,py-1,2,2)}
     ctx.drawImage(SP_TRAM.l,Math.round(x-w/2),Math.round(y-h/2),Math.round(w),Math.round(h));
     return;
   }
