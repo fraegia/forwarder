@@ -5685,7 +5685,7 @@ function hellWin(){
 })();
 
 /* =====================  PHASE 6 : version label, telescope easter egg  ===================== */
-const VERSION='1.17.0';
+const VERSION='1.17.1-test';
 /* TEST BUILD SWITCH (temporary): no damage anywhere in the game, all worlds unlocked in
    "Select world", achievements are not unlocked. Normal build: TEST_NODMG=false. */
 const TEST_NODMG=false;
@@ -7891,9 +7891,13 @@ function jrName(id){return t('jr.'+id+'.n')}
 function hunterReqs(){
   return [!!(Ach.u&&Ach.u.hell),!!(Inv.colW&&Inv.colW[1]&&Inv.colW[2]&&Inv.colW[3]),!!(Inv.mgw&&Inv.mgw[2]&&Inv.mgw[3]&&Inv.mgw[4]),(Jr.bonez||0)>=1];
 }
-function hunterReady(){return !hasBook()&&!Hell.on&&hunterReqs().every(Boolean)}
+/* TEST BUILD SWITCH (temporary): the Hunter is active without requirements and also stands on the
+   first roof of World 1. Normal build: HUNTER_TEST=false. */
+const HUNTER_TEST=true;
+function hunterReady(){return !hasBook()&&!Hell.on&&(HUNTER_TEST||hunterReqs().every(Boolean))}
 function addHunter(S){
   const st=(S.sets||[]).find(q=>q.kind==='tower'&&q.z===14);
+  if(HUNTER_TEST&&S.buildings[1]){const b1=S.buildings[1];S.npcs.push({k:'hunter',x:b1.x+3*T,y:b1.y,id:'hunter',hunter:true})}
   if(!st||!st.B)return;
   S.npcs.push({k:'hunter',x:st.B.x+st.B.w-3*T,y:st.B.y,id:'hunter',hunter:true});
 }
@@ -7902,16 +7906,16 @@ NPCS.hunter={col:'#c8c0d8',hat:'hunter',name:'IL CACCIATORE',glitch:1,lines:5};
 /* npc helpers: hidden hunter, custom line count */
 const _nearN=nearNpc;nearNpc=function(){const n=_nearN();if(n&&n.hunter&&(!hunterReady()||G.glitch))return null;return n};
 const _npcL=npcLines;npcLines=function(n){const d=NPCS[n.k];if(d&&d.lines){const a=[];for(let i=1;i<=d.lines;i++)a.push('npc.'+n.k+'.'+i);return a}return _npcL(n)};
-const _startT=startTalk;startTalk=function(n,keys,after){if(n&&n.hunter&&!keys){_startT(n,npcLines(n),hunterGive);Music.stop();return}_startT(n,keys,after)};
+const _startT=startTalk;startTalk=function(n,keys,after){if(n&&n.hunter&&!keys){G.talkHunter=n;_startT(n,npcLines(n),hunterGive);Music.stop();return}_startT(n,keys,after)};
 function hunterGive(){
   store('rp_book','1');achUnlock('hunter');
   toast(t('jr.got'),3.4);sfx(880,.6,'square',.06,900);
-  const n=world.npcs.find(q=>q.hunter);G.glitch={n:n,t:0};
+  const n=G.talkHunter||world.npcs.find(q=>q.hunter);G.glitch={n:n,t:0};
 }
 function glitchStep(dt){
   const g=G.glitch;if(!g)return;g.t+=dt;
   if(Math.random()<.35)sfx(80+Math.random()*1800,.04,Math.random()<.5?'square':'sawtooth',.03,(Math.random()-.5)*2000);
-  if(g.t>1.8){const i=world.npcs.indexOf(g.n);if(i>=0)world.npcs.splice(i,1);G.glitch=null;Music.mode(worldMusic());Music.start();burst(g.n.x,g.n.y-10,30,'#ffffff',160,.6)}
+  if(g.t>1.8){world.npcs=world.npcs.filter(q=>!q.hunter);G.glitch=null;Music.mode(worldMusic());Music.start();burst(g.n.x,g.n.y-10,30,'#ffffff',160,.6)}
 }
 function drawHunter(n,cx,cy){
   const x=Math.round(n.x-cx),y=Math.round(n.y-cy);if(x<-40||x>W+40)return;
