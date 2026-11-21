@@ -3469,11 +3469,11 @@ function drawCutscene(){
     ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);
     ctx.fillStyle='#173d2b';ctx.fillRect(0,170,W,H);ctx.fillStyle='#2fa05a';ctx.fillRect(0,170,W,4);
     for(let i=0;i<W/10;i++){const hv=hash2(i,4);ctx.fillStyle=FLOWER_COLS[Math.floor(hv*17)%5];ctx.fillRect(i*10+2,166-Math.floor(hv*4),3,3)}
-    ptxt(t('cut.w2'),W/2,70,24,'#fff','center');
-    ptxt(t('cut.w2n'),W/2,106,10,'#ff5fa8','center');
+    ptxt(tr('cut.w2'),W/2,70,24,'#fff','center');
+    ptxt(tr('cut.w2n'),W/2,106,10,'#ff5fa8','center');
     if(u<.6){ctx.fillStyle='#fff';ctx.globalAlpha=1-u/.6;ctx.fillRect(0,0,W,H);ctx.globalAlpha=1}
   }
-  if(t>.8&&Math.floor(NOW*2)%2)ptxt(t('cut.skip'),W-6,H-12,8,'#8c94b8','right');
+  if(t>.8&&Math.floor(NOW*2)%2)ptxt(tr('cut.skip'),W-6,H-12,8,'#8c94b8','right');
 }
 
 /* =====================  PHASE 3 : World 3 "The Foundations" and World 4 "Unity Castle"  ===================== */
@@ -5495,7 +5495,7 @@ function hellWin(){
 })();
 
 /* =====================  PHASE 6 : version label, telescope easter egg  ===================== */
-const VERSION='1.12.0';
+const VERSION='1.12.1';
 /* TEST BUILD SWITCH (temporary): no damage anywhere in the game, all worlds unlocked in
    "Select world", achievements are not unlocked. Normal build: TEST_NODMG=false. */
 const TEST_NODMG=false;
