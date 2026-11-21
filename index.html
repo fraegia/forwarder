@@ -1207,7 +1207,7 @@ function drawHUD(){
   ab(8,P.abil.dj,'dj');ab(30,P.abil.dash,'dash');
   /* right side */
   ctx.fillStyle='#07060f';ctx.globalAlpha=.7;ctx.fillRect(W-124,4,120,36);ctx.globalAlpha=1;
-  txt(Hell.on?boss.kind==='duo'?'BOSS HELL ???':'BOSS HELL '+(Hell.i+1+(Hell.i>=3?1:0)+(boss.kind==='tram'||boss.kind==='bonez'?1:0))+'/6':t('hud.sector')+' '+String(G.zone+1).padStart(2,'0')+'/'+String(world.nz).padStart(2,'0'),W-8,8,Hell.on?'#ff6a3d':'#e8f7ee','right');
+  txt(Hell.on?boss.kind==='duo'?t('menu.hell').toUpperCase()+' ???':t('menu.hell').toUpperCase()+' '+(Hell.i+1+(Hell.i>=3?1:0)+(boss.kind==='tram'||boss.kind==='bonez'?1:0))+'/6':t('hud.sector')+' '+String(G.zone+1).padStart(2,'0')+'/'+String(world.nz).padStart(2,'0'),W-8,8,Hell.on?'#ff6a3d':'#e8f7ee','right');
   txt(fmtTime(G.time),W-8,19,'#8c94b8','right');
   if(P.dmgT>0)txt(t('hud.dmg')+' '+Math.ceil(P.dmgT)+'s',W-8,30,'#ff4fd8','right');
   else if(world.theme<=3&&!Hell.on)txt(t(['','hud.chip','hud.seed','hud.gear'][world.theme])+' '+chipCount()+'/12',W-8,30,'#35e8ff','right');
@@ -5023,7 +5023,7 @@ function drawUfo(x,y,beam){
 function drawTramFront(cx,cy){
   const B=boss,A=world.arena;if(B.dead)return;
   drawCirc(cx,cy);
-  /* Unity lies inert in the background (in Boss Hell he moved to the stand) */
+  /* Unity lies inert in the background (in Pantheon he moved to the stand) */
   if(uni&&!world.hellArena){
     const dr=Math.min(8,(NOW-uni.n0)*5);
     ctx.drawImage(SP_UDARK,Math.round(uni.x-4-cx),Math.round(uni.y-9-cy+dr));
@@ -5379,7 +5379,7 @@ const Music=(function(){
   };
 })();
 
-/* =====================  PHASE 5 : boss hazards, platform fix, Boss Hell  ===================== */
+/* =====================  PHASE 5 : boss hazards, platform fix, Pantheon  ===================== */
 let hz=[],uh=[],vort=null;
 function clearHz(){hz=[];uh=[];vort=null}
 /* column/spike/projectile from the sky: warns for `warn` seconds, then hits for `act` seconds */
@@ -5486,7 +5486,7 @@ function fixPlatforms(S){
   buildLevelX=function(n){world.frank=null;world.hellArena=null;G.secret=false;G.bonezStage=false;G.bonezSeen=false;world.secret=null;bx(n);fixPlatforms(world)};
 }
 
-/* ---------- Boss Hell: every boss in a row, with every upgrade ---------- */
+/* ---------- Pantheon: every boss in a row, with every upgrade ---------- */
 const Hell={on:false,i:0,adv:0,tramStage:false,wait:0,lastS:0,cheer:0};
 const HELL_BOSS=['b.colossus','b.flora','b.centaur','b.unity','b.duo'];
 function startHell(d){
@@ -5553,7 +5553,7 @@ function drawHellWait(){
   if(world.pickups.some(k=>k.kind==='medkit'&&!collected.has(k.id))&&Math.floor(NOW*2)%2)ptxt(t('hell.med'),W/2,H-34,8,'#7dff7a','center');
 }
 
-/* ---------- Boss Hell arena: a great colosseum ---------- */
+/* ---------- Pantheon arena: a great colosseum ---------- */
 function buildHellArena(th){
   resetWorld();nextId=1;const S=world;
   S.theme=th;S.nz=1;S.frank=null;S.names=null;S.pals=PALS;initFeatures(S);S.gate=null;S.secret=null;
@@ -5670,21 +5670,21 @@ function hellWin(){
 (function(){
   const L=['it','en','es','fr'];
   const D={
-   'menu.hell':['Boss Hell','Boss Hell','Boss Hell','Boss Hell'],
+   'menu.hell':['Pantheon','Pantheon','Panteón','Panthéon'],
    'hell.next2':['PROSSIMO BOSS','NEXT BOSS','PRÓXIMO JEFE','PROCHAIN BOSS'],
    'hell.med':['MEDIKIT: CURA COMPLETA','MEDKIT: FULL HEAL','BOTIQUÍN: CURACIÓN TOTAL','MÉDIKIT : SOIN COMPLET'],
    't.medkit':['MEDIKIT · HP AL MASSIMO','MEDKIT · FULL HP','BOTIQUÍN · HP AL MÁXIMO','MÉDIKIT · PV AU MAXIMUM'],
-   'hell.stage':['BOSS HELL {0}/6 · {1}','BOSS HELL {0}/6 · {1}','BOSS HELL {0}/6 · {1}','BOSS HELL {0}/6 · {1}'],
+   'hell.stage':['PANTHEON {0}/6 · {1}','PANTHEON {0}/6 · {1}','PANTEÓN {0}/6 · {1}','PANTHÉON {0}/6 · {1}'],
    'hell.next':['BOSS SCONFITTO · ARRIVA IL PROSSIMO...','BOSS DEFEATED · NEXT ONE INCOMING...','JEFE DERROTADO · LLEGA EL SIGUIENTE...','BOSS VAINCU · LE SUIVANT ARRIVE...'],
    'hell.done':['TUTTI I BOSS SCONFITTI!','ALL BOSSES DEFEATED!','¡TODOS LOS JEFES DERROTADOS!','TOUS LES BOSS VAINCUS !'],
-   'hell.win.h':['BOSS HELL COMPLETATO!','BOSS HELL CLEARED!','¡BOSS HELL COMPLETADO!','BOSS HELL TERMINÉ !'],
+   'hell.win.h':['PANTHEON COMPLETATO!','PANTHEON CLEARED!','¡PANTEÓN COMPLETADO!','PANTHÉON TERMINÉ !'],
    'hell.win.p':['Hai sconfitto tutti i boss di fila, dal Colosso a Tramezzino. VERDE-7 è una leggenda.','You beat every boss in a row, from the Colossus to Tramezzino. VERDE-7 is a legend.','Has derrotado a todos los jefes seguidos, del Coloso a Tramezzino. VERDE-7 es una leyenda.','Tu as vaincu tous les boss d’affilée, du Colosse à Tramezzino. VERDE-7 est une légende.']
   };
   for(const k in D)D[k].forEach((s,i)=>{TX[L[i]][k]=s});
 })();
 
 /* =====================  PHASE 6 : version label, telescope easter egg  ===================== */
-const VERSION='1.15.0';
+const VERSION='1.16.0';
 /* TEST BUILD SWITCH (temporary): no damage anywhere in the game, all worlds unlocked in
    "Select world", achievements are not unlocked. Normal build: TEST_NODMG=false. */
 const TEST_NODMG=false;
@@ -5842,7 +5842,7 @@ function t2(){return t.apply(null,arguments)}
 })();
 
 /* =====================  PHASE 7 : secret boss BONEZ, the Royal Mechanic, and the Tartarus weapon  ===================== */
-/* unlocked in World 3 with all 12 gears: Bonez shows up after OBLIVION (always in Boss Hell) */
+/* unlocked in World 3 with all 12 gears: Bonez shows up after OBLIVION (always in Pantheon) */
 let bzg=[],whips=[];
 function bonezRoute(){return world.theme===3&&(Hell.on||chipCount()>=12)}
 function makeBonez(){
@@ -6123,7 +6123,7 @@ function drawWhips(cx,cy){
 
 /* =====================  PHASE 8 : stand of defeated bosses, divine light  ===================== */
 function secretFight(){return!!(boss&&!boss.dead&&boss.active&&(boss.kind==='bonez'||boss.kind==='tram'||boss.kind==='duo'))}
-/* bosses already beaten in Boss Hell, in the order they sit in the stand */
+/* bosses already beaten in Pantheon, in the order they sit in the stand */
 function hellBench(){
   if(!Hell.on||!boss)return[];
   if(boss.kind==='duo')return['colossus','flora','centaur','unity'];
@@ -6292,14 +6292,14 @@ const ACH=[
  {id:'tart',sec:1,n:['Dall’abisso','From the abyss','Desde el abismo','Venu de l’abîme'],d:['Ottieni il Tartarus.','Get the Tartarus.','Consigue el Tartarus.','Obtiens le Tartarus.']},
  {id:'tram',sec:1,n:['Ritorno a casa','Homecoming','Regreso a casa','Retour à la maison'],d:['Sconfiggi Tramezzino, il vero boss finale.','Defeat Tramezzino, the true final boss.','Derrota a Tramezzino, el verdadero jefe final.','Bats Tramezzino, le vrai boss final.']},
  {id:'scope',sec:1,n:['HomePlanet','HomePlanet','HomePlanet','HomePlanet'],d:['Guarda nel telescopio segreto.','Look into the secret telescope.','Mira por el telescopio secreto.','Regarde dans le télescope secret.']},
- {id:'hell',n:['Gladiatore','Gladiator','Gladiador','Gladiateur'],d:['Completa il Boss Hell.','Complete Boss Hell.','Completa el Boss Hell.','Termine le Boss Hell.']},
- {id:'hellnm',n:['Senza cerotti','No band-aids','Sin tiritas','Sans pansements'],d:['Completa il Boss Hell senza raccogliere medikit.','Complete Boss Hell without picking up a medkit.','Completa el Boss Hell sin recoger botiquines.','Termine le Boss Hell sans ramasser de médikit.']},
- {id:'hellx',n:['Collasso Totale','Total Meltdown','Colapso Total','Effondrement Total'],d:['Completa il Boss Hell a difficoltà Collasso Totale.','Complete Boss Hell on Total Meltdown.','Completa el Boss Hell en Colapso Total.','Termine le Boss Hell en Effondrement Total.']},
+ {id:'hell',n:['Gladiatore','Gladiator','Gladiador','Gladiateur'],d:['Completa il Pantheon.','Complete the Pantheon.','Completa el Panteón.','Termine le Panthéon.']},
+ {id:'hellnm',n:['Senza cerotti','No band-aids','Sin tiritas','Sans pansements'],d:['Completa il Pantheon senza raccogliere medikit.','Complete the Pantheon without picking up a medkit.','Completa el Panteón sin recoger botiquines.','Termine le Panthéon sans ramasser de médikit.']},
+ {id:'hellx',n:['Collasso Totale','Total Meltdown','Colapso Total','Effondrement Total'],d:['Completa il Pantheon a difficoltà Collasso Totale.','Complete the Pantheon on Total Meltdown.','Completa el Panteón en Colapso Total.','Termine le Panthéon en Effondrement Total.']},
  {id:'nodmg',n:['Intoccabile','Untouchable','Intocable','Intouchable'],d:['Completa il Mondo 1 dall’inizio senza subire danni.','Complete World 1 from the start without taking damage.','Completa el Mundo 1 desde el inicio sin recibir daño.','Termine le Monde 1 depuis le début sans subir de dégâts.']},
  {id:'perfect',n:['Danza perfetta','Perfect dance','Danza perfecta','Danse parfaite'],d:['Sconfiggi un boss senza farti colpire.','Defeat a boss without getting hit.','Derrota a un jefe sin recibir golpes.','Bats un boss sans être touché.']},
  {id:'bzperf',sec:1,n:['Meccanica di precisione','Precision mechanics','Mecánica de precisión','Mécanique de précision'],d:['Sconfiggi Bonez senza farti colpire.','Defeat Bonez without getting hit.','Derrota a Bonez sin recibir golpes.','Bats Bonez sans être touché.']},
  {id:'trperf',sec:1,n:['Numero da applausi','Standing ovation','Número de aplausos','Numéro applaudi'],d:['Sconfiggi Tramezzino senza farti colpire.','Defeat Tramezzino without getting hit.','Derrota a Tramezzino sin recibir golpes.','Bats Tramezzino sans être touché.']},
- {id:'duo',sec:1,n:['Divinità detronizzate','Gods dethroned','Dioses destronados','Dieux détrônés'],d:['Sopravvivi al Godly Duo nel Boss Hell.','Survive the Godly Duo in Boss Hell.','Sobrevive al Godly Duo en el Boss Hell.','Survis au Godly Duo dans le Boss Hell.']},
+ {id:'duo',sec:1,n:['Divinità detronizzate','Gods dethroned','Dioses destronados','Dieux détrônés'],d:['Sopravvivi al Godly Duo nel Pantheon.','Survive the Godly Duo in the Pantheon.','Sobrevive al Godly Duo en el Panteón.','Survis au Godly Duo dans le Panthéon.']},
  {id:'frank',sec:1,n:['Cliente insoddisfatto','Unhappy customer','Cliente insatisfecho','Client mécontent'],d:['Sopravvivi a Frank il Venditore.','Survive Frank the Vendor.','Sobrevive a Frank el Vendedor.','Survis à Frank le Marchand.']},
  {id:'apoc',n:['Fine del mondo','End of the world','Fin del mundo','Fin du monde'],d:['Completa il Mondo 4 a Collasso Totale.','Complete World 4 on Total Meltdown.','Completa el Mundo 4 en Colapso Total.','Termine le Monde 4 en Effondrement Total.']},
  {id:'kills',n:['Sterminatore','Exterminator','Exterminador','Exterminateur'],d:['Distruggi 500 nemici in totale.','Destroy 500 enemies in total.','Destruye 500 enemigos en total.','Détruis 500 ennemis au total.']},
@@ -6382,7 +6382,7 @@ function showAch(){
   for(const k in D)D[k].forEach((s,i)=>{TX[L[i]][k]=s});
 })();
 
-/* =====================  PHASE 10 : Boss Hell hidden boss, THE GODLY DUO  ===================== */
+/* =====================  PHASE 10 : Pantheon hidden boss, THE GODLY DUO  ===================== */
 /* after Tramezzino everything seems over, then Tramezzino and Bonez drop from the sky together:
    phase 1 on the ground (7000 shared HP), then the floor collapses and you survive 2 minutes of free fall */
 let FALL={t:0,mode:'',deb:[],sp:1,speed:0,bot:0,off:0};
