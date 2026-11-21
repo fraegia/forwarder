@@ -5685,10 +5685,10 @@ function hellWin(){
 })();
 
 /* =====================  PHASE 6 : version label, telescope easter egg  ===================== */
-const VERSION='1.17.4-test';
+const VERSION='1.17.5-test';
 /* TEST BUILD SWITCH (temporary): no damage anywhere in the game, all worlds unlocked in
    "Select world", achievements are not unlocked. Normal build: TEST_NODMG=false. */
-const TEST_NODMG=false;
+const TEST_NODMG=true;
 function testNoDmg(){return TEST_NODMG}
 const VER_EL=$('ver');VER_EL.textContent='v'+VERSION;
 
