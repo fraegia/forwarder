@@ -5685,7 +5685,7 @@ function hellWin(){
 })();
 
 /* =====================  PHASE 6 : version label, telescope easter egg  ===================== */
-const VERSION='1.17.1-test';
+const VERSION='1.17.2-test';
 /* TEST BUILD SWITCH (temporary): no damage anywhere in the game, all worlds unlocked in
    "Select world", achievements are not unlocked. Normal build: TEST_NODMG=false. */
 const TEST_NODMG=false;
@@ -7865,8 +7865,8 @@ function drawBossBar(B,frac,label,style,sub){
 /* =====================  THE GOD HUNTER'S BOOK  =====================
    A hidden inhabitant, the Hunter, appears on top of the radio tower in World 1 ("Antenna Ridge")
    only when all of these are true: the Pantheon has been completed, all 36 collectibles of
-   Worlds 1-3 are collected in this save, the three minigames are won in this save and Bonez has
-   been defeated. He gives the God Hunter's Book and vanishes like a glitch.
+   Worlds 1-3 have been collected and the three minigames have been won (in any game) and Bonez
+   has been defeated. Everything is remembered in the browser. He gives the God Hunter's Book and vanishes like a glitch.
    The book is a bestiary: every creature you defeat gets an entry with its portrait and a
    description; after enough kills the Hunter's notes unlock. Kills are counted from now on in
    every mode and stored in the browser, like achievements. */
@@ -7888,8 +7888,18 @@ function jrAdd(id){
 function hasBook(){return fetchS('rp_book')==='1'}
 function jrName(id){return t('jr.'+id+'.n')}
 /* the Hunter appears only when every requirement is met */
+/* the requirements are remembered in the browser, like achievements: meet them in any game,
+   then the Hunter waits on Antenna Ridge in every game (for example a new one) */
+const HReq=(function(){let o={};try{o=JSON.parse(fetchS('rp_hreq')||'{}')||{}}catch(e){o={}}return o})();
+function hreqSync(){
+  let ch=false;
+  for(const n of[1,2,3])if(Inv.colW&&Inv.colW[n]&&!HReq['c'+n]){HReq['c'+n]=1;ch=true}
+  for(const n of[2,3,4])if(Inv.mgw&&Inv.mgw[n]&&!HReq['m'+n]){HReq['m'+n]=1;ch=true}
+  if(ch)try{store('rp_hreq',JSON.stringify(HReq))}catch(e){}
+}
 function hunterReqs(){
-  return [!!(Ach.u&&Ach.u.hell),!!(Inv.colW&&Inv.colW[1]&&Inv.colW[2]&&Inv.colW[3]),!!(Inv.mgw&&Inv.mgw[2]&&Inv.mgw[3]&&Inv.mgw[4]),(Jr.bonez||0)>=1];
+  hreqSync();
+  return [!!(Ach.u&&Ach.u.hell),!!(HReq.c1&&HReq.c2&&HReq.c3),!!(HReq.m2&&HReq.m3&&HReq.m4),(Jr.bonez||0)>=1];
 }
 /* TEST BUILD SWITCH (temporary): the Hunter is active without requirements and also stands on the
    first roof of World 1. Normal build: HUNTER_TEST=false. */
@@ -7955,7 +7965,7 @@ function drawGlitchFX(){
   for(let i=0;i<n*2;i++){ctx.fillStyle=['#ff00ff','#00ffff','#ffffff'][i%3];ctx.globalAlpha=.5;ctx.fillRect(Math.random()*W,Math.random()*H,4+Math.random()*30,1+Math.random()*3);ctx.globalAlpha=1}
   if(Math.floor(g.t*8)%2)txt('ERR0R: ENTITY_NOT_FOUND',W/2,H/2-30,'#ff00ff','center');
 }
-const _stepB=step;step=function(dt){_stepB(dt);if(G.glitch)glitchStep(dt);jrBossCheck()};
+const _stepB=step;step=function(dt){_stepB(dt);if(G.glitch)glitchStep(dt);jrBossCheck();if((G.hrT=(G.hrT||0)+dt)>1){G.hrT=0;hreqSync()}};
 const _drawB=draw;draw=function(){_drawB();if(G.state==='play')drawGlitchFX()};
 /* kill tracking */
 const _killE=killEnemy;killEnemy=function(e){_killE(e);if(e&&e.type)jrAdd(e.type)};
