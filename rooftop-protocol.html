@@ -4027,6 +4027,24 @@ const SP_UHEAD=mkSprite(56,54,R=>{
   /* tear lines of light and mouth */
   R(W,20,37,1,5);R(W,35,37,1,5);R(K,25,45,6,1);R(K,24,44,1,1);R(K,31,44,1,1);
 });
+/* Unity's true face (phase 2): the mask splits open, red light pours out, many eyes and a mouth of teeth */
+const SP_UHEAD2=mkSprite(56,54,R=>{
+  const K='#07060f',V='#1c0a1a',P='#3a0a1e',L='#7a1030',W='#ffd0d8',M='#d8c8d0',Rd='#ff2040',Y='#fff2a0';
+  const horns=[[3,10,2],[10,3,2],[18,0,2],[27,0,2],[36,0,2],[44,3,2],[51,10,2]];
+  for(const[x,y,w]of horns){R(K,x-1,y,w+2,24-y);R(L,x,y+1,w,23-y);R(Rd,x,y,w,1)}
+  for(let y=16;y<54;y++){const u=(y-35)/19,hw=Math.round(Math.sqrt(Math.max(0,1-u*u))*25);R(K,28-hw,y,hw*2,1);if(hw>2)R(y<22?P:V,29-hw,y,hw*2-2,1)}
+  /* the two halves of the broken mask, pushed apart */
+  for(let y=20;y<50;y++){const u=(y-35)/16,hw=Math.round(Math.sqrt(Math.max(0,1-u*u))*12);if(hw<2)continue;const gap=2+Math.round((y-20)/10);
+    R(K,28-hw-gap-1,y,hw-1,1);R(y>42?'#a898a8':M,28-hw-gap,y,hw-2,1);R(K,28+gap+2,y,hw-1,1);R(y>42?'#a898a8':M,28+gap+2,y,hw-2,1)}
+  /* red light from the crack */
+  for(let y=20;y<52;y++){const gap=2+Math.round((y-20)/10);R(Rd,28-gap,y,gap*2,1);R(Y,28-1,y,2,1)}
+  /* many eyes in the dark, the old eyes now red */
+  for(const[x,y,w]of[[17,26,4],[37,26,4],[21,33,3],[33,33,3],[14,40,3],[40,40,3],[24,22,2],[31,22,2]]){R(K,x-1,y-1,w+2,w>2?4:3);R(Rd,x,y,w,w>2?2:1)}
+  R('#ffffff',18,26,1,1);R('#ffffff',38,26,1,1);
+  /* mouth full of teeth */
+  R(K,18,45,20,6);R(Rd,19,46,18,4);for(let x=19;x<37;x+=3){R(W,x,46,2,2);R(W,x+1,48,2,2)}
+  R(K,12,50,32,4);R(L,13,51,30,2);
+});
 function makeBoss3(){const a=world.arena;return{kind:'centaur',nameKey:'b.centaur',x:a.x+a.w-110,y:a.roof-58,w:64,h:58,hp:2000,max:2000,state:'idle',t:0,cd:1.6,face:-1,active:false,dead:false,flash:0,last:'',deathT:0,vx:0,shots:0,hitDone:false,ang:0,len:0}}
 function makeBoss4(){const a=world.arena,cx=a.x+a.w/2;return{kind:'unity',nameKey:'b.unity',x:cx-24,y:a.roof-98,w:48,h:44,hp:3600,max:3600,state:'idle',t:0,cd:2,active:false,dead:false,flash:0,last:'',deathT:0,laserT:24,regenT:50,cuts:0,tx:cx,hitDone:false,seg:null}}
 function makeBossFor(){
@@ -4458,13 +4476,32 @@ function drawUnityBody(cx,cy){
   for(let k=0;k<8;k++){const a=tm*.8+k*.785;ctx.fillStyle=rage?'#ff6a8a':'#e8d4ff';ctx.fillRect(Math.round(X+Math.cos(a)*40)-1,Math.round(hy0-6+Math.sin(a)*12)-1,2,2)}
   ctx.globalAlpha=1;
 }
+/* phase 2: the true face, drawn in wavy slices with a red/cyan split and random glitches */
+const SP_UHEAD2R=(()=>{const c=document.createElement('canvas');c.width=SP_UHEAD2.r.width;c.height=SP_UHEAD2.r.height;const g=c.getContext('2d');g.drawImage(SP_UHEAD2.r,0,0);g.globalCompositeOperation='source-atop';g.fillStyle='#ff2040';g.fillRect(0,0,c.width,c.height);return c})();
+function drawUnityTrueFace(hx,hy,flash){
+  const img=flash?SP_UHEAD2.wr:SP_UHEAD2.r,w=img.width,h=img.height,t=NOW;
+  const glitch=Math.random()<.08,cx=hx+w/2,cy=hy+h/2;
+  /* round red aura */
+  const ag=ctx.createRadialGradient(cx,cy,6,cx,cy,w*.9);ag.addColorStop(0,'rgba(255,32,64,.35)');ag.addColorStop(1,'rgba(255,32,64,0)');
+  ctx.fillStyle=ag;ctx.fillRect(cx-w,cy-w,w*2,w*2);
+  /* red ghost slightly out of place (chromatic split) */
+  ctx.globalAlpha=.4;ctx.drawImage(SP_UHEAD2R,hx-2-Math.round(Math.sin(t*9)*1.5),hy);ctx.globalAlpha=1;
+  /* the face itself in wavy slices */
+  for(let y=0;y<h;y+=2){
+    const off=Math.round(Math.sin(t*7+y*.35)*1.5+(glitch&&y>h*.3&&y<h*.6?(Math.random()-.5)*10:0));
+    ctx.drawImage(img,0,y,w,2,hx+off,hy+y,w,2);
+  }
+  /* cyan glitch flecks */
+  if(Math.random()<.25){ctx.fillStyle='#35e8ff';ctx.globalAlpha=.6;ctx.fillRect(hx+Math.random()*w,hy+Math.random()*h,4+Math.random()*8,1);ctx.globalAlpha=1}
+}
 function drawUnityFront(cx,cy){
   const B=boss,A=world.arena;if(B.dead)return;
   const mx=Math.round(A.x+A.w/2-cx),ry=Math.round(A.roof-cy);
   const sh=B.hp<=0&&B.deathT<3.2?Math.round((Math.random()-.5)*4):0;
   const hx=Math.round(B.x-4-cx)+sh,hy=Math.round(B.y-9-cy+Math.sin(NOW*1.5)*2);
   if(B.state==='regen'){ctx.globalAlpha=.2+.15*Math.sin(NOW*10);ctx.fillStyle='#7dff7a';ctx.fillRect(hx-8,hy-8,72,70);ctx.globalAlpha=1}
-  ctx.drawImage(B.flash>0?SP_UHEAD.wr:SP_UHEAD.r,hx,hy);
+  if(B.hp<B.max/2&&B.hp>0)drawUnityTrueFace(hx,hy,B.flash>0);
+  else ctx.drawImage(B.flash>0?SP_UHEAD.wr:SP_UHEAD.r,hx,hy);
   if(B.hp<=0){
     if(B.deathT>=3.2){
       /* the arm pointing at VERDE-7 */
@@ -5532,7 +5569,8 @@ function buildHellArena(th){
     for(let k=0;k<8;k++){const sg=mkB(ax+k*3*T,3*T);sg.seg=true;segs.push(sg)}
     mkB(ax+aw,3*T);
     S.arena={x:ax,y:roof,w:aw,roof:roof,trigger:ax+3*T,segs:segs,lx:ax,rx:ax+aw};
-    const cx=ax+aw/2;for(const px of[cx-88,cx+40]){const p={x:px,y:roof-52,w:48,h:8,plat:true};S.plats.push(p);S.solids.push(p)}
+    /* floating platforms only for the Godly Duo: Unity is fought from the ground, as in World 4 */
+    const cx=ax+aw/2;if(Hell.i!==3)for(const px of[cx-88,cx+40]){const p={x:px,y:roof-52,w:48,h:8,plat:true};S.plats.push(p);S.solids.push(p)}
   }else{
     const fl=mkB(x0,x1-x0);S.arena={x:ax,y:roof,w:aw,roof:roof,trigger:ax+3*T,bld:fl};
   }
@@ -5651,7 +5689,7 @@ function hellWin(){
 })();
 
 /* =====================  PHASE 6 : version label, telescope easter egg  ===================== */
-const VERSION='1.19.3';
+const VERSION='1.20.0';
 /* TEST BUILD SWITCH (temporary): no damage anywhere in the game, all worlds unlocked in
    "Select world", achievements are not unlocked. Normal build: TEST_NODMG=false. */
 const TEST_NODMG=false;
