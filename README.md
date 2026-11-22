@@ -6,13 +6,13 @@ You are **VERDE-7**, the last maintenance unit still running in Neo-Verdana. Cro
 
 ## How to play
 
-Open `index.html` in a browser (Chrome, Edge or Firefox), or serve it locally:
+Open `rooftop-protocol.html` in a browser (Chrome, Edge or Firefox), or serve it locally:
 
 ```bash
 python3 -m http.server 8000
 ```
 
-then visit http://localhost:8000.
+then visit http://localhost:8000/rooftop-protocol.html.
 
 The file can also be shared as-is (for example as a document on WhatsApp): on desktop and Android it opens in the browser. An internet connection is only needed to load the fonts. Saves and achievements stay in each player's browser.
 
@@ -47,4 +47,4 @@ On phones a touch pad appears below the game screen, with movement, ACTION (inte
 
 ## Version
 
-The current version is shown in the bottom-right corner of the title screen and is defined by the `VERSION` constant in `index.html`. Update it with every release.
+The current version is shown in the bottom-right corner of the title screen and is defined by the `VERSION` constant in `rooftop-protocol.html`. Update it with every release.
